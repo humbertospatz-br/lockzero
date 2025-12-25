@@ -9,7 +9,6 @@ Library4=json
 Library5=reflection
 Library6=stringutils
 Library7=xui views
-Library8=phone
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
 Module1=B4XMainPage
 Module10=ModSession
@@ -31,7 +30,7 @@ Module7=ModNotes
 Module8=ModPasswords
 Module9=ModSecurity
 NumberOfFiles=1
-NumberOfLibraries=8
+NumberOfLibraries=7
 NumberOfModules=19
 Version=13.4
 @EndOfDesignText@
@@ -44,12 +43,12 @@ Version=13.4
 	#CanInstallToExternalStorage: False
 #End Region
 
-#Region  Activity Attributes 
+#Region  Activity Attributes
 	#FullScreen: False
 	#IncludeTitle: True
 #End Region
 
-'#BridgeLogger: True
+#BridgeLogger: True
 
 Sub Process_Globals
 	Public ActionBarHomeClicked As Boolean

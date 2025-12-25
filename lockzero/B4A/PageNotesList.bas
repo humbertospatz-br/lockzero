@@ -128,7 +128,7 @@ Private Sub LoadNotes
 
 	For i = 0 To notes.Size - 1
 		Dim note As clsNoteEntry = notes.Get(i)
-		Dim pnlCard As Panel = CreateNoteCard(note, width - (margin * 2), cardHeight)
+		Dim pnlCard As Panel = CreateNoteCard(note, width - (margin * 2))
 		pnlCard.Tag = note.Id
 		pnlNotes.AddView(pnlCard, margin, y, width - (margin * 2), cardHeight)
 		y = y + cardHeight + 10dip
@@ -137,7 +137,7 @@ Private Sub LoadNotes
 	pnlNotes.Height = y + 20dip
 End Sub
 
-Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int, cardHeight As Int) As Panel
+Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	Dim pnl As Panel
 	pnl.Initialize("pnlNote")
 

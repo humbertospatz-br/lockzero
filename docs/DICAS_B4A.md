@@ -770,5 +770,193 @@ Private ProtectionPhrase As String = "PHRASE"
 
 ---
 
+## 25. Padrao de UI - Tamanhos e Fontes (OBRIGATORIO)
+
+### Por que padronizar?
+
+- Consistencia visual em todas as telas
+- Facilita manutencao (alterar em um lugar, reflete em todo app)
+- Evita tamanhos "magicos" espalhados pelo codigo
+
+### Constantes Definidas em Starter.bas:
+
+```vb
+'=== PADRAO DE UI - TAMANHOS DE FONTE ===
+Public Const FONT_TITLE As Float = 22       'Titulos de pagina
+Public Const FONT_SUBTITLE As Float = 18    'Subtitulos, headers de secao
+Public Const FONT_BODY As Float = 15        'Texto principal
+Public Const FONT_LABEL As Float = 13       'Labels de campo
+Public Const FONT_CAPTION As Float = 12     'Textos pequenos, hints
+Public Const FONT_BUTTON As Float = 14      'Texto de botoes
+Public Const FONT_INPUT As Float = 15       'Texto em campos de entrada
+
+'=== PADRAO DE UI - ALTURAS ===
+Public Const HEIGHT_HEADER As Int = 56      'Altura do header (dip)
+Public Const HEIGHT_BUTTON As Int = 48      'Altura padrao de botao (dip)
+Public Const HEIGHT_INPUT As Int = 48       'Altura de EditText (dip)
+Public Const HEIGHT_ITEM As Int = 72        'Altura de item de lista (dip)
+Public Const HEIGHT_ITEM_LARGE As Int = 88  'Item com mais info (dip)
+
+'=== PADRAO DE UI - ESPACAMENTOS ===
+Public Const MARGIN_PAGE As Int = 16        'Margem lateral da pagina (dip)
+Public Const MARGIN_ITEM As Int = 12        'Espaco entre itens (dip)
+Public Const PADDING_CARD As Int = 16       'Padding interno de cards (dip)
+
+'=== ICONES UNICODE ===
+Public Const ICON_EYE_OPEN As String = Chr(0x1F441)   'Olho aberto
+Public Const ICON_EYE_CLOSED As String = Chr(0x2022) & Chr(0x2022) & Chr(0x2022) 'Pontos
+Public Const ICON_BACK As String = Chr(0x2190)        'Seta esquerda
+Public Const ICON_LOCK As String = Chr(0x1F512)       'Cadeado fechado
+Public Const ICON_STAR As String = Chr(0x2605)        'Estrela favorito
+Public Const ICON_SETTINGS As String = Chr(0x2699)    'Engrenagem
+```
+
+### Como Usar:
+
+```vb
+' ERRADO - Valores magicos
+lblTitle.TextSize = 22
+btnSave.TextSize = 14
+edtName.TextSize = 15
+pnlHeader.Height = 56dip
+
+' CORRETO - Usar constantes
+lblTitle.TextSize = Starter.FONT_TITLE
+btnSave.TextSize = Starter.FONT_BUTTON
+edtName.TextSize = Starter.FONT_INPUT
+pnlHeader.Height = Starter.HEIGHT_HEADER & "dip"
+```
+
+### Exemplo Completo - Criar Header:
+
+```vb
+Private Sub CreateHeader
+    pnlHeader.Initialize("")
+    pnlHeader.Color = ModTheme.HeaderBackground
+    Root.AddView(pnlHeader, 0, 0, Root.Width, Starter.HEIGHT_HEADER & "dip")
+
+    lblTitle.Initialize("")
+    lblTitle.Text = ModLang.T("page_title")
+    lblTitle.TextSize = Starter.FONT_SUBTITLE
+    lblTitle.TextColor = ModTheme.HeaderText
+    pnlHeader.AddView(lblTitle, Starter.MARGIN_PAGE & "dip", 0, Root.Width - 100dip, Starter.HEIGHT_HEADER & "dip")
+
+    btnBack.Initialize("btnBack")
+    btnBack.Text = Starter.ICON_BACK
+    btnBack.TextSize = 20
+    pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
+End Sub
+```
+
+### Exemplo - Criar Campo de Entrada:
+
+```vb
+Private Sub CreateInputField(parent As B4XView, y As Int, hint As String) As EditText
+    Dim edt As EditText
+    edt.Initialize("")
+    edt.Hint = hint
+    edt.TextSize = Starter.FONT_INPUT
+    edt.TextColor = ModTheme.InputText
+    edt.HintColor = ModTheme.InputHint
+    parent.AddView(edt, Starter.MARGIN_PAGE & "dip", y, parent.Width - (Starter.MARGIN_PAGE * 2) & "dip", Starter.HEIGHT_INPUT & "dip")
+    Return edt
+End Sub
+```
+
+### Exemplo - Item de Lista:
+
+```vb
+Private Sub CreateListItem(parent As B4XView, y As Int, title As String, subtitle As String) As Panel
+    Dim pnl As Panel
+    pnl.Initialize("pnlItem")
+    pnl.Color = ModTheme.CardBackground
+    parent.AddView(pnl, Starter.MARGIN_PAGE & "dip", y, parent.Width - (Starter.MARGIN_PAGE * 2) & "dip", Starter.HEIGHT_ITEM & "dip")
+
+    Dim lblTitle As Label
+    lblTitle.Initialize("")
+    lblTitle.Text = title
+    lblTitle.TextSize = Starter.FONT_BODY
+    lblTitle.TextColor = ModTheme.TextPrimary
+    pnl.AddView(lblTitle, Starter.PADDING_CARD & "dip", 12dip, pnl.Width - 60dip, 24dip)
+
+    Dim lblSub As Label
+    lblSub.Initialize("")
+    lblSub.Text = subtitle
+    lblSub.TextSize = Starter.FONT_LABEL
+    lblSub.TextColor = ModTheme.TextSecondary
+    pnl.AddView(lblSub, Starter.PADDING_CARD & "dip", 36dip, pnl.Width - 60dip, 20dip)
+
+    Return pnl
+End Sub
+```
+
+### Icones de Visibilidade (Olho):
+
+```vb
+' Botao de mostrar/ocultar senha
+btnShowPass.Initialize("btnShowPass")
+btnShowPass.Text = Starter.ICON_EYE_OPEN  ' Olho aberto = senha oculta
+btnShowPass.TextSize = 18
+
+Private Sub btnShowPass_Click
+    PassVisible = Not(PassVisible)
+    If PassVisible Then
+        edtPassword.InputType = edtPassword.INPUT_TYPE_TEXT
+        btnShowPass.Text = Starter.ICON_EYE_CLOSED  ' Pontos = senha visivel
+    Else
+        edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128)
+        btnShowPass.Text = Starter.ICON_EYE_OPEN    ' Olho = senha oculta
+    End If
+End Sub
+```
+
+### REGRA DE OURO:
+
+> **NUNCA use numeros magicos para tamanhos de fonte ou altura de elementos.**
+> **SEMPRE use as constantes de Starter.FONT_* e Starter.HEIGHT_*.**
+
+---
+
+## 26. AdjustResize no Manifest - Scroll Automatico com Teclado
+
+### Problema:
+Em varias telas com formularios, quando o teclado aparece ele cobre os campos de entrada.
+
+### Solucao Simples - Manifest:
+
+Adicionar no ManifestCode do arquivo `.b4a`:
+
+```vb
+SetActivityAttribute(Main, android:windowSoftInputMode, "adjustResize|stateHidden")
+```
+
+### O que faz:
+- `adjustResize` - Redimensiona a Activity quando o teclado aparece, fazendo o ScrollView funcionar automaticamente
+- `stateHidden` - O teclado comeca oculto (nao aparece sozinho ao abrir tela)
+
+### Onde adicionar:
+No arquivo `.b4a` (ex: `lockzero.b4a`), na linha ManifestCode:
+
+```
+ManifestCode='...~\n~'Keyboard scroll fix - adjustResize~\n~SetActivityAttribute(Main, android:windowSoftInputMode, "adjustResize|stateHidden")~\n~'End of default text.~\n~
+```
+
+### Vantagens:
+- Solucao global - funciona em TODAS as paginas automaticamente
+- Nao precisa de codigo extra nas paginas
+- Nao precisa da biblioteca IME
+- Nao precisa de eventos FocusChanged
+
+### Quando usar solucao manual (dicas #16 e #17):
+- Se precisar de controle fino sobre o comportamento
+- Se quiser detectar quando o teclado abre/fecha
+- Se o adjustResize nao resolver casos especificos
+
+### IMPORTANTE:
+Apos adicionar no manifest, as paginas com ScrollView devem funcionar automaticamente.
+O Android vai redimensionar a tela e o ScrollView vai permitir rolar ate o campo focado.
+
+---
+
 **Ultima atualizacao:** 2025-12-25
 **Projeto:** LockZero (e familia Lockseed Products)

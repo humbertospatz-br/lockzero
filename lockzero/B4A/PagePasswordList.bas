@@ -277,19 +277,27 @@ End Sub
 ' ============================================
 
 Private Sub ShowEntryDetails(entryId As String)
+	If ModSession.IsSessionActive = False Then
+		ToastMessageShow(ModLang.T("session_expired"), True)
+		Return
+	End If
+
 	Dim e As clsPasswordEntry = ModPasswords.GetEntryById(entryId)
 	If e.IsInitialized = False Then Return
 
 	Dim username As String = ModPasswords.DecryptValue(e.Username)
+	Dim password As String = ModPasswords.DecryptValue(e.PasswordEnc)
 	Dim notes As String = ModPasswords.DecryptValue(e.Notes)
 
 	Dim details As String = e.GetDisplayName & CRLF & CRLF
-	details = details & ModLang.T("url") & ": " & e.Url & CRLF
+	If e.Url <> "" Then
+		details = details & ModLang.T("url") & ": " & e.Url & CRLF
+	End If
 	details = details & ModLang.T("username") & ": " & username & CRLF
-	details = details & ModLang.T("password") & ": ********" & CRLF
+	details = details & ModLang.T("password") & ": " & password & CRLF
 
 	If notes <> "" Then
-		details = details & CRLF & notes
+		details = details & CRLF & ModLang.T("note") & ": " & notes
 	End If
 
 	Wait For (xui.Msgbox2Async(details, e.GetDisplayName, ModLang.T("copy"), ModLang.T("edit"), ModLang.T("close"), Null)) Msgbox_Result(Result As Int)

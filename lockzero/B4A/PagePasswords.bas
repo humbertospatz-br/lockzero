@@ -187,25 +187,38 @@ End Sub
 ' ============================================
 
 Private Sub ShowAddGroupDialog
+	'Prepara EditText
 	edtGroupName.Initialize("")
-	edtGroupName.Hint = "Nome do grupo"
+	edtGroupName.Hint = ModLang.T("group_name_hint")
 	edtGroupName.SingleLine = True
+	edtGroupName.Text = ""
 
-	Dim sf As Object = xui.CreatePanel("")
-	Dim pnl As B4XView = sf
-	pnl.SetLayoutAnimated(0, 0, 0, 250dip, 50dip)
-	pnl.AddView(edtGroupName, 0, 0, 250dip, 50dip)
+	'Cria painel customizado
+	Dim pnl As B4XView = xui.CreatePanel("")
+	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
+	pnl.Color = ModTheme.Surface
+	pnl.AddView(edtGroupName, 10dip, 5dip, 260dip, 50dip)
 
-	Wait For (xui.Msgbox2Async("Nome do grupo:", "", ModLang.T("save"), "", ModLang.T("cancel"), sf)) Msgbox_Result(Result As Int)
+	'Mostra dialogo
+	Dim dialog As B4XDialog
+	dialog.Initialize(Root)
+	dialog.Title = ModLang.T("new_group")
+
+	Wait For (dialog.ShowCustom(pnl, ModLang.T("save"), "", ModLang.T("cancel"))) Complete (Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
-		Dim name As String = edtGroupName.Text.Trim
-		If name.Length > 0 Then
+		Dim groupName As String = edtGroupName.Text.Trim
+		If groupName.Length > 0 Then
+			'Cria grupo
 			Dim g As clsPasswordGroup
 			g.Initialize
-			g.Name = name
+			g.Name = groupName
+			g.GenerateSalt
 			ModPasswords.SaveGroup(g)
 			LoadGroups
+			ToastMessageShow(ModLang.T("success"), False)
+		Else
+			ToastMessageShow(ModLang.T("error_empty_field"), True)
 		End If
 	End If
 End Sub
@@ -229,23 +242,33 @@ Private Sub ShowEditGroupDialog(groupId As String)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(groupId)
 	If g.IsInitialized = False Then Return
 
+	'Prepara EditText com nome atual
 	edtGroupName.Initialize("")
 	edtGroupName.Text = g.Name
 	edtGroupName.SingleLine = True
 
-	Dim sf As Object = xui.CreatePanel("")
-	Dim pnl As B4XView = sf
-	pnl.SetLayoutAnimated(0, 0, 0, 250dip, 50dip)
-	pnl.AddView(edtGroupName, 0, 0, 250dip, 50dip)
+	'Cria painel customizado
+	Dim pnl As B4XView = xui.CreatePanel("")
+	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
+	pnl.Color = ModTheme.Surface
+	pnl.AddView(edtGroupName, 10dip, 5dip, 260dip, 50dip)
 
-	Wait For (xui.Msgbox2Async(ModLang.T("edit"), "", ModLang.T("save"), "", ModLang.T("cancel"), sf)) Msgbox_Result(Result As Int)
+	'Mostra dialogo
+	Dim dialog As B4XDialog
+	dialog.Initialize(Root)
+	dialog.Title = ModLang.T("edit_group")
+
+	Wait For (dialog.ShowCustom(pnl, ModLang.T("save"), "", ModLang.T("cancel"))) Complete (Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
-		Dim name As String = edtGroupName.Text.Trim
-		If name.Length > 0 Then
-			g.Name = name
+		Dim groupName As String = edtGroupName.Text.Trim
+		If groupName.Length > 0 Then
+			g.Name = groupName
 			ModPasswords.SaveGroup(g)
 			LoadGroups
+			ToastMessageShow(ModLang.T("success"), False)
+		Else
+			ToastMessageShow(ModLang.T("error_empty_field"), True)
 		End If
 	End If
 End Sub

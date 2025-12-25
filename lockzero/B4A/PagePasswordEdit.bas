@@ -151,7 +151,8 @@ Private Sub CreateUI
 	pnlForm.AddView(edtPassword, 20dip, y, fieldWidth - 100dip, fieldHeight)
 
 	btnShowPassword.Initialize("btnShowPassword")
-	btnShowPassword.Text = ModLang.T("show")
+	btnShowPassword.Text = Starter.ICON_EYE_OPEN 'Olho aberto = senha oculta
+	btnShowPassword.TextSize = 18
 	pnlForm.AddView(btnShowPassword, width - 115dip, y, 45dip, fieldHeight)
 
 	btnGenerate.Initialize("btnGenerate")
@@ -243,10 +244,10 @@ Private Sub btnShowPassword_Click
 	IsPasswordVisible = Not(IsPasswordVisible)
 	If IsPasswordVisible Then
 		edtPassword.InputType = edtPassword.INPUT_TYPE_TEXT
-		btnShowPassword.Text = ModLang.T("hide")
+		btnShowPassword.Text = Starter.ICON_EYE_CLOSED 'Pontos = senha visivel
 	Else
 		edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128)
-		btnShowPassword.Text = ModLang.T("show")
+		btnShowPassword.Text = Starter.ICON_EYE_OPEN 'Olho = senha oculta
 	End If
 End Sub
 
