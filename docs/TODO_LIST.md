@@ -11,6 +11,46 @@
 
 ---
 
+## BUGS URGENTES (CORRIGIR PRIMEIRO)
+
+> **Identificados em:** 2025-12-25
+
+- [ ] Texto da dica frase-senha cortado no onboarding (aumentar area do lblWarningText)
+- [ ] Tela nao ajusta quando teclado sobe (PagePasswordEdit, PagePasswords)
+- [ ] Bloquear criacao de senha/grupo sem frase-senha cadastrada primeiro
+- [ ] Testar B4XDialog.ShowCustom no PagePasswords (dialogo de grupos)
+
+---
+
+## MODULOS LACRADOS - NAO MODIFICAR
+
+> **Codigo reutilizado do LockSeed - ja testado e funcional**
+
+| Arquivo | Origem | Status |
+|---------|--------|--------|
+| ModSecurity.bas | LockSeed | LACRADO - AES-256 + Salt + Brute Force |
+| Logica frase-senha | LockSeed | LACRADO - mesmo algoritmo |
+
+**AVISO:** O algoritmo de frase-senha e IDENTICO ao LockSeed. NAO ALTERAR.
+
+---
+
+## LIMITES POR VERSAO (Proposta Monetizacao)
+
+| Recurso | FREE | PREMIUM |
+|---------|------|---------|
+| Senhas | 15 | Ilimitado |
+| Cartoes | 3 | Ilimitado |
+| Notas | 5 | Ilimitado |
+| Documentos | 2 | Ilimitado |
+| Wi-Fi | 3 | Ilimitado |
+| OCR Scanner | Nao | Sim |
+| Import/Export CSV | Nao | Sim |
+| Gerador | Basico | Completo |
+| Backup .lockzero | Sim | Sim |
+
+---
+
 ## VERSOES
 
 | Versao | Data | Status |
@@ -61,6 +101,8 @@
 - [x] [2025-12-25] Favoritos/fixar senhas
 - [ ] [2025-12-25] Detector de senhas fracas
 - [ ] [2025-12-25] Detector de senhas duplicadas
+- [ ] [2025-12-25] Historico de senhas anteriores (ao editar, guarda versao antiga)
+- [ ] [2025-12-25] Ordenacao: nome, data criacao, ultimo uso, manual
 
 ---
 
@@ -69,6 +111,37 @@
 ### Estrutura de Dados
 - [ ] [2025-12-25] Criar clsCardEntry.bas (modelo de cartao)
 - [ ] [2025-12-25] Criar ModCards.bas (CRUD cartoes)
+
+### Estrutura clsCardEntry.bas
+```
+id: String
+nickname: String          ' Ex: "Nubank Pessoal"
+cardholderName: String    ' Nome impresso no cartao
+cardNumber: String        ' Numero completo (criptografado)
+expiryMonth: String       ' MM
+expiryYear: String        ' YY ou YYYY
+cvv: String               ' CVV (criptografado)
+brand: String             ' visa, mastercard, elo, etc
+type: String              ' credit, debit, both
+color: String             ' Cor visual do cartao
+bankName: String          ' Banco/instituicao
+lastFourDigits: String    ' Para exibicao segura
+createdAt: Long
+updatedAt: Long
+expiryAlert: Boolean      ' Alertar vencimento
+```
+
+### Tabela BIN - Deteccao de Bandeira
+| Prefixo | Bandeira |
+|---------|----------|
+| 4 | Visa |
+| 51-55, 2221-2720 | Mastercard |
+| 34, 37 | American Express |
+| 636368, 438935, 504175, 451416, 636297 | Elo |
+| 606282, 3841 | Hipercard |
+| 36, 38, 39 | Diners Club |
+| 6011, 644-649, 65 | Discover |
+| 35 | JCB |
 
 ### Telas B4xPages
 - [ ] [2025-12-25] PageCards.bas - Lista de cartoes
@@ -80,6 +153,8 @@
 - [ ] [2025-12-25] Deteccao automatica de bandeira (Visa, Master, etc.)
 - [ ] [2025-12-25] Exibicao segura (**** **** **** 1234)
 - [ ] [2025-12-25] Alerta de vencimento
+- [ ] [2025-12-25] Cor do cartao (visual, escolher ao criar)
+- [ ] [2025-12-25] Campo banco/instituicao
 
 ---
 
@@ -122,6 +197,18 @@
 - [ ] [2025-12-25] PageAddWifi.bas - Adicionar rede
 - [ ] [2025-12-25] Leitura de QR Code Wi-Fi
 
+### Estrutura clsWifiEntry.bas
+```
+id: String
+ssid: String              ' Nome da rede
+password: String          ' Senha (criptografada)
+security: String          ' WPA, WPA2, WPA3, WEP, Open
+location: String          ' Ex: "Casa", "Escritorio"
+notes: String
+createdAt: Long
+updatedAt: Long
+```
+
 ---
 
 ## FASE 6: OCR E SCANNER (PENDENTE)
@@ -141,7 +228,7 @@
 
 ## FASE 7: GERADOR DE SENHAS (PENDENTE)
 
-### Funcionalidades
+### Funcionalidades Basicas
 - [ ] [2025-12-25] Criar ModGenerator.bas
 - [ ] [2025-12-25] PageGenerator.bas - Tela do gerador
 - [ ] [2025-12-25] Configuracoes: tamanho (8-128)
@@ -150,6 +237,12 @@
 - [ ] [2025-12-25] Medidor de forca da senha
 - [ ] [2025-12-25] Tempo estimado para quebrar
 - [ ] [2025-12-25] Gerar -> Copiar ou Salvar direto
+
+### Modos Avancados
+- [ ] [2025-12-25] Modo "memoravel" (palavras pronunciaveis)
+- [ ] [2025-12-25] Modo "PIN" (apenas numeros, 4-8 digitos)
+- [ ] [2025-12-25] Modo "passphrase" (3-5 palavras separadas)
+- [ ] [2025-12-25] Historico de senhas geradas (ultimas 10)
 
 ---
 
@@ -170,6 +263,27 @@
 - [ ] [2025-12-25] PageExport.bas (CSV/JSON)
 - [ ] [2025-12-25] PageImport.bas (CSV/JSON)
 
+### Formato CSV (Compatibilidade Navegadores)
+
+**Header obrigatorio:**
+```csv
+name,url,username,password
+```
+
+**Exemplo:**
+```csv
+name,url,username,password
+Google,https://google.com,email@gmail.com,minhasenha123
+Facebook,https://facebook.com,usuario,senha456
+```
+
+**Navegadores compativeis:**
+- Chrome: Configuracoes > Senhas > Importar/Exportar
+- Edge: Configuracoes > Senhas > Importar/Exportar
+- Safari: Preferencias > Senhas > Importar/Exportar
+- Firefox: Configuracoes > Senhas > Importar/Exportar
+- Opera/Brave: Mesmo processo (baseados em Chromium)
+
 ---
 
 ## FASE 9: CONFIGURACOES (PENDENTE)
@@ -179,7 +293,8 @@
 - [ ] [2025-12-25] Selecao de idioma (PT/EN)
 - [ ] [2025-12-25] Selecao de tema (claro/escuro)
 - [ ] [2025-12-25] Tempo de sessao (30s a 30min)
-- [ ] [2025-12-25] Limpeza automatica clipboard
+- [ ] [2025-12-25] Tempo de limpeza clipboard (15s, 30s, 1min, nunca)
+- [ ] [2025-12-25] Bloqueio ao minimizar app (sim/nao)
 - [ ] [2025-12-25] PIN de acesso (opcional)
 - [ ] [2025-12-25] Biometria (FaceID/Fingerprint)
 
@@ -208,6 +323,33 @@
 ### Publicacao
 - [ ] [2025-12-25] Google Play Store (Android)
 - [ ] [2025-12-25] Apple App Store (iOS - B4i)
+
+---
+
+## BACKLOG - POS-MVP
+
+> **Funcionalidades para versoes futuras (apos v1.0)**
+
+### Alta Prioridade (impacto na conversao)
+- [ ] Onboarding tutorial interativo (3-4 telas)
+- [ ] Indicador visual de forca da frase-senha
+- [ ] Widget home (acesso rapido, mostra qtd itens)
+
+### Media Prioridade (melhora experiencia)
+- [ ] Icones personalizados por grupo/entrada
+- [ ] Limpeza automatica de clipboard configuravel
+- [ ] Ordenacao manual (arrastar itens)
+- [ ] Busca global (todas categorias)
+
+### Baixa Prioridade (diferenciacao)
+- [ ] PIN de panico (mostra cofre vazio sob coacao)
+- [ ] Modo disfarce (icone de calculadora/relogio)
+- [ ] Compartilhamento seguro via QR temporario
+- [ ] Tema personalizado (cores do usuario)
+
+### NAO RECOMENDADO (quebra filosofia)
+- ~~Backup em nuvem~~ - quebra filosofia 100% offline
+- ~~Sincronizacao entre dispositivos~~ - adiciona complexidade e riscos
 
 ---
 
