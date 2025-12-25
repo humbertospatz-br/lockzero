@@ -248,9 +248,7 @@ Private Sub CopyPassword(entryId As String)
 	End If
 
 	'Copia para clipboard
-	Dim cb As Phone
-	cb.Initialize
-	cb.SetClipboardText(password)
+	SetClipboardText(password)
 
 	'Marca como usado
 	e.MarkAsUsed
@@ -269,9 +267,7 @@ Private Sub tmrClipboard_Tick
 	If ClipboardCountdown <= 0 Then
 		tmrClipboard.Enabled = False
 		'Limpa clipboard
-		Dim cb As Phone
-		cb.Initialize
-		cb.SetClipboardText("")
+		SetClipboardText("")
 		ToastMessageShow(ModLang.T("clipboard_clear") & "!", False)
 	End If
 End Sub
@@ -285,7 +281,6 @@ Private Sub ShowEntryDetails(entryId As String)
 	If e.IsInitialized = False Then Return
 
 	Dim username As String = ModPasswords.DecryptValue(e.Username)
-	Dim password As String = ModPasswords.DecryptValue(e.PasswordEnc)
 	Dim notes As String = ModPasswords.DecryptValue(e.Notes)
 
 	Dim details As String = e.GetDisplayName & CRLF & CRLF
@@ -309,9 +304,6 @@ End Sub
 Private Sub ShowEntryOptions(entryId As String)
 	Dim e As clsPasswordEntry = ModPasswords.GetEntryById(entryId)
 	If e.IsInitialized = False Then Return
-
-	Dim favText As String = "Favorito"
-	If e.IsFavorite Then favText = "Remover Favorito"
 
 	Wait For (xui.Msgbox2Async(e.GetDisplayName, "", ModLang.T("edit"), ModLang.T("delete"), ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
 
@@ -360,4 +352,22 @@ Private Sub ApplyTheme
 
 	btnAdd.Color = ModTheme.Primary
 	btnAdd.TextColor = Colors.White
+End Sub
+
+' ============================================
+'  CLIPBOARD HELPER
+' ============================================
+
+Private Sub SetClipboardText(text As String)
+	Try
+		Dim jo As JavaObject
+		jo.InitializeContext
+		Dim cm As JavaObject = jo.RunMethod("getSystemService", Array("clipboard"))
+		Dim cd As JavaObject
+		cd.InitializeStatic("android.content.ClipData")
+		Dim clip As JavaObject = cd.RunMethod("newPlainText", Array("LockZero", text))
+		cm.RunMethod("setPrimaryClip", Array(clip))
+	Catch
+		Log("SetClipboardText error: " & LastException)
+	End Try
 End Sub

@@ -187,8 +187,6 @@ End Sub
 ' ============================================
 
 Private Sub ShowAddGroupDialog
-	Dim dialog As Object = xui.Msgbox2Async(ModLang.T("add") & " " & ModLang.T("passwords"), "", ModLang.T("save"), "", ModLang.T("cancel"), Null)
-
 	edtGroupName.Initialize("")
 	edtGroupName.Hint = "Nome do grupo"
 	edtGroupName.SingleLine = True

@@ -355,9 +355,9 @@ End Sub
 
 Private Sub GetDeviceInfo As String
 	Try
-		Dim p As Phone
-		p.Initialize
-		Return p.Model
+		Dim jo As JavaObject
+		jo.InitializeStatic("android.os.Build")
+		Return jo.GetField("MODEL")
 	Catch
 		Log("ModBackup.GetDeviceInfo erro: " & LastException)
 		Return "Unknown"
