@@ -73,49 +73,35 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'=== PAINEL DE DESBLOQUEIO COM SCROLLVIEW ===
+	'=== PAINEL DE DESBLOQUEIO ===
 	pnlUnlock = xui.CreatePanel("")
 	pnlUnlock.SetLayoutAnimated(0, 0, 0, width, height)
 	Root.AddView(pnlUnlock, 0, 0, width, height)
 
-	'ScrollView para permitir scroll quando teclado aparece
-	svUnlock.Initialize(0)
-	pnlUnlock.AddView(svUnlock, 0, 0, width, height)
-
-	pnlUnlockContent = svUnlock.Panel
-	pnlUnlockContent.Color = Colors.Transparent
-
-	'Conteudo centralizado
-	Dim contentHeight As Int = 350dip
-	Dim startY As Int = 80dip
-
 	'Logo
 	lblLogo = CreateLabel("LockZero", 36, True)
-	pnlUnlockContent.AddView(lblLogo, 0, startY, width, 60dip)
+	pnlUnlock.AddView(lblLogo, 0, height * 0.2, width, 60dip)
 
 	'Tagline
 	lblTagline = CreateLabel("Lock and ZERO worries", 14, False)
-	pnlUnlockContent.AddView(lblTagline, 0, startY + 60dip, width, 30dip)
+	pnlUnlock.AddView(lblTagline, 0, height * 0.2 + 60dip, width, 30dip)
 
 	'Campo de frase-senha
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.InputType = Bit.Or(edtPassphrase.INPUT_TYPE_TEXT, 128) 'Password
 	edtPassphrase.Gravity = Gravity.CENTER
-	pnlUnlockContent.AddView(edtPassphrase, 40dip, startY + 120dip, width - 80dip, 50dip)
+	pnlUnlock.AddView(edtPassphrase, 40dip, height * 0.45, width - 80dip, 50dip)
 
 	'Botao desbloquear
 	btnUnlock.Initialize("btnUnlock")
 	btnUnlock.Text = ModLang.T("unlock")
-	pnlUnlockContent.AddView(btnUnlock, 40dip, startY + 190dip, width - 80dip, 50dip)
+	pnlUnlock.AddView(btnUnlock, 40dip, height * 0.45 + 70dip, width - 80dip, 50dip)
 
 	'Label de erro
 	lblError = CreateLabel("", 12, False)
 	lblError.Visible = False
-	pnlUnlockContent.AddView(lblError, 0, startY + 250dip, width, 30dip)
-
-	'Define altura do conteudo
-	pnlUnlockContent.Height = startY + contentHeight
+	pnlUnlock.AddView(lblError, 0, height * 0.45 + 130dip, width, 30dip)
 
 	'=== PAINEL DO DASHBOARD ===
 	pnlDashboard = xui.CreatePanel("")
@@ -326,7 +312,6 @@ Private Sub ApplyTheme
 
 	'Unlock
 	pnlUnlock.Color = ModTheme.Background
-	pnlUnlockContent.Color = ModTheme.Background
 	lblLogo.TextColor = ModTheme.Primary
 	lblTagline.TextColor = ModTheme.TextSecondary
 

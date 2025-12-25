@@ -504,5 +504,120 @@ End Sub
 
 ---
 
+## 18. Google Play - Orientacao Obrigatoria
+
+### Requisito:
+O Google Play exige que aplicativos funcionem em **qualquer orientacao** (portrait e landscape).
+
+### Solucao:
+Criar UI que se adapta ao tamanho da tela:
+
+```vb
+Private Sub CreateUI
+    Dim width As Int = Root.Width
+    Dim height As Int = Root.Height
+
+    ' Usar porcentagens em vez de valores fixos
+    pnlContent.AddView(edtField, 40dip, height * 0.3, width - 80dip, 50dip)
+End Sub
+```
+
+### Manifest:
+NAO usar `android:screenOrientation="portrait"` a menos que seja essencial.
+
+---
+
+## 19. Botao Escondido pelo Teclado - Solucao com Height
+
+### Problema:
+Quando teclado aparece, botoes na parte inferior ficam escondidos.
+
+### Solucao - Aumentar Height do Painel:
+Em vez de usar ScrollView, aumentar a altura do painel para "subir" o conteudo:
+
+```vb
+Private Sub CreateUI
+    Dim width As Int = Root.Width
+    Dim height As Int = Root.Height
+
+    ' Aumentar altura do painel para subir elementos
+    Dim extraHeight As Int = 200dip  ' Ajustar conforme necessario
+
+    pnlUnlock = xui.CreatePanel("")
+    pnlUnlock.SetLayoutAnimated(0, 0, 0, width, height + extraHeight)
+    Root.AddView(pnlUnlock, 0, 0, width, height)
+
+    ' Posicionar elementos mais acima
+    Dim startY As Int = 50dip  ' Comecar mais no topo
+
+    lblLogo.AddView(pnlUnlock, 0, startY, width, 60dip)
+    edtPassphrase.AddView(pnlUnlock, 40dip, startY + 100dip, width - 80dip, 50dip)
+    btnUnlock.AddView(pnlUnlock, 40dip, startY + 170dip, width - 80dip, 50dip)
+End Sub
+```
+
+### Alternativa - Posicionar elementos mais acima:
+```vb
+' Em vez de height * 0.45, usar valor fixo menor
+edtPassphrase.Top = 150dip  ' Mais perto do topo
+btnUnlock.Top = 220dip
+```
+
+---
+
+## 20. B4XPages - Registrar Paginas Corretamente
+
+### Problema:
+`Error: page id not found: PagePasswords`
+`Ids: (ArrayList) [mainpage]`
+
+### Solucao - Declarar em Process_Globals:
+```vb
+Sub Process_Globals
+    Private xui As XUI
+    'Paginas B4XPages
+    Public pgPasswords As PagePasswords
+    Public pgPasswordList As PagePasswordList
+    Public pgBackup As PageBackup
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+    Activity.LoadLayout("Main")
+
+    If FirstTime Then
+        'Inicializar paginas
+        pgPasswords.Initialize
+        pgPasswordList.Initialize
+        pgBackup.Initialize
+
+        'Registrar paginas
+        B4XPages.AddPage("PagePasswords", pgPasswords)
+        B4XPages.AddPage("PagePasswordList", pgPasswordList)
+        B4XPages.AddPage("PageBackup", pgBackup)
+    End If
+End Sub
+```
+
+### ERRADO - Usar classe diretamente:
+```vb
+' NAO funciona - classe nao instanciada
+B4XPages.AddPage("PagePasswords", PagePasswords)
+B4XPages.AddPageAndCreate("PagePasswords", PagePasswords)
+```
+
+### CORRETO - Usar instancia:
+```vb
+' Declarar variavel da pagina
+Public pgPasswords As PagePasswords
+
+' Inicializar
+pgPasswords.Initialize
+
+' Registrar com instancia
+B4XPages.AddPage("PagePasswords", pgPasswords)
+```
+
+---
+
 **Ultima atualizacao:** 2025-12-25
 **Projeto:** LockZero (e familia Lockseed Products)

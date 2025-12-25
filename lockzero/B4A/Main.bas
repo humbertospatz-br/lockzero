@@ -16,6 +16,14 @@ Version=9.85
 
 Sub Process_Globals
 	Private xui As XUI
+	'Paginas B4XPages
+	Public pgPasswords As PagePasswords
+	Public pgPasswordList As PagePasswordList
+	Public pgPasswordEdit As PagePasswordEdit
+	Public pgBackup As PageBackup
+	Public pgOnboarding As PageOnboarding
+	Public pgNotesList As PageNotesList
+	Public pgNoteEdit As PageNoteEdit
 End Sub
 
 Sub Globals
@@ -30,14 +38,22 @@ Sub Activity_Create(FirstTime As Boolean)
 		ModPasswords.Init
 		ModNotes.Init
 
-		'Registra todas as paginas secundarias (B4XMainPage ja e registrado automaticamente)
-		B4XPages.AddPageAndCreate("PagePasswords", PagePasswords)
-		B4XPages.AddPageAndCreate("PagePasswordList", PagePasswordList)
-		B4XPages.AddPageAndCreate("PagePasswordEdit", PagePasswordEdit)
-		B4XPages.AddPageAndCreate("PageBackup", PageBackup)
-		B4XPages.AddPageAndCreate("PageOnboarding", PageOnboarding)
-		B4XPages.AddPageAndCreate("PageNotesList", PageNotesList)
-		B4XPages.AddPageAndCreate("PageNoteEdit", PageNoteEdit)
+		'Cria e registra todas as paginas secundarias
+		pgPasswords.Initialize
+		pgPasswordList.Initialize
+		pgPasswordEdit.Initialize
+		pgBackup.Initialize
+		pgOnboarding.Initialize
+		pgNotesList.Initialize
+		pgNoteEdit.Initialize
+
+		B4XPages.AddPage("PagePasswords", pgPasswords)
+		B4XPages.AddPage("PagePasswordList", pgPasswordList)
+		B4XPages.AddPage("PagePasswordEdit", pgPasswordEdit)
+		B4XPages.AddPage("PageBackup", pgBackup)
+		B4XPages.AddPage("PageOnboarding", pgOnboarding)
+		B4XPages.AddPage("PageNotesList", pgNotesList)
+		B4XPages.AddPage("PageNoteEdit", pgNoteEdit)
 
 		B4XPages.GetManager.LogEvents = True
 
