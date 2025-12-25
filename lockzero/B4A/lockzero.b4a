@@ -4,11 +4,12 @@ FileGroup1=Default Group
 Group=Default Group
 Library1=b4xpages
 Library2=core
-Library3=json
-Library4=reflection
-Library5=stringutils
-Library6=xui views
-Library7=encryption
+Library3=encryption
+Library4=json
+Library5=reflection
+Library6=stringutils
+Library7=xui views
+Library8=phone
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
 Module1=B4XMainPage
 Module10=ModSession
@@ -30,16 +31,16 @@ Module7=ModNotes
 Module8=ModPasswords
 Module9=ModSecurity
 NumberOfFiles=1
-NumberOfLibraries=7
+NumberOfLibraries=8
 NumberOfModules=19
 Version=13.4
 @EndOfDesignText@
-#Region  Project Attributes 
-	#ApplicationLabel: B4A Example
+#Region  Project Attributes
+	#ApplicationLabel: LockZero
 	#VersionCode: 1
-	#VersionName: 
+	#VersionName: 0.1.0
 	'SupportedOrientations possible values: unspecified, landscape or portrait.
-	#SupportedOrientations: portrait
+	#SupportedOrientations: unspecified
 	#CanInstallToExternalStorage: False
 #End Region
 
@@ -52,6 +53,14 @@ Version=13.4
 
 Sub Process_Globals
 	Public ActionBarHomeClicked As Boolean
+	'Paginas B4XPages
+	Public pgPasswords As PagePasswords
+	Public pgPasswordList As PagePasswordList
+	Public pgPasswordEdit As PagePasswordEdit
+	Public pgBackup As PageBackup
+	Public pgOnboarding As PageOnboarding
+	Public pgNotesList As PageNotesList
+	Public pgNoteEdit As PageNoteEdit
 End Sub
 
 Sub Globals
@@ -61,6 +70,37 @@ End Sub
 Sub Activity_Create(FirstTime As Boolean)
 	Dim pm As B4XPagesManager
 	pm.Initialize(Activity)
+
+	If FirstTime Then
+		'Inicializa modulos
+		ModPasswords.Init
+		ModNotes.Init
+
+		'Cria e registra todas as paginas secundarias
+		pgPasswords.Initialize
+		pgPasswordList.Initialize
+		pgPasswordEdit.Initialize
+		pgBackup.Initialize
+		pgOnboarding.Initialize
+		pgNotesList.Initialize
+		pgNoteEdit.Initialize
+
+		B4XPages.AddPage("PagePasswords", pgPasswords)
+		B4XPages.AddPage("PagePasswordList", pgPasswordList)
+		B4XPages.AddPage("PagePasswordEdit", pgPasswordEdit)
+		B4XPages.AddPage("PageBackup", pgBackup)
+		B4XPages.AddPage("PageOnboarding", pgOnboarding)
+		B4XPages.AddPage("PageNotesList", pgNotesList)
+		B4XPages.AddPage("PageNoteEdit", pgNoteEdit)
+
+		B4XPages.GetManager.LogEvents = True
+
+		'Verifica se e primeiro uso
+		Dim onboardingComplete As String = ModSecurity.GetSetting("onboarding_complete", "false")
+		If onboardingComplete <> "true" Then
+			B4XPages.ShowPageAndRemovePreviousPages("PageOnboarding")
+		End If
+	End If
 End Sub
 
 'Template version: B4A-1.01
