@@ -617,6 +617,157 @@ pgPasswords.Initialize
 B4XPages.AddPage("PagePasswords", pgPasswords)
 ```
 
+### IMPORTANTE - Globals vs Process_Globals:
+```vb
+' ERRADO - Causa erro "Cannot access activity object from sub Process_Globals"
+Sub Process_Globals
+    Public pgPasswords As PagePasswords  ' ERRO!
+End Sub
+
+' CORRETO - Paginas B4XPages devem ficar em Globals
+Sub Globals
+    Private pgPasswords As PagePasswords  ' OK!
+End Sub
+```
+
+**Regra:** Classes que referenciam Activity (como paginas B4XPages) NAO podem ser declaradas em Process_Globals.
+
+---
+
+## 21. Globals vs Process_Globals - Quando Usar Cada
+
+### Process_Globals:
+- Variaveis que persistem entre Activities
+- Tipos primitivos (Int, String, Boolean, etc.)
+- Objetos que NAO referenciam Activity
+- Modulos de codigo (Code Modules)
+
+```vb
+Sub Process_Globals
+    Private xui As XUI           ' OK - XUI e seguro
+    Private IsInitialized As Boolean  ' OK - tipo primitivo
+    Private MyList As List       ' OK - lista generica
+End Sub
+```
+
+### Globals:
+- Variaveis especificas da Activity
+- Views (Button, Label, Panel, etc.)
+- Classes que referenciam Activity
+- Paginas B4XPages
+
+```vb
+Sub Globals
+    Private btnSave As Button    ' OK - View de Activity
+    Private pgPasswords As PagePasswords  ' OK - Pagina B4XPages
+    Private pnlMain As Panel     ' OK - Panel de Activity
+End Sub
+```
+
+### ERROS COMUNS:
+```vb
+' ERRADO - Views em Process_Globals
+Sub Process_Globals
+    Private btnSave As Button    ' ERRO! View nao pode ficar aqui
+End Sub
+
+' ERRADO - Paginas B4XPages em Process_Globals
+Sub Process_Globals
+    Private pgPasswords As PagePasswords  ' ERRO!
+End Sub
+```
+
+---
+
+## 22. B4XPages - Arquivo .b4a e a Main Activity
+
+### Estrutura B4XPages:
+Em projetos B4XPages, o arquivo `.b4a` (ex: `lockzero.b4a`) E a Main Activity, NAO um arquivo Main.bas separado.
+
+### Onde registrar paginas:
+```vb
+' No arquivo .b4a (lockzero.b4a)
+
+Sub Globals
+    'Paginas devem ficar em Globals, NAO Process_Globals
+    Private pgPasswords As PagePasswords
+    Private pgBackup As PageBackup
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+    Dim pm As B4XPagesManager
+    pm.Initialize(Activity)
+
+    If FirstTime Then
+        'Inicializar e registrar paginas APOS pm.Initialize
+        pgPasswords.Initialize
+        pgBackup.Initialize
+
+        B4XPages.AddPage("PagePasswords", pgPasswords)
+        B4XPages.AddPage("PageBackup", pgBackup)
+    End If
+End Sub
+```
+
+### NAO criar Main.bas separado:
+Em B4XPages, todo o codigo de inicializacao vai no arquivo `.b4a`.
+Arquivos Main.bas adicionais podem causar confusao.
+
+---
+
+## 23. Palavras Reservadas do B4A
+
+### Lista de palavras que NAO podem ser usadas como nomes de variaveis:
+
+| Palavra | Alternativa |
+|---------|-------------|
+| `step` | `stepNum`, `currentStep` |
+| `Initialized` | `mInitialized`, `isInit` |
+| `Result` | `dialogResult`, `retVal` |
+| `Error` | `errorMsg`, `lastError` |
+| `Type` | `itemType`, `entryType` |
+
+### Exemplo - Renomear variavel reservada:
+```vb
+' ERRADO
+Private step As Int = 0
+Private Initialized As Boolean = False
+
+' CORRETO
+Private stepNum As Int = 0
+Private mInitialized As Boolean = False
+```
+
+---
+
+## 24. Constantes Publicas - Somente em Class_Globals
+
+### ERRADO - Constantes fora de Class_Globals:
+```vb
+' Isso causa erro de compilacao
+Public Const MY_VALUE As String = "teste"
+
+Sub Class_Globals
+    ' ...
+End Sub
+```
+
+### CORRETO - Constantes dentro de Class_Globals:
+```vb
+Sub Class_Globals
+    Public Const MY_VALUE As String = "teste"  ' OK!
+End Sub
+```
+
+### Alternativa - Usar variaveis ou strings literais:
+```vb
+' Em vez de constante, usar string literal diretamente
+If ProtectionType = "PHRASE" Then  ' String literal
+
+' Ou usar variavel privada
+Private ProtectionPhrase As String = "PHRASE"
+```
+
 ---
 
 **Ultima atualizacao:** 2025-12-25
