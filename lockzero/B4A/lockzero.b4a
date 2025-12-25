@@ -53,18 +53,17 @@ Version=13.4
 
 Sub Process_Globals
 	Public ActionBarHomeClicked As Boolean
-	'Paginas B4XPages
-	Public pgPasswords As PagePasswords
-	Public pgPasswordList As PagePasswordList
-	Public pgPasswordEdit As PagePasswordEdit
-	Public pgBackup As PageBackup
-	Public pgOnboarding As PageOnboarding
-	Public pgNotesList As PageNotesList
-	Public pgNoteEdit As PageNoteEdit
 End Sub
 
 Sub Globals
-
+	'Paginas B4XPages (devem ficar em Globals, nao Process_Globals)
+	Private pgPasswords As PagePasswords
+	Private pgPasswordList As PagePasswordList
+	Private pgPasswordEdit As PagePasswordEdit
+	Private pgBackup As PageBackup
+	Private pgOnboarding As PageOnboarding
+	Private pgNotesList As PageNotesList
+	Private pgNoteEdit As PageNoteEdit
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)

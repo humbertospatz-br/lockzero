@@ -14,8 +14,6 @@ Sub Class_Globals
 
 	'=== UI - Tela de Desbloqueio ===
 	Private pnlUnlock As B4XView
-	Private svUnlock As ScrollView
-	Private pnlUnlockContent As B4XView
 	Private lblLogo As B4XView
 	Private lblTagline As B4XView
 	Private edtPassphrase As EditText
