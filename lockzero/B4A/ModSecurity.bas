@@ -180,8 +180,8 @@ Public Sub IsValidPIN(pin As String) As Boolean
 
 	'Verifica se e apenas numeros
 	For i = 0 To pin.Length - 1
-		Dim c As Char = pin.CharAt(i)
-		If c < "0" Or c > "9" Then Return False
+		Dim code As Int = Asc(pin.CharAt(i))
+		If code < 48 Or code > 57 Then Return False  '48="0", 57="9"
 	Next
 
 	Return True

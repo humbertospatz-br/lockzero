@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -170,7 +170,9 @@ Private Sub pnlGroup_Click
 	params.Initialize
 	params.Put("groupId", groupId)
 
-	B4XPages.ShowPageAndRemovePreviousPages("PagePasswordList", params)
+	Dim pg As PagePasswordList = B4XPages.GetPage("PagePasswordList")
+	pg.SetParams(params)
+	B4XPages.ShowPage("PagePasswordList")
 End Sub
 
 Private Sub pnlGroup_LongClick

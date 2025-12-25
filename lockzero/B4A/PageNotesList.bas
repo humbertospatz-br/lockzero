@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -194,7 +194,9 @@ Private Sub OpenNote(noteId As String)
 	Dim note As clsNoteEntry = ModNotes.GetNoteById(noteId)
 	If note = Null Then Return
 
-	B4XPages.ShowPage("PageNoteEdit", CreateMap("noteId": noteId, "groupId": CurrentGroupId))
+	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
+	pg.SetParams(CreateMap("noteId": noteId, "groupId": CurrentGroupId))
+	B4XPages.ShowPage("PageNoteEdit")
 End Sub
 
 ' ============================================
@@ -207,7 +209,9 @@ End Sub
 
 Private Sub btnAdd_Click
 	ModSession.Touch
-	B4XPages.ShowPage("PageNoteEdit", CreateMap("noteId": "", "groupId": CurrentGroupId))
+	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
+	pg.SetParams(CreateMap("noteId": "", "groupId": CurrentGroupId))
+	B4XPages.ShowPage("PageNoteEdit")
 End Sub
 
 ' ============================================

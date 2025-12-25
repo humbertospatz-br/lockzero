@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=StaticCode
@@ -356,8 +356,10 @@ End Sub
 Private Sub GetDeviceInfo As String
 	Try
 		Dim p As Phone
+		p.Initialize
 		Return p.Model
 	Catch
+		Log("ModBackup.GetDeviceInfo erro: " & LastException)
 		Return "Unknown"
 	End Try
 End Sub

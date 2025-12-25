@@ -11,14 +11,27 @@ Library6=xui views
 Library7=encryption
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~
 Module1=B4XMainPage
-Module2=ModLang
-Module3=ModSecurity
-Module4=ModSession
-Module5=ModTheme
-Module6=Starter
+Module10=ModSession
+Module11=ModTheme
+Module12=PageBackup
+Module13=PageNoteEdit
+Module14=PageNotesList
+Module15=PageOnboarding
+Module16=PagePasswordEdit
+Module17=PagePasswordList
+Module18=PagePasswords
+Module19=Starter
+Module2=clsNoteEntry
+Module3=clsPasswordEntry
+Module4=clsPasswordGroup
+Module5=ModBackup
+Module6=ModLang
+Module7=ModNotes
+Module8=ModPasswords
+Module9=ModSecurity
 NumberOfFiles=1
 NumberOfLibraries=7
-NumberOfModules=6
+NumberOfModules=19
 Version=13.4
 @EndOfDesignText@
 #Region  Project Attributes 

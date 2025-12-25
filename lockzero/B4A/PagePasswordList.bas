@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -42,12 +42,6 @@ End Sub
 Private Sub B4XPage_Appear
 	ModSession.Touch
 
-	'Recebe parametros
-	Dim params As Map = B4XPages.GetPageParams(Me)
-	If params <> Null And params.IsInitialized Then
-		CurrentGroupId = params.GetDefault("groupId", "")
-	End If
-
 	If CurrentGroupId <> "" Then
 		CurrentGroup = ModPasswords.GetGroupById(CurrentGroupId)
 		If CurrentGroup.IsInitialized Then
@@ -56,6 +50,12 @@ Private Sub B4XPage_Appear
 	End If
 
 	LoadEntries
+End Sub
+
+'Recebe parametros da pagina anterior
+Public Sub SetParams(params As Map)
+	If params = Null Then Return
+	CurrentGroupId = params.GetDefault("groupId", "")
 End Sub
 
 Private Sub B4XPage_Disappear
@@ -199,7 +199,9 @@ Private Sub btnAdd_Click
 	params.Put("groupId", CurrentGroupId)
 	params.Put("entryId", "") 'Novo
 
-	B4XPages.ShowPage("PagePasswordEdit", params)
+	Dim pg As PagePasswordEdit = B4XPages.GetPage("PagePasswordEdit")
+	pg.SetParams(params)
+	B4XPages.ShowPage("PagePasswordEdit")
 End Sub
 
 Private Sub pnlEntry_Click
@@ -247,6 +249,7 @@ Private Sub CopyPassword(entryId As String)
 
 	'Copia para clipboard
 	Dim cb As Phone
+	cb.Initialize
 	cb.SetClipboardText(password)
 
 	'Marca como usado
@@ -267,6 +270,7 @@ Private Sub tmrClipboard_Tick
 		tmrClipboard.Enabled = False
 		'Limpa clipboard
 		Dim cb As Phone
+		cb.Initialize
 		cb.SetClipboardText("")
 		ToastMessageShow(ModLang.T("clipboard_clear") & "!", False)
 	End If
@@ -324,7 +328,9 @@ Private Sub EditEntry(entryId As String)
 	params.Put("groupId", CurrentGroupId)
 	params.Put("entryId", entryId)
 
-	B4XPages.ShowPage("PagePasswordEdit", params)
+	Dim pg As PagePasswordEdit = B4XPages.GetPage("PagePasswordEdit")
+	pg.SetParams(params)
+	B4XPages.ShowPage("PagePasswordEdit")
 End Sub
 
 Private Sub ConfirmDeleteEntry(entryId As String)

@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -51,13 +51,6 @@ End Sub
 Private Sub B4XPage_Appear
 	ModSession.Touch
 
-	'Recebe parametros
-	Dim params As Map = B4XPages.GetPageParams(Me)
-	If params <> Null And params.IsInitialized Then
-		CurrentGroupId = params.GetDefault("groupId", "")
-		CurrentEntryId = params.GetDefault("entryId", "")
-	End If
-
 	IsEditMode = (CurrentEntryId <> "")
 
 	If IsEditMode Then
@@ -67,6 +60,13 @@ Private Sub B4XPage_Appear
 		lblTitle.Text = ModLang.T("add_password")
 		ClearForm
 	End If
+End Sub
+
+'Recebe parametros da pagina anterior
+Public Sub SetParams(params As Map)
+	If params = Null Then Return
+	CurrentGroupId = params.GetDefault("groupId", "")
+	CurrentEntryId = params.GetDefault("entryId", "")
 End Sub
 
 ' ============================================

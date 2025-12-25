@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -334,21 +334,21 @@ End Sub
 
 Private Sub DoImport(phrase As String, folder As String, fileName As String)
 	'Confirma antes de importar
-	Wait For (xui.Msgbox2Async("ATENCAO: Isso ira adicionar os dados do backup aos seus dados atuais." & CRLF & CRLF & "Deseja continuar?", "Confirmar", "Sim, restaurar", "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+	Wait For (xui.Msgbox2Async("ATENCAO: Isso ira adicionar os dados do backup aos seus dados atuais." & CRLF & CRLF & "Deseja continuar?", "Confirmar", "Sim, restaurar", "", ModLang.T("cancel"), Null)) Msgbox_Result(DialogResult As Int)
 
-	If Result <> xui.DialogResponse_Positive Then Return
+	If DialogResult <> xui.DialogResponse_Positive Then Return
 
-	Dim result As Map = ModBackup.ImportBackup(phrase, folder, fileName)
+	Dim importResult As Map = ModBackup.ImportBackup(phrase, folder, fileName)
 
-	If result.Get("success") = True Then
-		Dim stats As Map = result.Get("stats")
+	If importResult.Get("success") = True Then
+		Dim stats As Map = importResult.Get("stats")
 		Dim msg As String = "Backup restaurado!" & CRLF & CRLF
 		msg = msg & "Grupos: " & stats.Get("groupsImported") & CRLF
 		msg = msg & "Senhas: " & stats.Get("entriesImported") & CRLF
 		msg = msg & "Notas: " & stats.GetDefault("notesImported", 0)
 		xui.MsgboxAsync(msg, "Sucesso")
 	Else
-		xui.MsgboxAsync(result.Get("message"), "Erro")
+		xui.MsgboxAsync(importResult.Get("message"), "Erro")
 	End If
 End Sub
 

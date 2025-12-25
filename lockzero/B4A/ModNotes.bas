@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=StaticCode
@@ -10,7 +10,7 @@ Version=9.85
 Sub Process_Globals
 	Private Const NOTES_FILE As String = "lockzero_notes.json"
 	Private Notes As List
-	Private Initialized As Boolean = False
+	Private mInitialized As Boolean = False
 End Sub
 
 ' ============================================
@@ -18,14 +18,14 @@ End Sub
 ' ============================================
 
 Public Sub Init
-	If Initialized Then Return
+	If mInitialized Then Return
 	Notes.Initialize
 	LoadNotes
-	Initialized = True
+	mInitialized = True
 End Sub
 
 Private Sub EnsureInit
-	If Not(Initialized) Then Init
+	If mInitialized = False Then Init
 End Sub
 
 ' ============================================

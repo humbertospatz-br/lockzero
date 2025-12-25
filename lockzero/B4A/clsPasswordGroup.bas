@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -18,16 +18,12 @@ Sub Class_Globals
 	Public UpdatedAt As Long
 End Sub
 
-'Constantes de tipo de protecao
-Public Const PROTECTION_PHRASE As String = "PHRASE"
-Public Const PROTECTION_PIN As String = "PIN"
-
 Public Sub Initialize
 	Id = ""
 	Name = ""
 	Icon = "key"  'Padrao
 	Color = 0
-	ProtectionType = PROTECTION_PHRASE  'Padrao: frase
+	ProtectionType = "PHRASE"  'Padrao: frase
 	Salt = ""  'Gerado na criacao
 	CreatedAt = DateTime.Now
 	UpdatedAt = DateTime.Now
@@ -80,7 +76,7 @@ Public Sub FromMap(m As Map)
 	Name = m.GetDefault("name", "")
 	Icon = m.GetDefault("icon", "key")
 	Color = m.GetDefault("color", 0)
-	ProtectionType = m.GetDefault("protectionType", PROTECTION_PHRASE)
+	ProtectionType = m.GetDefault("protectionType", "PHRASE")
 	Salt = m.GetDefault("salt", "")
 	CreatedAt = m.GetDefault("createdAt", DateTime.Now)
 	UpdatedAt = m.GetDefault("updatedAt", DateTime.Now)
@@ -88,17 +84,17 @@ End Sub
 
 'Retorna se usa frase
 Public Sub UsesPhrase As Boolean
-	Return ProtectionType = PROTECTION_PHRASE
+	Return ProtectionType = "PHRASE"
 End Sub
 
 'Retorna se usa PIN
 Public Sub UsesPin As Boolean
-	Return ProtectionType = PROTECTION_PIN
+	Return ProtectionType = "PIN"
 End Sub
 
 'Retorna texto do tipo de protecao
 Public Sub GetProtectionText As String
-	If ProtectionType = PROTECTION_PIN Then
+	If ProtectionType = "PIN" Then
 		Return "PIN"
 	Else
 		Return "Frase"

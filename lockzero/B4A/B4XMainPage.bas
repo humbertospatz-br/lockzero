@@ -260,7 +260,7 @@ End Sub
 Private Sub btnSettings_Click
 	ModSession.Touch
 	'Por enquanto vai direto para Backup (Settings completo sera criado depois)
-	B4XPages.ShowPage("PageBackup", Null)
+	B4XPages.ShowPage("PageBackup")
 End Sub
 
 ' ============================================
@@ -269,7 +269,7 @@ End Sub
 
 Private Sub btnPasswords_Click
 	ModSession.Touch
-	B4XPages.ShowPage("PagePasswords", Null)
+	B4XPages.ShowPage("PagePasswords")
 End Sub
 
 Private Sub btnCards_Click
@@ -285,11 +285,12 @@ End Sub
 Private Sub btnNotes_Click
 	ModSession.Touch
 	'Usa o grupo "Geral" por padrao para notas
-	'TODO: criar tela de grupos de notas se necessario
 	Dim groups As List = ModPasswords.GetAllGroups
 	If groups.Size > 0 Then
-		Dim group As clsPasswordGroup = groups.Get(0)
-		B4XPages.ShowPage("PageNotesList", CreateMap("groupId": group.Id, "groupName": group.Name))
+		Dim grp As clsPasswordGroup = groups.Get(0)
+		Dim pg As PageNotesList = B4XPages.GetPage("PageNotesList")
+		pg.SetParams(CreateMap("groupId": grp.Id, "groupName": grp.Name))
+		B4XPages.ShowPage("PageNotesList")
 	Else
 		ToastMessageShow("Crie um grupo primeiro", True)
 	End If

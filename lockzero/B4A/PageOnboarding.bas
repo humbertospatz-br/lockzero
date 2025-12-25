@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -254,14 +254,14 @@ End Sub
 '  NAVEGACAO ENTRE STEPS
 ' ============================================
 
-Private Sub ShowStep(step As Int)
-	CurrentStep = step
+Private Sub ShowStep(stepNum As Int)
+	CurrentStep = stepNum
 
-	pnlWelcome.Visible = (step = 0)
-	pnlWarning.Visible = (step = 1)
-	pnlSetup.Visible = (step = 2)
-	pnlBackup.Visible = (step = 3)
-	pnlComplete.Visible = (step = 4)
+	pnlWelcome.Visible = (stepNum = 0)
+	pnlWarning.Visible = (stepNum = 1)
+	pnlSetup.Visible = (stepNum = 2)
+	pnlBackup.Visible = (stepNum = 3)
+	pnlComplete.Visible = (stepNum = 4)
 End Sub
 
 Private Sub btnWelcomeNext_Click
