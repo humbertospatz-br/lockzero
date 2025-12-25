@@ -23,29 +23,27 @@ Sub Globals
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
-	If FirstTime Then
-		'Registra todas as paginas B4XPages
-		B4XPages.Initialize
-		B4XPages.AddPage("B4XMainPage", B4XMainPage)
-		B4XPages.AddPage("PagePasswords", PagePasswords)
-		B4XPages.AddPage("PagePasswordList", PagePasswordList)
-		B4XPages.AddPage("PagePasswordEdit", PagePasswordEdit)
-		B4XPages.AddPage("PageBackup", PageBackup)
-		B4XPages.AddPage("PageOnboarding", PageOnboarding)
-		B4XPages.AddPage("PageNotesList", PageNotesList)
-		B4XPages.AddPage("PageNoteEdit", PageNoteEdit)
+	Activity.LoadLayout("Main")
 
+	If FirstTime Then
 		'Inicializa modulos
 		ModPasswords.Init
 		ModNotes.Init
 
+		'Registra todas as paginas secundarias (B4XMainPage ja e registrado automaticamente)
+		B4XPages.AddPageAndCreate("PagePasswords", PagePasswords)
+		B4XPages.AddPageAndCreate("PagePasswordList", PagePasswordList)
+		B4XPages.AddPageAndCreate("PagePasswordEdit", PagePasswordEdit)
+		B4XPages.AddPageAndCreate("PageBackup", PageBackup)
+		B4XPages.AddPageAndCreate("PageOnboarding", PageOnboarding)
+		B4XPages.AddPageAndCreate("PageNotesList", PageNotesList)
+		B4XPages.AddPageAndCreate("PageNoteEdit", PageNoteEdit)
+
+		B4XPages.GetManager.LogEvents = True
+
 		'Verifica se e primeiro uso (onboarding nao completo)
 		CheckFirstRun
 	End If
-
-	'Inicia com a pagina principal
-	B4XPages.GetManager.LogEvents = True
-	Activity.LoadLayout("Main")
 End Sub
 
 Private Sub CheckFirstRun
