@@ -12,6 +12,8 @@ Version=9.85
 	#IncludeTitle: False
 #End Region
 
+#BridgeLogger: True 'Enable logs in Release mode
+
 Sub Process_Globals
 	Private xui As XUI
 End Sub
