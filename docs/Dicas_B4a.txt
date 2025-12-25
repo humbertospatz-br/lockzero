@@ -1,0 +1,67 @@
+Dicas B4A - LockSeed
+====================
+
+1. Borda em EditText
+--------------------
+Para adicionar borda arredondada em EditText:
+
+    Dim cd As ColorDrawable
+    ' Parametros: cor fundo, raio borda, largura borda, cor borda
+    cd.Initialize2(Colors.White, 5dip, 1dip, Colors.Black)
+    edt.Background = cd
+
+Exemplo com cor cinza clara:
+    cd.Initialize2(Colors.RGB(243, 243, 243), 5dip, 1dip, Colors.Black)
+
+2. Label como Botao (evita tema do sistema)
+-------------------------------------------
+Usar Label em vez de Button para manter aparencia consistente:
+
+    Dim lblAdd As Label
+    lblAdd.Initialize("btnAdd")
+    lblAdd.Text = "+"
+    lblAdd.TextSize = 28
+    lblAdd.Typeface = Typeface.DEFAULT_BOLD
+    lblAdd.Gravity = Gravity.CENTER
+    lblAdd.Color = ModTheme.GetPrimaryColor
+    lblAdd.TextColor = Colors.White
+    pnlHeader.AddView(lblAdd, 100%%x - 52dip, 10dip, 40dip, 40dip)
+
+    ' Arredonda o label
+    Dim xvAdd As B4XView = lblAdd
+    xvAdd.SetColorAndBorder(ModTheme.GetPrimaryColor, 0, ModTheme.GetPrimaryColor, 20dip)
+
+3. Panel com borda arredondada
+------------------------------
+    Dim xvItem As B4XView = pnlItem
+    xvItem.SetColorAndBorder(ModTheme.GetPanelColor, 1dip, ModTheme.GetBorderColor, 8dip)
+
+4. Mostrar/Ocultar senha em EditText
+------------------------------------
+    ' Mostrar
+    edtPassword.InputType = edtPassword.INPUT_TYPE_TEXT
+
+    ' Ocultar (mascara)
+    edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128)
+
+    ' Manter cursor no final
+    edtPassword.SelectionStart = edtPassword.Text.Length
+
+5. Subir tela quando teclado aparece (Activity.Top negativo)
+------------------------------------------------------------
+Quando ScrollView nao funciona para subir o conteudo quando o teclado
+aparece, use Activity.Top com valor negativo para mover a tela inteira:
+
+    Sub edtCampo_FocusChanged(HasFocus As Boolean)
+        If HasFocus Then
+            ' Move a Activity para cima
+            Dim offset As Int = pnlAlvo.Height / 2 + 50dip
+            Activity.Top = -offset
+        Else
+            ' Restaura posicao original
+            Activity.Top = 0
+        End If
+    End Sub
+
+Nota: Solucao mais simples que tentar manipular ScrollView.ScrollPosition
+ou usar IME.HeightChanged. Funciona quando outras abordagens falham.

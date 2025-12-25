@@ -1,19 +1,22 @@
-# CLAUDE - DOCUMENTO DE SESSAO - LOCKPASS
+# CLAUDE - DOCUMENTO DE SESSAO - LOCKZERO
 
 **Versao:** 1.0
 **Criado:** 2025-12-25
-**Projeto:** LockPass - Gerenciador de Senhas Seguro
+**Projeto:** LockZero - Gerenciador de Senhas Seguro
+**Mote:** "Lock and ZERO worries - Guarde suas informacoes e ZERO preocupacao"
 
 ---
 
 ## CONFIGURACAO DO PROJETO
 
 ```
-NOME_PROJETO: LockPass
-STACK: B4A/B4X (Basic4Android) + JSON
+NOME_PROJETO: LockZero
+STACK: B4xPages (B4A/B4i) + JSON
 VERSAO_ATUAL: v0.1.0 (desenvolvimento)
 DATA_INICIO: 2025-12-25
-PLATAFORMA: Android (futuro: iOS)
+PLATAFORMA: Android (B4A) - futuro: iOS (B4i)
+PATH_PROJETO: C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A
+PATH_OLD: C:\Basic4a\lockzero\lockzero_VSC\lockzero_old
 ORIGEM: Modulo extraido do LockSeed em 2025-12-09
 ```
 
@@ -70,9 +73,9 @@ O Claude deve buscar referencias, exemplos e solucoes existentes ANTES de desist
 
 ## DESCRICAO DO PROJETO
 
-### O que e o LockPass
+### O que e o LockZero
 
-O LockPass e um aplicativo mobile (B4A/B4X) para Android que:
+O LockZero e um aplicativo mobile (B4A/B4X) para Android que:
 
 1. **Gerencia senhas** de sites, cartoes, aplicativos, etc.
 2. **Usa frase-senha pessoal** para criptografar todos os dados (AES-256)
@@ -94,34 +97,50 @@ O LockPass e um aplicativo mobile (B4A/B4X) para Android que:
 ## ESTRUTURA DO PROJETO
 
 ```
-lockpass_VSC/
+lockzero_VSC/
 ├── docs/
 │   ├── CLAUDE.md              # Este arquivo
 │   ├── TODO_LIST.md           # Tarefas pendentes
 │   ├── HISTORICO.md           # Historico de trabalho
-│   └── cli_logs/              # Logs de sessoes CLI
-├── lockpass/
-│   ├── lockpass.b4a           # Projeto principal B4A (a criar)
-│   │
-│   ├── # ACTIVITIES
-│   ├── Main.bas               # Tela inicial (a criar)
-│   ├── ActPasswordGroups.bas  # Lista de grupos
-│   ├── ActPasswordList.bas    # Senhas por grupo
-│   ├── ActSettings.bas        # Configuracoes (a criar)
-│   │
-│   ├── # CLASSES
-│   ├── clsPasswordGroup.bas   # Modelo de grupo
-│   ├── clsPasswordEntry.bas   # Modelo de senha
-│   │
-│   ├── # MODULOS
-│   ├── ModPasswords.bas       # CRUD de senhas + sessao
-│   ├── ModSecurity.bas        # Criptografia AES-256
-│   ├── ModTheme.bas           # Tema claro/escuro
-│   ├── ModLang.bas            # Multi-lingua (a criar)
-│   │
-│   └── Files/                 # Assets do app
+│   └── LOCKZERO_SPEC.md       # Especificacao tecnica completa
 │
-└── old/                       # Codigo obsoleto
+├── lockzero/
+│   └── B4A/                   # Projeto Android (B4xPages)
+│       ├── lockzero.b4a       # Projeto principal
+│       ├── Starter.bas        # Service de inicializacao
+│       ├── B4XMainPage.bas    # Pagina principal B4xPages
+│       │
+│       ├── # PAGES (B4xPages)
+│       ├── PageHome.bas       # Dashboard principal
+│       ├── PagePasswords.bas  # Lista de senhas
+│       ├── PageCards.bas      # Lista de cartoes
+│       ├── PageDocuments.bas  # Lista de documentos
+│       ├── PageNotes.bas      # Lista de notas
+│       ├── PageWifi.bas       # Lista de redes wifi
+│       ├── PageSettings.bas   # Configuracoes
+│       ├── PageGenerator.bas  # Gerador de senhas
+│       ├── PageScanner.bas    # Scanner OCR
+│       │
+│       ├── # CLASSES
+│       ├── clsPasswordEntry.bas   # Modelo de senha
+│       ├── clsPasswordGroup.bas   # Modelo de grupo
+│       ├── clsCardEntry.bas       # Modelo de cartao
+│       ├── clsDocumentEntry.bas   # Modelo de documento
+│       ├── clsNoteEntry.bas       # Modelo de nota
+│       ├── clsWifiEntry.bas       # Modelo de wifi
+│       │
+│       ├── # MODULOS
+│       ├── ModPasswords.bas   # CRUD de senhas
+│       ├── ModCards.bas       # CRUD de cartoes
+│       ├── ModSecurity.bas    # Criptografia AES-256
+│       ├── ModSession.bas     # Gerenciador de sessao
+│       ├── ModTheme.bas       # Tema claro/escuro
+│       ├── ModLang.bas        # Multi-lingua PT/EN
+│       ├── ModGenerator.bas   # Gerador de senhas
+│       │
+│       └── Files/             # Assets do app
+│
+└── lockzero_old/              # Codigo legado (7 arquivos para referencia)
 ```
 
 ---
@@ -265,7 +284,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 ## FILOSOFIA
 
-> **"Suas senhas, sua responsabilidade. LockPass apenas protege."**
+> **"Suas senhas, sua responsabilidade. LockZero apenas protege."**
 
 - Seguranca > Conveniencia
 - Offline > Online
@@ -275,5 +294,5 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 ---
 
 **Versao do Documento:** 1.0
-**Baseado em:** LockSeed CLAUDE.md + Modulo de Senhas
+**Baseado em:** LockSeed CLAUDE.md + Modulo de Senhas (renomeado para LockZero)
 **Criado por:** Claude + Humberto

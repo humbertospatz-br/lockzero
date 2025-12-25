@@ -1,0 +1,91 @@
+O posicionamento “100% offline” + freemium é um diferencial forte, especialmente para quem desconfia de nuvem. Abaixo vão textos já ajustados para essa lógica.
+​
+
+Hero – Dor + solução 100% offline
+Título:
+Proteja senhas e cartões. 100% offline. Zero preocupação.
+
+Subtítulo:
+Cansado de guardar senhas e dados de cartão em prints, notas e apps inseguros? Lockzero é um cofre local e criptografado: seus dados ficam só no seu dispositivo, não na nuvem.
+
+Frase de apoio (OFFLINE):
+Nenhum dado na nuvem, nenhum servidor externo. Tudo fica com você.
+
+CTA principal:
+Criar meu cofre offline grátis
+
+Seção – Dor do cliente
+Título:
+Hoje suas senhas estão em todo lugar. Menos seguras.
+
+Texto:
+
+Senhas repetidas em vários sites, salvas no navegador ou em bloco de notas.
+
+Cartões de crédito e débito espalhados em fotos, e-mail e mensageiros.
+
+Medo de vazamento na nuvem, invasão de conta e golpes cada vez mais sofisticados.
+​
+
+Fecho:
+
+Lockzero resolve isso com um cofre 100% offline: um único app, local, criptografado, sob seu controle.
+
+Seção – Proposta de valor (offline + freemium)
+Título:
+Cofre local, seguro e simples – com versão grátis e Premium
+
+Texto curto:
+
+100% offline: nada vai para servidores ou cloud. Seus dados ficam apenas nos seus dispositivos.
+​
+
+Criptografia forte e senha-mestra: só você consegue abrir o cofre.
+
+Plano grátis para começar sem risco. Versão Premium para quem quer recursos avançados sem abrir mão do offline.
+​
+
+Seção – Versão Grátis x Premium
+Título:
+Escolha como quer usar o Lockzero
+
+Grátis – para começar seguro
+
+Cofre offline para senhas, cartões e notas sigilosas.
+
+Criptografia local e proteção por senha-mestra/biometria.
+
+Uso em um dispositivo, sem anúncios e sem necessidade de cadastro.
+
+Premium – para poderosos e heavy users
+
+Tudo da versão grátis.
+
+Mais tipos de itens (identidades, múltiplos cofres, tags, etc.).
+​
+
+Exportação/backup avançado (arquivo criptografado para guardar onde quiser).
+
+Opções extras de segurança (tempo de bloqueio, camadas adicionais, etc.).
+
+(Você pode ajustar exatamente o que entra em cada plano, mas o texto já está compatível com um freemium moderno.)
+​
+
+Seção – Características principais (focando offline)
+Título:
+O que o Lockzero faz por você
+
+Cofre de senhas
+Guarde logins de sites e apps com criptografia local. Sem sincronização em servidor, sem exposição em vazamentos de terceiros.
+​
+
+Cofre de cartões
+Armazene número, validade, CVV e observações dos seus cartões em um único lugar protegido.
+
+Notas e dados sensíveis
+Guarde documentos, códigos e informações confidenciais fora de apps de notas comuns.
+​
+
+100% offline por padrão
+Funciona mesmo sem internet. Você continua acessando tudo mesmo em modo avião ou sem rede.
+​
