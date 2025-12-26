@@ -1,6 +1,4 @@
 ﻿Build1=Default,com.lockzero
-File1=MainPage.bal
-FileGroup1=Default Group
 Group=Default Group
 Library1=b4xpages
 Library2=core
@@ -29,7 +27,7 @@ Module6=ModLang
 Module7=ModNotes
 Module8=ModPasswords
 Module9=ModSecurity
-NumberOfFiles=1
+NumberOfFiles=0
 NumberOfLibraries=7
 NumberOfModules=19
 Version=13.4
@@ -140,3 +138,8 @@ public boolean _onCreateOptionsMenu(android.view.Menu menu) {
 #End Region
 
 'Program code should go into B4XMainPage and other pages.
+
+'Funcao para definir titulo da ActionBar (chamada pelas paginas)
+Public Sub SetPageTitle(title As String)
+	Activity.Title = title
+End Sub

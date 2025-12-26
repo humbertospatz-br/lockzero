@@ -13,7 +13,8 @@ Sub Class_Globals
 	Public Icon As String              'Emoji ou icone (Ex: "bank", "social", "email")
 	Public Color As Int                'Cor do grupo (opcional)
 	Public ProtectionType As String    '"PHRASE" ou "PIN"
-	Public Salt As String              'Salt aleatorio (base64, 16 bytes)
+	Public Salt As String              'Salt aleatorio (hex, 32 chars)
+	Public TestValue As String         '"LOCKZERO" criptografado - para validar frase
 	Public CreatedAt As Long
 	Public UpdatedAt As Long
 End Sub
@@ -25,17 +26,28 @@ Public Sub Initialize
 	Color = 0
 	ProtectionType = "PHRASE"  'Padrao: frase
 	Salt = ""  'Gerado na criacao
+	TestValue = ""  'Gerado na criacao com a frase
 	CreatedAt = DateTime.Now
 	UpdatedAt = DateTime.Now
 End Sub
 
 'Gera salt aleatorio (chamar ao criar grupo)
 Public Sub GenerateSalt
-	Dim r As Reflector
-	r.Target = r.RunStaticMethod("java.util.UUID", "randomUUID", Null, Null)
-	Dim uuid As String = r.RunMethod("toString")
-	'Usa UUID como base para salt (16 bytes)
-	Salt = uuid.Replace("-", "").SubString2(0, 32)
+	Salt = ModSecurity.GenerateRandomSalt
+End Sub
+
+'Cria TestValue criptografando "LOCKZERO" com a frase
+'Chamar ao criar grupo, depois de GenerateSalt
+Public Sub CreateTestValue(phrase As String)
+	TestValue = ModSecurity.EncryptWithSalt(phrase, Salt, "LOCKZERO")
+End Sub
+
+'Valida se a frase esta correta
+'Retorna True se descriptografar TestValue = "LOCKZERO"
+Public Sub ValidatePhrase(phrase As String) As Boolean
+	If TestValue = "" Or Salt = "" Then Return False
+	Dim decrypted As String = ModSecurity.DecryptWithSalt(phrase, Salt, TestValue)
+	Return decrypted = "LOCKZERO"
 End Sub
 
 Public Sub IsInitialized As Boolean
@@ -65,6 +77,7 @@ Public Sub ToMap As Map
 	m.Put("color", Color)
 	m.Put("protectionType", ProtectionType)
 	m.Put("salt", Salt)
+	m.Put("testValue", TestValue)
 	m.Put("createdAt", CreatedAt)
 	m.Put("updatedAt", UpdatedAt)
 	Return m
@@ -78,6 +91,7 @@ Public Sub FromMap(m As Map)
 	Color = m.GetDefault("color", 0)
 	ProtectionType = m.GetDefault("protectionType", "PHRASE")
 	Salt = m.GetDefault("salt", "")
+	TestValue = m.GetDefault("testValue", "")
 	CreatedAt = m.GetDefault("createdAt", DateTime.Now)
 	UpdatedAt = m.GetDefault("updatedAt", DateTime.Now)
 End Sub

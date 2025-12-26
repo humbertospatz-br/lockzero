@@ -12,28 +12,15 @@ Sub Class_Globals
 	Private Root As B4XView
 	Private xui As XUI
 
-	'=== HEADER ===
-	Private pnlHeader As Panel
-	Private lblTitle As Label
-	Private btnMenu As Button
-
 	'=== MENU LATERAL ===
+	Private pnlMenuOverlay As Panel
 	Private pnlMenu As Panel
 	Private svMenu As ScrollView
 	Private MenuVisible As Boolean = False
 
 	'=== CONTEUDO PRINCIPAL ===
-	Private pnlMain As Panel
-
-	'=== HOME - Categorias ===
-	Private pnlPasswords As Panel
-	Private pnlCards As Panel
-	Private pnlDocuments As Panel
-	Private pnlNotes As Panel
-	Private lblPasswords As Label
-	Private lblCards As Label
-	Private lblDocuments As Label
-	Private lblNotes As Label
+	Private svMain As ScrollView
+	Private pnlMain As B4XView
 
 	'=== TIMER SESSAO ===
 	Private tmrSession As Timer
@@ -48,7 +35,6 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	Root.Color = ModTheme.Background
 
-	CreateHeader
 	CreateMainPanel
 	CreateSideMenu
 	ShowHome
@@ -56,8 +42,10 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
-	'Atualiza textos (caso idioma tenha mudado)
-	UpdateHomeLabels
+	'Define titulo na ActionBar
+	CallSub2(Main, "SetPageTitle", "LockZero")
+
+	'Atualiza menu (caso idioma tenha mudado)
 	RebuildMenuItems
 
 	'Inicia timer de sessao se ativa
@@ -71,50 +59,28 @@ Private Sub B4XPage_Disappear
 End Sub
 
 ' ============================================
-'  HEADER
-' ============================================
-
-Private Sub CreateHeader
-	Dim width As Int = Root.Width
-
-	pnlHeader.Initialize("")
-	pnlHeader.Color = ModTheme.HeaderBackground
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
-
-	'Titulo
-	lblTitle.Initialize("")
-	lblTitle.Text = Starter.APP_NAME
-	lblTitle.TextSize = Starter.FONT_SUBTITLE
-	lblTitle.TextColor = ModTheme.HeaderText
-	lblTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblTitle, 16dip, 0, width - 70dip, 56dip)
-
-	'Botao Menu (hamburger - 3 tracos usando underscore)
-	btnMenu.Initialize("btnMenu")
-	btnMenu.Text = "___" & Chr(10) & "___" & Chr(10) & "___"
-	btnMenu.TextSize = 10
-	btnMenu.Color = Colors.Transparent
-	btnMenu.TextColor = ModTheme.HeaderText
-	btnMenu.Gravity = Gravity.CENTER
-	pnlHeader.AddView(btnMenu, width - 56dip, 4dip, 48dip, 48dip)
-End Sub
-
-' ============================================
 '  MENU LATERAL
 ' ============================================
 
 Private Sub CreateSideMenu
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
-	Dim menuW As Int = width * 0.65 '65% da largura
+	Dim menuW As Int = width * 0.70 '70% da largura
 
+	'Overlay escuro
+	pnlMenuOverlay.Initialize("pnlMenuOverlay")
+	pnlMenuOverlay.Color = Colors.ARGB(150, 0, 0, 0)
+	pnlMenuOverlay.Visible = False
+	Root.AddView(pnlMenuOverlay, 0, 0, width, height)
+
+	'Menu lateral
 	pnlMenu.Initialize("pnlMenu")
 	pnlMenu.Color = ModTheme.Surface
-	Root.AddView(pnlMenu, -menuW, 56dip, menuW, height - 56dip)
+	Root.AddView(pnlMenu, -menuW, 0, menuW, height)
 
 	svMenu.Initialize(0)
 	svMenu.Color = ModTheme.Surface
-	pnlMenu.AddView(svMenu, 0, 0, menuW, height - 56dip)
+	pnlMenu.AddView(svMenu, 0, 0, menuW, height)
 
 	RebuildMenuItems
 End Sub
@@ -123,10 +89,28 @@ Public Sub RebuildMenuItems
 	svMenu.Panel.RemoveAllViews
 	svMenu.Panel.Color = ModTheme.Surface
 
-	Dim top As Int = 16dip
-	Dim btnW As Int = pnlMenu.Width - 32dip
-	Dim btnH As Int = 44dip
-	Dim gap As Int = 8dip
+	Dim menuW As Int = pnlMenu.Width
+	Dim top As Int = 0
+
+	'Header do menu com logo
+	Dim pnlMenuHeader As Panel
+	pnlMenuHeader.Initialize("")
+	pnlMenuHeader.Color = ModTheme.Primary
+	svMenu.Panel.AddView(pnlMenuHeader, 0, top, menuW, 80dip)
+
+	Dim lblMenuTitle As Label
+	lblMenuTitle.Initialize("")
+	lblMenuTitle.Text = Starter.APP_NAME
+	lblMenuTitle.TextSize = 22
+	lblMenuTitle.TextColor = Colors.White
+	lblMenuTitle.Gravity = Gravity.CENTER_VERTICAL
+	lblMenuTitle.Typeface = Typeface.DEFAULT_BOLD
+	pnlMenuHeader.AddView(lblMenuTitle, 20dip, 0, menuW - 40dip, 80dip)
+	top = top + 80dip + 16dip
+
+	Dim btnW As Int = menuW - 32dip
+	Dim btnH As Int = 48dip
+	Dim gap As Int = 4dip
 
 	'Menu items
 	AddMenuButton(ModLang.T("passwords"), "mnuPasswords", top, btnW, btnH)
@@ -139,7 +123,7 @@ Public Sub RebuildMenuItems
 	top = top + btnH + gap
 
 	AddMenuButton(ModLang.T("notes"), "mnuNotes", top, btnW, btnH)
-	top = top + btnH + gap * 2
+	top = top + btnH + 16dip
 
 	'Separador
 	Dim pnlSep As Panel
@@ -169,22 +153,29 @@ Private Sub AddMenuButton(txt As String, eventName As String, top As Int, w As I
 End Sub
 
 Private Sub ToggleMenu
-	Dim newLeft As Int
 	If pnlMenu.Left < 0 Then
-		newLeft = 0
-		MenuVisible = True
+		ShowMenu
 	Else
-		newLeft = -pnlMenu.Width
-		MenuVisible = False
+		HideMenu
 	End If
-	pnlMenu.SetLayoutAnimated(200, newLeft, pnlMenu.Top, pnlMenu.Width, pnlMenu.Height)
+End Sub
+
+Private Sub ShowMenu
+	pnlMenuOverlay.Visible = True
+	pnlMenu.SetLayoutAnimated(200, 0, pnlMenu.Top, pnlMenu.Width, pnlMenu.Height)
+	MenuVisible = True
 End Sub
 
 Private Sub HideMenu
 	If MenuVisible Then
+		pnlMenuOverlay.Visible = False
 		pnlMenu.SetLayoutAnimated(200, -pnlMenu.Width, pnlMenu.Top, pnlMenu.Width, pnlMenu.Height)
 		MenuVisible = False
 	End If
+End Sub
+
+Private Sub pnlMenuOverlay_Click
+	HideMenu
 End Sub
 
 ' ============================================
@@ -195,17 +186,16 @@ Private Sub CreateMainPanel
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	pnlMain.Initialize("pnlMain")
-	pnlMain.Color = ModTheme.Background
-	Root.AddView(pnlMain, 0, 56dip, width, height - 56dip)
-End Sub
+	svMain.Initialize(0)
+	svMain.Color = ModTheme.Background
+	Root.AddView(svMain, 0, 0, width, height)
 
-Private Sub pnlMain_Click
-	If MenuVisible Then HideMenu
+	pnlMain = svMain.Panel
+	pnlMain.Color = ModTheme.Background
 End Sub
 
 ' ============================================
-'  HOME - CATEGORIAS
+'  HOME - LISTA VERTICAL PROFISSIONAL
 ' ============================================
 
 Private Sub ShowHome
@@ -213,107 +203,120 @@ Private Sub ShowHome
 	pnlMain.Color = ModTheme.Background
 
 	Dim width As Int = Root.Width
-	Dim height As Int = Root.Height - 56dip
+	Dim y As Int = 16dip
+	Dim margin As Int = 16dip
 
-	'Layout em grid 2x3
-	Dim iconSize As Int = 100dip
-	Dim spacing As Int = 20dip
-	Dim totalW As Int = 2 * iconSize + spacing
-	Dim startX As Int = (width - totalW) / 2
-	Dim startY As Int = 40dip
+	'Titulo da secao
+	Dim lblSection As Label
+	lblSection.Initialize("")
+	lblSection.Text = "CATEGORIAS"
+	lblSection.TextSize = 12
+	lblSection.TextColor = ModTheme.TextMuted
+	lblSection.Typeface = Typeface.DEFAULT_BOLD
+	pnlMain.AddView(lblSection, margin, y, width - margin * 2, 20dip)
+	y = y + 30dip
 
-	'Row 1: Senhas, Cartoes
-	pnlPasswords = CreateCategoryPanel("pnlPasswords", ModTheme.CategoryPassword)
-	pnlMain.AddView(pnlPasswords, startX, startY, iconSize, iconSize + 30dip)
-	lblPasswords = CreateCategoryLabel(ModLang.T("passwords"))
-	pnlPasswords.AddView(lblPasswords, 0, iconSize, iconSize, 30dip)
-	AddCategoryIcon(pnlPasswords, Chr(0x1F512), iconSize) 'Cadeado
+	'Lista de categorias - design vertical
+	Dim itemH As Int = 72dip
+	Dim cardWidth As Int = width - margin * 2
 
-	pnlCards = CreateCategoryPanel("pnlCards", ModTheme.CategoryCard)
-	pnlMain.AddView(pnlCards, startX + iconSize + spacing, startY, iconSize, iconSize + 30dip)
-	lblCards = CreateCategoryLabel(ModLang.T("cards"))
-	pnlCards.AddView(lblCards, 0, iconSize, iconSize, 30dip)
-	AddCategoryIcon(pnlCards, Chr(0x1F4B3), iconSize) 'Cartao
+	'Senhas
+	CreateListItem("pnlPasswords", ModLang.T("passwords"), "Gerenciar senhas e credenciais", Chr(0x25C6), ModTheme.Primary, y, cardWidth, itemH, margin)
+	y = y + itemH + 8dip
 
-	'Row 2: Documentos, Notas
-	Dim row2Y As Int = startY + iconSize + 50dip
+	'Cartoes
+	CreateListItem("pnlCards", ModLang.T("cards"), "Cartoes de credito e debito", Chr(0x25A0), ModTheme.CategoryCard, y, cardWidth, itemH, margin)
+	y = y + itemH + 8dip
 
-	pnlDocuments = CreateCategoryPanel("pnlDocuments", ModTheme.CategoryDocument)
-	pnlMain.AddView(pnlDocuments, startX, row2Y, iconSize, iconSize + 30dip)
-	lblDocuments = CreateCategoryLabel(ModLang.T("documents"))
-	pnlDocuments.AddView(lblDocuments, 0, iconSize, iconSize, 30dip)
-	AddCategoryIcon(pnlDocuments, Chr(0x1F4C4), iconSize) 'Documento
+	'Documentos
+	CreateListItem("pnlDocuments", ModLang.T("documents"), "Documentos e arquivos seguros", Chr(0x25B2), ModTheme.CategoryDocument, y, cardWidth, itemH, margin)
+	y = y + itemH + 8dip
 
-	pnlNotes = CreateCategoryPanel("pnlNotes", ModTheme.CategoryNote)
-	pnlMain.AddView(pnlNotes, startX + iconSize + spacing, row2Y, iconSize, iconSize + 30dip)
-	lblNotes = CreateCategoryLabel(ModLang.T("notes"))
-	pnlNotes.AddView(lblNotes, 0, iconSize, iconSize, 30dip)
-	AddCategoryIcon(pnlNotes, Chr(0x1F4DD), iconSize) 'Nota
+	'Notas
+	CreateListItem("pnlNotes", ModLang.T("notes"), "Notas seguras criptografadas", Chr(0x25CF), ModTheme.CategoryNote, y, cardWidth, itemH, margin)
+	y = y + itemH + 30dip
 
 	'Slogan
 	Dim lblSlogan As Label
 	lblSlogan.Initialize("")
 	lblSlogan.Text = ModLang.T("app_tagline")
 	lblSlogan.TextSize = 14
-	lblSlogan.TextColor = ModTheme.TextSecondary
+	lblSlogan.TextColor = ModTheme.TextMuted
 	lblSlogan.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblSlogan, 0, height - 80dip, width, 30dip)
+	pnlMain.AddView(lblSlogan, 0, y, width, 30dip)
+	y = y + 40dip
 
 	'Timer de sessao
 	lblSessionTimer.Initialize("")
 	lblSessionTimer.Text = ""
-	lblSessionTimer.TextSize = Starter.FONT_CAPTION
-	lblSessionTimer.TextColor = ModTheme.TextMuted
+	lblSessionTimer.TextSize = 12
+	lblSessionTimer.TextColor = ModTheme.Primary
 	lblSessionTimer.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblSessionTimer, 0, height - 50dip, width, 25dip)
+	pnlMain.AddView(lblSessionTimer, 0, y, width, 25dip)
+	y = y + 30dip
 
-	'Versao
+	'Versao FREE
 	Dim lblVersion As Label
 	lblVersion.Initialize("")
-	lblVersion.Text = "v" & Starter.APP_VERSION
-	lblVersion.TextSize = Starter.FONT_CAPTION
+	lblVersion.Text = "FREE - v" & Starter.APP_VERSION
+	lblVersion.TextSize = 12
 	lblVersion.TextColor = ModTheme.TextMuted
 	lblVersion.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblVersion, 0, height - 30dip, width, 20dip)
+	pnlMain.AddView(lblVersion, 0, y, width, 25dip)
+	y = y + 35dip
+
+	pnlMain.Height = y + 20dip
 End Sub
 
-Private Sub CreateCategoryPanel(eventName As String, bgColor As Int) As Panel
+Private Sub CreateListItem(eventName As String, title As String, subtitle As String, icon As String, iconColor As Int, y As Int, w As Int, h As Int, margin As Int)
 	Dim pnl As Panel
 	pnl.Initialize(eventName)
-	pnl.Color = bgColor
 
 	Dim xv As B4XView = pnl
-	xv.SetColorAndBorder(bgColor, 0, bgColor, 16dip)
+	xv.SetColorAndBorder(ModTheme.Surface, 1dip, ModTheme.CardBorder, 12dip)
+	pnlMain.AddView(pnl, margin, y, w, h)
 
-	Return pnl
-End Sub
+	'Avatar circular
+	Dim pnlAvatar As Panel
+	pnlAvatar.Initialize("")
 
-Private Sub CreateCategoryLabel(txt As String) As Label
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = txt
-	lbl.TextSize = Starter.FONT_LABEL
-	lbl.TextColor = ModTheme.TextPrimary
-	lbl.Gravity = Gravity.CENTER
-	Return lbl
-End Sub
+	Dim xvAvatar As B4XView = pnlAvatar
+	xvAvatar.SetColorAndBorder(iconColor, 0, iconColor, 24dip)
+	pnl.AddView(pnlAvatar, 16dip, 12dip, 48dip, 48dip)
 
-Private Sub AddCategoryIcon(pnl As Panel, icon As String, size As Int)
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = icon
-	lbl.TextSize = 40
-	lbl.TextColor = Colors.White
-	lbl.Gravity = Gravity.CENTER
-	pnl.AddView(lbl, 0, 20dip, size, size - 40dip)
-End Sub
+	Dim lblIcon As Label
+	lblIcon.Initialize("")
+	lblIcon.Text = icon
+	lblIcon.TextSize = 22
+	lblIcon.TextColor = Colors.White
+	lblIcon.Gravity = Gravity.CENTER
+	pnlAvatar.AddView(lblIcon, 0, 0, 48dip, 48dip)
 
-Private Sub UpdateHomeLabels
-	If lblPasswords.IsInitialized Then lblPasswords.Text = ModLang.T("passwords")
-	If lblCards.IsInitialized Then lblCards.Text = ModLang.T("cards")
-	If lblDocuments.IsInitialized Then lblDocuments.Text = ModLang.T("documents")
-	If lblNotes.IsInitialized Then lblNotes.Text = ModLang.T("notes")
-	If lblTitle.IsInitialized Then lblTitle.Text = Starter.APP_NAME
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = title
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = ModTheme.TextPrimary
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	pnl.AddView(lblTitle, 80dip, 14dip, w - 120dip, 24dip)
+
+	'Subtitulo
+	Dim lblSubtitle As Label
+	lblSubtitle.Initialize("")
+	lblSubtitle.Text = subtitle
+	lblSubtitle.TextSize = 13
+	lblSubtitle.TextColor = ModTheme.TextSecondary
+	pnl.AddView(lblSubtitle, 80dip, 38dip, w - 120dip, 22dip)
+
+	'Chevron
+	Dim lblChevron As Label
+	lblChevron.Initialize("")
+	lblChevron.Text = Chr(0x203A) '›
+	lblChevron.TextSize = 24
+	lblChevron.TextColor = ModTheme.TextMuted
+	lblChevron.Gravity = Gravity.CENTER
+	pnl.AddView(lblChevron, w - 40dip, 0, 30dip, h)
 End Sub
 
 ' ============================================
@@ -382,6 +385,11 @@ Private Sub pnlNotes_Click
 	NavigateToNotes
 End Sub
 
+Private Sub pnlBackup_Click
+	HideMenu
+	B4XPages.ShowPage("PageBackup")
+End Sub
+
 Private Sub NavigateToNotes
 	'Usa o grupo "Geral" por padrao para notas
 	Dim groups As List = ModPasswords.GetAllGroups
@@ -416,10 +424,6 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	If pnlHeader.IsInitialized Then pnlHeader.Color = ModTheme.HeaderBackground
-	If lblTitle.IsInitialized Then lblTitle.TextColor = ModTheme.HeaderText
-	If btnMenu.IsInitialized Then btnMenu.TextColor = ModTheme.HeaderText
 
 	If pnlMain.IsInitialized Then pnlMain.Color = ModTheme.Background
 	If pnlMenu.IsInitialized Then pnlMenu.Color = ModTheme.Surface

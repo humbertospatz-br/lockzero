@@ -12,9 +12,6 @@ Sub Process_Globals
 	Private Const SETTINGS_FILE As String = "lockzero_settings.dat"
 	Private Const PIN_FILE As String = "lockzero_pin.dat"
 	Private Const ATTEMPTS_FILE As String = "lockzero_attempts.json"
-
-	'Delays progressivos (em ms)
-	Private DELAYS() As Int = Array As Int(0, 2000, 5000, 15000, 30000, 60000)
 End Sub
 
 ' ============================================
@@ -196,6 +193,18 @@ End Sub
 '  BRUTE FORCE PROTECTION
 ' ============================================
 
+'Calcula delay baseado no numero de tentativas falhas
+'Regra: 5 tent→1min, +3(8)→5min, cada +2→+5min
+Private Sub CalculateDelay(count As Int) As Int
+	If count < 5 Then Return 0  '1-4 tentativas: sem delay
+	If count = 5 Then Return 60000  '5 tentativas: 1 minuto
+	If count <= 8 Then Return 60000  '6-8 tentativas: 1 minuto
+
+	'A partir de 9: 5 minutos base + 5 min a cada 2 tentativas
+	Dim extra As Int = (count - 8) / 2
+	Return 300000 + (extra * 300000)  '5 min + extras
+End Sub
+
 'Registra tentativa falha para um grupo
 'Returns: delay em ms que deve esperar antes da proxima tentativa
 Public Sub RegisterFailedAttempt(groupId As String) As Int
@@ -217,10 +226,8 @@ Public Sub RegisterFailedAttempt(groupId As String) As Int
 
 	SaveAttempts(attempts)
 
-	'Retorna delay baseado no numero de tentativas
-	Dim delayIndex As Int = Min(count - 1, DELAYS.Length - 1)
-	If delayIndex < 0 Then delayIndex = 0
-	Return DELAYS(delayIndex)
+	'Retorna delay calculado
+	Return CalculateDelay(count)
 End Sub
 
 'Reseta contador de tentativas (apos sucesso)
@@ -241,7 +248,7 @@ Public Sub GetFailedAttempts(groupId As String) As Int
 	Return groupData.GetDefault("count", 0)
 End Sub
 
-'Retorna delay restante antes de poder tentar novamente
+'Retorna delay restante antes de poder tentar novamente (em ms)
 Public Sub GetRemainingDelay(groupId As String) As Int
 	Dim attempts As Map = LoadAttempts
 	If attempts.ContainsKey(groupId) = False Then Return 0
@@ -252,15 +259,22 @@ Public Sub GetRemainingDelay(groupId As String) As Int
 
 	If count = 0 Then Return 0
 
-	Dim delayIndex As Int = Min(count - 1, DELAYS.Length - 1)
-	If delayIndex < 0 Then Return 0
+	Dim requiredDelay As Int = CalculateDelay(count)
+	If requiredDelay = 0 Then Return 0
 
-	Dim requiredDelay As Int = DELAYS(delayIndex)
 	Dim elapsed As Long = DateTime.Now - lastFailed
 	Dim remaining As Int = requiredDelay - elapsed
 
 	If remaining < 0 Then Return 0
 	Return remaining
+End Sub
+
+'Formata delay restante para exibicao (MM:SS)
+Public Sub FormatDelay(delayMs As Int) As String
+	Dim secs As Int = delayMs / 1000
+	Dim mins As Int = secs / 60
+	Dim secsRest As Int = secs Mod 60
+	Return NumberFormat(mins, 1, 0) & ":" & NumberFormat(secsRest, 2, 0)
 End Sub
 
 'Verifica se deve apagar grupo (limite atingido)

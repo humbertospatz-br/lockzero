@@ -49,7 +49,8 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
-	'Nao faz nada especial
+	'Define titulo na ActionBar
+	CallSub2(Main, "SetPageTitle", "LockZero")
 End Sub
 
 ' ============================================
@@ -100,19 +101,20 @@ Private Sub CreateUI
 	lblWarningText.Text = ModLang.T("onb_warning_text")
 	lblWarningText.TextSize = Starter.FONT_BODY
 	lblWarningText.Gravity = Gravity.LEFT
-	pnlWarning.AddView(lblWarningText, margin, 120dip, contentWidth, height - 350dip)
+	'Aumentado espaco para texto nao cortar
+	pnlWarning.AddView(lblWarningText, margin, 120dip, contentWidth, height - 280dip)
 
 	chkUnderstand.Initialize("chkUnderstand")
 	chkUnderstand.Text = ModLang.T("onb_understand")
 	chkUnderstand.TextSize = Starter.FONT_LABEL
 	chkUnderstand.Checked = False
-	pnlWarning.AddView(chkUnderstand, margin, height - 180dip, contentWidth, 70dip)
+	pnlWarning.AddView(chkUnderstand, margin, height - 150dip, contentWidth, 50dip)
 
 	btnWarningNext.Initialize("btnWarningNext")
 	btnWarningNext.Text = ModLang.T("onb_accept")
 	btnWarningNext.TextSize = Starter.FONT_BUTTON
 	btnWarningNext.Enabled = False
-	pnlWarning.AddView(btnWarningNext, margin, height - 100dip, contentWidth, 50dip)
+	pnlWarning.AddView(btnWarningNext, margin, height - 90dip, contentWidth, 50dip)
 
 	'=== STEP 2: COMPLETE ===
 	pnlComplete = xui.CreatePanel("")

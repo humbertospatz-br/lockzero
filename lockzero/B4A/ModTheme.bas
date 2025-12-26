@@ -6,7 +6,7 @@ Version=9.85
 @EndOfDesignText@
 'ModTheme.bas - Modulo de Temas
 'LockZero - Lock and ZERO worries
-'Tema Claro e Escuro com cores modernas
+'REDESIGN UX 2025-12-26: Paleta sobria para app de seguranca
 
 Sub Process_Globals
 	Public IsDarkTheme As Boolean = True 'Padrao: escuro (app de seguranca)
@@ -26,64 +26,67 @@ Public Sub ToggleTheme
 End Sub
 
 ' ============================================
-'  CORES PRIMARIAS
+'  CORES PRIMARIAS (Navy profundo)
 ' ============================================
 
-'Cor primaria (Indigo)
 Public Sub Primary As Int
-	Return Colors.RGB(99, 102, 241) '#6366F1
+	Return Colors.RGB(10, 37, 64) '#0A2540 Navy profundo
 End Sub
 
 Public Sub PrimaryDark As Int
-	Return Colors.RGB(79, 70, 229) '#4F46E5
+	Return Colors.RGB(5, 25, 45) '#05192D Navy escurecido
 End Sub
 
 Public Sub PrimaryLight As Int
-	Return Colors.RGB(129, 140, 248) '#818CF8
+	Return Colors.RGB(20, 55, 90) '#14375A Navy claro
+End Sub
+
+Public Sub Accent As Int
+	Return Colors.RGB(45, 90, 140) '#2D5A8C Azul acinzentado
 End Sub
 
 ' ============================================
-'  CORES DE STATUS
+'  CORES DE STATUS (sem verde)
 ' ============================================
 
 Public Sub Success As Int
-	Return Colors.RGB(16, 185, 129) '#10B981 Emerald
+	Return Colors.RGB(45, 90, 140) '#2D5A8C Azul (sem verde)
 End Sub
 
 Public Sub Warning As Int
-	Return Colors.RGB(245, 158, 11) '#F59E0B Amber
+	Return Colors.RGB(160, 110, 45) '#A06E2D Amber escuro
 End Sub
 
 Public Sub Danger As Int
-	Return Colors.RGB(239, 68, 68) '#EF4444 Red
+	Return Colors.RGB(140, 45, 50) '#8C2D32 Vermelho escuro
 End Sub
 
 Public Sub Info As Int
-	Return Colors.RGB(6, 182, 212) '#06B6D4 Cyan
+	Return Colors.RGB(45, 90, 140) '#2D5A8C Azul acinzentado
 End Sub
 
 ' ============================================
-'  CORES DE CATEGORIA
+'  CORES DE CATEGORIA (SOBRIAS - tons de cinza)
 ' ============================================
 
 Public Sub CategoryPassword As Int
-	Return Colors.RGB(99, 102, 241) '#6366F1 Indigo
+	Return Colors.RGB(10, 37, 64) '#0A2540 Navy (primary)
 End Sub
 
 Public Sub CategoryCard As Int
-	Return Colors.RGB(245, 158, 11) '#F59E0B Amber
+	Return Colors.RGB(50, 60, 75) '#323C4B Cinza azulado
 End Sub
 
 Public Sub CategoryDocument As Int
-	Return Colors.RGB(16, 185, 129) '#10B981 Emerald
+	Return Colors.RGB(38, 48, 60) '#26303C Cinza slate
 End Sub
 
 Public Sub CategoryNote As Int
-	Return Colors.RGB(236, 72, 153) '#EC4899 Pink
+	Return Colors.RGB(45, 55, 70) '#2D3746 Cinza ardosia
 End Sub
 
 Public Sub CategoryWifi As Int
-	Return Colors.RGB(6, 182, 212) '#06B6D4 Cyan
+	Return Colors.RGB(55, 65, 80) '#374150 Cinza medio
 End Sub
 
 ' ============================================
@@ -92,15 +95,15 @@ End Sub
 
 Public Sub Background As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(15, 23, 42) '#0F172A Slate 900
+		Return Colors.RGB(12, 14, 18) '#0C0E12 Preto azulado profundo
 	Else
-		Return Colors.RGB(248, 250, 252) '#F8FAFC Slate 50
+		Return Colors.RGB(245, 247, 250) '#F5F7FA Cinza muito claro
 	End If
 End Sub
 
 Public Sub Surface As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(30, 41, 59) '#1E293B Slate 800
+		Return Colors.RGB(22, 27, 34) '#161B22 Superficie elevada
 	Else
 		Return Colors.White
 	End If
@@ -108,9 +111,17 @@ End Sub
 
 Public Sub SurfaceLight As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(51, 65, 85) '#334155 Slate 700
+		Return Colors.RGB(33, 40, 50) '#212832 Superficie hover
 	Else
-		Return Colors.RGB(241, 245, 249) '#F1F5F9 Slate 100
+		Return Colors.RGB(240, 242, 245) '#F0F2F5
+	End If
+End Sub
+
+Public Sub Elevated As Int
+	If IsDarkTheme Then
+		Return Colors.RGB(40, 48, 60) '#28303C Cards destacados
+	Else
+		Return Colors.White
 	End If
 End Sub
 
@@ -120,25 +131,25 @@ End Sub
 
 Public Sub TextPrimary As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(248, 250, 252) '#F8FAFC Slate 50
+		Return Colors.RGB(230, 235, 240) '#E6EBF0
 	Else
-		Return Colors.RGB(15, 23, 42) '#0F172A Slate 900
+		Return Colors.RGB(20, 25, 30) '#14191E
 	End If
 End Sub
 
 Public Sub TextSecondary As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(148, 163, 184) '#94A3B8 Slate 400
+		Return Colors.RGB(140, 155, 170) '#8C9BAA
 	Else
-		Return Colors.RGB(71, 85, 105) '#475569 Slate 600
+		Return Colors.RGB(80, 95, 110) '#505F6E
 	End If
 End Sub
 
 Public Sub TextMuted As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(100, 116, 139) '#64748B Slate 500
+		Return Colors.RGB(95, 110, 125) '#5F6E7D
 	Else
-		Return Colors.RGB(148, 163, 184) '#94A3B8 Slate 400
+		Return Colors.RGB(140, 155, 170) '#8C9BAA
 	End If
 End Sub
 
@@ -148,7 +159,7 @@ End Sub
 
 Public Sub InputBackground As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(51, 65, 85) '#334155 Slate 700
+		Return Colors.RGB(33, 40, 50) '#212832
 	Else
 		Return Colors.White
 	End If
@@ -156,9 +167,9 @@ End Sub
 
 Public Sub InputBorder As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(71, 85, 105) '#475569 Slate 600
+		Return Colors.RGB(55, 65, 80) '#374150
 	Else
-		Return Colors.RGB(203, 213, 225) '#CBD5E1 Slate 300
+		Return Colors.RGB(200, 205, 215) '#C8CDD7
 	End If
 End Sub
 
@@ -180,9 +191,9 @@ End Sub
 
 Public Sub ButtonSecondary As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(71, 85, 105) '#475569 Slate 600
+		Return Colors.RGB(55, 65, 80) '#374150
 	Else
-		Return Colors.RGB(226, 232, 240) '#E2E8F0 Slate 200
+		Return Colors.RGB(220, 225, 230) '#DCE1E6
 	End If
 End Sub
 
@@ -192,9 +203,9 @@ End Sub
 
 Public Sub ButtonDisabled As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(51, 65, 85) '#334155 Slate 700
+		Return Colors.RGB(40, 48, 60) '#28303C
 	Else
-		Return Colors.RGB(226, 232, 240) '#E2E8F0 Slate 200
+		Return Colors.RGB(220, 225, 230) '#DCE1E6
 	End If
 End Sub
 
@@ -216,18 +227,14 @@ End Sub
 
 Public Sub CardBorder As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(51, 65, 85) '#334155 Slate 700
+		Return Colors.RGB(33, 40, 50) '#212832
 	Else
-		Return Colors.RGB(226, 232, 240) '#E2E8F0 Slate 200
+		Return Colors.RGB(220, 225, 230) '#DCE1E6
 	End If
 End Sub
 
 Public Sub ItemPressed As Int
-	If IsDarkTheme Then
-		Return Colors.RGB(51, 65, 85) '#334155 Slate 700
-	Else
-		Return Colors.RGB(241, 245, 249) '#F1F5F9 Slate 100
-	End If
+	Return SurfaceLight
 End Sub
 
 ' ============================================
@@ -235,11 +242,7 @@ End Sub
 ' ============================================
 
 Public Sub HeaderBackground As Int
-	If IsDarkTheme Then
-		Return Colors.RGB(30, 41, 59) '#1E293B Slate 800
-	Else
-		Return Primary
-	End If
+	Return Primary '#0A2540 Navy
 End Sub
 
 Public Sub HeaderText As Int
@@ -248,7 +251,7 @@ End Sub
 
 Public Sub NavBackground As Int
 	If IsDarkTheme Then
-		Return Colors.RGB(30, 41, 59) '#1E293B Slate 800
+		Return Colors.RGB(22, 27, 34) '#161B22
 	Else
 		Return Colors.White
 	End If

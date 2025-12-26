@@ -94,11 +94,16 @@ Private Sub LoadPortuguese
 	'=== AUTENTICACAO ===
 	Texts.Put("enter_passphrase", "Digite sua frase secreta")
 	Texts.Put("passphrase_hint", "Sua frase pessoal...")
+	Texts.Put("passphrase_min_8", "Frase deve ter no mínimo 8 caracteres")
+	Texts.Put("confirm", "Confirmar")
 	Texts.Put("unlock", "Desbloquear")
 	Texts.Put("use_biometric", "Usar biometria")
 	Texts.Put("wrong_passphrase", "Frase incorreta")
 	Texts.Put("session_expired", "Sessão expirada")
 	Texts.Put("session_remaining", "Sessão expira em")
+	Texts.Put("wait_timeout", "Aguarde")
+	Texts.Put("attempts", "tentativas")
+	Texts.Put("failed_attempts", "tentativas incorretas")
 
 	'=== CATEGORIAS ===
 	Texts.Put("passwords", "Senhas")
@@ -141,6 +146,7 @@ Private Sub LoadPortuguese
 	Texts.Put("username", "Usuário")
 	Texts.Put("url", "URL/Site")
 	Texts.Put("site_name", "Nome do site")
+	Texts.Put("new_password", "Nova Senha")
 	Texts.Put("add_password", "Adicionar senha")
 	Texts.Put("edit_password", "Editar senha")
 	Texts.Put("password_copied", "Senha copiada!")
@@ -179,6 +185,7 @@ Private Sub LoadPortuguese
 	Texts.Put("note", "Nota")
 	Texts.Put("note_title", "Título")
 	Texts.Put("note_content", "Conteúdo")
+	Texts.Put("new_note", "Nova Nota")
 	Texts.Put("add_note", "Adicionar nota")
 	Texts.Put("edit_note", "Editar nota")
 
@@ -261,11 +268,16 @@ Private Sub LoadEnglish
 	'=== AUTHENTICATION ===
 	Texts.Put("enter_passphrase", "Enter your secret phrase")
 	Texts.Put("passphrase_hint", "Your personal phrase...")
+	Texts.Put("passphrase_min_8", "Phrase must have at least 8 characters")
+	Texts.Put("confirm", "Confirm")
 	Texts.Put("unlock", "Unlock")
 	Texts.Put("use_biometric", "Use biometric")
 	Texts.Put("wrong_passphrase", "Wrong phrase")
 	Texts.Put("session_expired", "Session expired")
 	Texts.Put("session_remaining", "Session expires in")
+	Texts.Put("wait_timeout", "Wait")
+	Texts.Put("attempts", "attempts")
+	Texts.Put("failed_attempts", "failed attempts")
 
 	'=== CATEGORIES ===
 	Texts.Put("passwords", "Passwords")
@@ -284,6 +296,7 @@ Private Sub LoadEnglish
 	Texts.Put("username", "Username")
 	Texts.Put("url", "URL/Website")
 	Texts.Put("site_name", "Site name")
+	Texts.Put("new_password", "New Password")
 	Texts.Put("add_password", "Add password")
 	Texts.Put("edit_password", "Edit password")
 	Texts.Put("password_copied", "Password copied!")
@@ -322,6 +335,7 @@ Private Sub LoadEnglish
 	Texts.Put("note", "Note")
 	Texts.Put("note_title", "Title")
 	Texts.Put("note_content", "Content")
+	Texts.Put("new_note", "New Note")
 	Texts.Put("add_note", "Add note")
 	Texts.Put("edit_note", "Edit note")
 

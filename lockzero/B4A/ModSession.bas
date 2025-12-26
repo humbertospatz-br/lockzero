@@ -9,8 +9,10 @@ Version=9.85
 'Controle de sessao com frase-senha e timeout
 
 Sub Process_Globals
-	'Frase-senha em memoria (NUNCA salva em disco)
-	Private Passphrase As String
+	'Frase ofuscada em memoria (XOR com salt aleatorio)
+	'Nunca em texto claro - outros apps nao conseguem ler
+	Private PhraseObfuscated As String
+	Private SessionSalt As String
 
 	'Controle de tempo
 	Private SessionStartTime As Long
@@ -24,19 +26,39 @@ End Sub
 '  CONTROLE DE SESSAO
 ' ============================================
 
-'Inicia sessao com frase-senha
+'Inicia sessao com frase
+'A frase fica ofuscada em memoria (XOR) - outros apps nao conseguem ler
 Public Sub StartSession(phrase As String)
-	Passphrase = phrase
+	'Gera salt aleatorio para esta sessao
+	SessionSalt = ModSecurity.GenerateRandomSalt
+
+	'Ofusca a frase (XOR com salt)
+	PhraseObfuscated = Obfuscate(phrase, SessionSalt)
+
 	SessionStartTime = DateTime.Now
 	LastActivityTime = DateTime.Now
 	IsUnlocked = True
-	Log("ModSession: Sessao iniciada")
+	Log("ModSession: Sessao iniciada (frase ofuscada)")
+End Sub
+
+'Ofusca/desofusca string com XOR (mesma funcao para ambos)
+Private Sub Obfuscate(text As String, salt As String) As String
+	If text = "" Or salt = "" Then Return ""
+	Dim result As StringBuilder
+	result.Initialize
+	For i = 0 To text.Length - 1
+		Dim t As Int = Asc(text.CharAt(i))
+		Dim s As Int = Asc(salt.CharAt(i Mod salt.Length))
+		Dim x As Int = Bit.Xor(t, s)
+		result.Append(Chr(x))
+	Next
+	Return result.ToString
 End Sub
 
 'Verifica se sessao esta ativa
 Public Sub IsSessionActive As Boolean
 	If IsUnlocked = False Then Return False
-	If Passphrase = "" Then Return False
+	If PhraseObfuscated = "" Then Return False
 
 	'Verifica timeout
 	Dim timeoutSeconds As Int = ModSecurity.GetSessionTimeout
@@ -51,10 +73,10 @@ Public Sub IsSessionActive As Boolean
 	Return True
 End Sub
 
-'Retorna frase-senha (se sessao ativa)
+'Retorna frase (desofuscada, se sessao ativa)
 Public Sub GetPassphrase As String
 	If IsSessionActive Then
-		Return Passphrase
+		Return Obfuscate(PhraseObfuscated, SessionSalt) 'XOR novamente = original
 	End If
 	Return ""
 End Sub
@@ -68,7 +90,8 @@ End Sub
 
 'Encerra sessao (limpa frase da memoria)
 Public Sub EndSession
-	Passphrase = ""
+	PhraseObfuscated = ""
+	SessionSalt = ""
 	SessionStartTime = 0
 	LastActivityTime = 0
 	IsUnlocked = False
@@ -128,13 +151,13 @@ End Sub
 'Criptografa usando frase da sessao
 Public Sub Encrypt(plainText As String) As String
 	If IsSessionActive = False Then Return ""
-	Return ModSecurity.Encrypt(Passphrase, plainText)
+	Return ModSecurity.Encrypt(GetPassphrase, plainText)
 End Sub
 
 'Descriptografa usando frase da sessao
 Public Sub Decrypt(encText As String) As String
 	If IsSessionActive = False Then Return ""
-	Return ModSecurity.Decrypt(Passphrase, encText)
+	Return ModSecurity.Decrypt(GetPassphrase, encText)
 End Sub
 
 'Verifica se frase esta correta (descriptografando um valor de teste)

@@ -11,14 +11,54 @@
 
 ---
 
-## BUGS URGENTES (CORRIGIR PRIMEIRO)
+## REDESIGN UX - SESSAO 2025-12-26
 
-> **Identificados em:** 2025-12-25
+> **Consultoria UX aplicada** - App de seguranca deve ser SOBRIO
 
-- [ ] Texto da dica frase-senha cortado no onboarding (aumentar area do lblWarningText)
-- [ ] Tela nao ajusta quando teclado sobe (PagePasswordEdit, PagePasswords)
-- [ ] Bloquear criacao de senha/grupo sem frase-senha cadastrada primeiro
-- [ ] Testar B4XDialog.ShowCustom no PagePasswords (dialogo de grupos)
+### Paleta de Cores Aprovada (Navy + Cinzas)
+```
+Primary:     RGB(10, 37, 64)    #0A2540  Navy profundo
+Background:  RGB(12, 14, 18)    #0C0E12  Preto azulado
+Surface:     RGB(22, 27, 34)    #161B22  Cards
+Text:        RGB(230, 235, 240) #E6EBF0  Texto principal
+Text Muted:  RGB(95, 110, 125)  #5F6E7D  Hints
+Warning:     RGB(160, 110, 45)  #A06E2D  Amber escuro
+Danger:      RGB(140, 45, 50)   #8C2D32  Vermelho escuro
+```
+
+### Tarefas do Redesign
+- [x] [2025-12-26] Aplicar nova paleta em ModTheme.bas - FEITO (Navy + cinzas)
+- [x] [2025-12-26] Habilitar ActionBar do sistema (#IncludeTitle: True) - FEITO
+- [x] [2025-12-26] Configurar titulos das paginas - FEITO (B4XPages.SetTitle em cada pagina)
+- [x] [2025-12-26] Categorias monocromaticas - FEITO (tons de cinza/navy)
+- [x] [2025-12-26] Corrigir texto backup - FEITO ("use frase que ja conhece de cor")
+- [x] [2025-12-26] Remover marrom das categorias - FEITO (CategoryDocument agora e cinza slate)
+
+### Anteriores
+- [x] [2025-12-26] Header B4X removido
+- [x] [2025-12-26] Emojis trocados por Unicode basico
+- [x] [2025-12-26] Verde removido do app
+
+### Navegacao
+- [ ] [2025-12-26] Ao entrar em grupo, mostrar nome no ActionBar
+- [ ] [2025-12-26] Teclado cobre campo "Notas" - ajustar scroll
+
+### Anteriores (concluidos)
+- [x] [2025-12-26] Texto da dica frase-senha cortado no onboarding
+- [x] [2025-12-26] Tela nao ajusta quando teclado sobe (PagePasswordEdit, PageNoteEdit)
+- [x] [2025-12-26] Bloquear criacao de senha/grupo sem frase cadastrada
+
+## IMPLEMENTADO SESSAO 2025-12-26
+
+> **Seguranca e Protecao**
+
+- [x] [2025-12-26] Headers removidos das paginas (usar header proprio)
+- [x] [2025-12-26] TestValue por grupo ("LOCKZERO" criptografado para validar frase)
+- [x] [2025-12-26] Frase ofuscada em memoria (XOR com salt aleatorio)
+- [x] [2025-12-26] Brute force: 5 tent→1min, +3→5min, +2→+5min progressivo
+- [x] [2025-12-26] Dialog criar grupo pede nome + frase
+- [x] [2025-12-26] Dialog abrir grupo valida frase com TestValue
+- [x] [2025-12-26] Regra rigida de fluxo: PLANEJAR→TODO_LIST→EXECUTAR→COMMIT
 
 ---
 

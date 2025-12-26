@@ -12,10 +12,6 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI
-	Private pnlHeader As B4XView
-	Private lblTitle As B4XView
-	Private btnBack As Button
-
 	Private svContent As ScrollView
 	Private pnlContent As B4XView
 
@@ -39,6 +35,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Define titulo na ActionBar
+	CallSub2(Main, "SetPageTitle", ModLang.T("backup"))
+
 	ModSession.Touch
 	UpdateLastBackupInfo
 End Sub
@@ -51,21 +50,9 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'Header
-	pnlHeader = xui.CreatePanel("")
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
-
-	btnBack.Initialize("btnBack")
-	btnBack.Text = "<"
-	pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
-
-	lblTitle = CreateLabel(ModLang.T("backup"), 18, True)
-	lblTitle.SetTextAlignment("CENTER", "LEFT")
-	pnlHeader.AddView(lblTitle, 56dip, 0, width - 112dip, 56dip)
-
-	'Conteudo
+	'Conteudo (tela inteira)
 	svContent.Initialize(0)
-	Root.AddView(svContent, 0, 56dip, width, height - 56dip)
+	Root.AddView(svContent, 0, 0, width, height)
 
 	pnlContent = svContent.Panel
 	pnlContent.Color = Colors.Transparent
@@ -177,34 +164,23 @@ Private Sub CreateUI
 	pnlContent.AddView(lblTestInfo, 20dip, y, btnWidth, 40dip)
 	y = y + 60dip
 
-	'Aviso importante
+	'Aviso importante - fundo navy para consistencia
 	Dim pnlWarning As Panel
 	pnlWarning.Initialize("")
-	pnlWarning.Color = ModTheme.Warning
+	pnlWarning.Color = ModTheme.Primary 'Navy
 	pnlContent.AddView(pnlWarning, 20dip, y, btnWidth, 80dip)
 
 	Dim lblWarning As Label
 	lblWarning.Initialize("")
-	lblWarning.Text = "IMPORTANTE: Se voce esquecer a frase do backup, NAO sera possivel restaurar seus dados. Anote em local seguro!"
-	lblWarning.TextSize = 12
+	lblWarning.Text = "DICA: Use uma oracao, trecho de musica ou frase que voce ja conhece de cor. Assim nao precisa anotar!"
+	lblWarning.TextSize = 13
 	lblWarning.TextColor = Colors.White
 	lblWarning.Gravity = Gravity.CENTER
+	lblWarning.Typeface = Typeface.DEFAULT_BOLD
 	pnlWarning.AddView(lblWarning, 10dip, 10dip, btnWidth - 20dip, 60dip)
 	y = y + 100dip
 
 	pnlContent.Height = y + 20dip
-End Sub
-
-Private Sub CreateLabel(text As String, size As Float, bold As Boolean) As B4XView
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = text
-	lbl.TextSize = size
-	lbl.Gravity = Gravity.CENTER
-	If bold Then
-		lbl.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
-	End If
-	Return lbl
 End Sub
 
 ' ============================================
@@ -224,10 +200,6 @@ End Sub
 ' ============================================
 '  EVENTOS
 ' ============================================
-
-Private Sub btnBack_Click
-	B4XPages.ClosePage(Me)
-End Sub
 
 Private Sub btnExport_Click
 	ModSession.Touch
@@ -415,12 +387,6 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	pnlHeader.Color = ModTheme.Surface
-	lblTitle.TextColor = ModTheme.TextPrimary
-
-	btnBack.Color = ModTheme.ButtonSecondary
-	btnBack.TextColor = ModTheme.TextPrimary
 
 	btnExport.Color = ModTheme.Primary
 	btnExport.TextColor = Colors.White

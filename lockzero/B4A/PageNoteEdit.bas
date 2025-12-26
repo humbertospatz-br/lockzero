@@ -12,9 +12,6 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI
-	Private pnlHeader As B4XView
-	Private lblTitle As B4XView
-	Private btnBack As Button
 	Private btnSave As Button
 	Private btnDelete As Button
 
@@ -42,6 +39,13 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Define titulo na ActionBar
+	If IsNewNote Then
+		CallSub2(Main, "SetPageTitle", ModLang.T("new_note"))
+	Else
+		CallSub2(Main, "SetPageTitle", ModLang.T("edit"))
+	End If
+
 	ModSession.Touch
 End Sub
 
@@ -54,13 +58,11 @@ Public Sub SetParams(params As Map)
 	IsNewNote = (CurrentNoteId.Length = 0)
 
 	If IsNewNote Then
-		lblTitle.Text = "Nova Nota"
 		btnDelete.Visible = False
 		edtTitle.Text = ""
 		edtContent.Text = ""
 		chkFavorite.Checked = False
 	Else
-		lblTitle.Text = "Editar Nota"
 		btnDelete.Visible = True
 		LoadNote
 	End If
@@ -74,33 +76,27 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'Header
-	pnlHeader = xui.CreatePanel("")
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
-
-	btnBack.Initialize("btnBack")
-	btnBack.Text = "<"
-	pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
-
-	lblTitle = CreateLabel("Nova Nota", 18, True)
-	lblTitle.SetTextAlignment("CENTER", "LEFT")
-	pnlHeader.AddView(lblTitle, 56dip, 0, width - 160dip, 56dip)
-
+	'Botoes flutuantes
 	btnDelete.Initialize("btnDelete")
 	btnDelete.Text = "X"
 	btnDelete.Visible = False
-	pnlHeader.AddView(btnDelete, width - 96dip, 8dip, 40dip, 40dip)
+	Root.AddView(btnDelete, width - 160dip, height - 70dip, 50dip, 50dip)
 
 	btnSave.Initialize("btnSave")
-	btnSave.Text = Chr(10003) '"✓"
-	pnlHeader.AddView(btnSave, width - 48dip, 8dip, 40dip, 40dip)
+	btnSave.Text = ModLang.T("save")
+	btnSave.TextSize = 14
+	Root.AddView(btnSave, width - 90dip, height - 70dip, 80dip, 50dip)
 
-	'Conteudo
+	'Conteudo (tela inteira)
 	svContent.Initialize(0)
-	Root.AddView(svContent, 0, 56dip, width, height - 56dip)
+	Root.AddView(svContent, 0, 0, width, height - 80dip)
 
 	pnlContent = svContent.Panel
 	pnlContent.Color = Colors.Transparent
+
+	'Coloca botoes na frente
+	btnDelete.BringToFront
+	btnSave.BringToFront
 
 	Dim y As Int = 20dip
 	Dim margin As Int = 16dip
@@ -119,6 +115,7 @@ Private Sub CreateUI
 	edtTitle.Hint = "Digite o titulo da nota"
 	edtTitle.SingleLine = True
 	edtTitle.TextSize = 16
+	edtTitle.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
 	pnlContent.AddView(edtTitle, margin, y, fieldWidth, 50dip)
 	y = y + 60dip
 
@@ -157,18 +154,6 @@ Private Sub CreateUI
 	y = y + 60dip
 
 	pnlContent.Height = y + 50dip
-End Sub
-
-Private Sub CreateLabel(text As String, size As Float, bold As Boolean) As B4XView
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = text
-	lbl.TextSize = size
-	lbl.Gravity = Gravity.CENTER
-	If bold Then
-		lbl.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
-	End If
-	Return lbl
 End Sub
 
 ' ============================================
@@ -231,6 +216,24 @@ Private Sub btnSave_Click
 End Sub
 
 ' ============================================
+'  AJUSTE DE TECLADO - Scroll para campo focado
+' ============================================
+
+Private Sub edtTitle_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtTitle)
+End Sub
+
+Private Sub edtContent_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtContent)
+End Sub
+
+Private Sub ScrollToView(v As View)
+	Dim targetY As Int = v.Top - 50dip
+	If targetY < 0 Then targetY = 0
+	svContent.ScrollPosition = targetY
+End Sub
+
+' ============================================
 '  EXCLUIR NOTA
 ' ============================================
 
@@ -247,25 +250,11 @@ Private Sub btnDelete_Click
 End Sub
 
 ' ============================================
-'  EVENTOS
-' ============================================
-
-Private Sub btnBack_Click
-	B4XPages.ClosePage(Me)
-End Sub
-
-' ============================================
 '  TEMA
 ' ============================================
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	pnlHeader.Color = ModTheme.Surface
-	lblTitle.TextColor = ModTheme.TextPrimary
-
-	btnBack.Color = ModTheme.ButtonSecondary
-	btnBack.TextColor = ModTheme.TextPrimary
 
 	btnSave.Color = ModTheme.Success
 	btnSave.TextColor = Colors.White

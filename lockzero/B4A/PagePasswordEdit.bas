@@ -17,9 +17,6 @@ Sub Class_Globals
 	Private IsEditMode As Boolean
 
 	'UI
-	Private pnlHeader As B4XView
-	Private lblTitle As B4XView
-	Private btnBack As Button
 	Private btnSave As Button
 
 	Private svForm As ScrollView
@@ -53,11 +50,12 @@ Private Sub B4XPage_Appear
 
 	IsEditMode = (CurrentEntryId <> "")
 
+	'Define titulo na ActionBar
 	If IsEditMode Then
-		lblTitle.Text = ModLang.T("edit_password")
+		CallSub2(Main, "SetPageTitle", ModLang.T("edit"))
 		LoadEntry
 	Else
-		lblTitle.Text = ModLang.T("add_password")
+		CallSub2(Main, "SetPageTitle", ModLang.T("new_password"))
 		ClearForm
 	End If
 End Sub
@@ -77,28 +75,21 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'Header
-	pnlHeader = xui.CreatePanel("")
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
-
-	btnBack.Initialize("btnBack")
-	btnBack.Text = "<"
-	pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
-
-	lblTitle = CreateLabel("", 18, True)
-	lblTitle.SetTextAlignment("CENTER", "LEFT")
-	pnlHeader.AddView(lblTitle, 56dip, 0, width - 112dip, 56dip)
-
+	'Botao salvar (flutuante no canto)
 	btnSave.Initialize("btnSave")
 	btnSave.Text = ModLang.T("save")
-	pnlHeader.AddView(btnSave, width - 80dip, 8dip, 70dip, 40dip)
+	btnSave.TextSize = 14
+	Root.AddView(btnSave, width - 90dip, height - 70dip, 80dip, 50dip)
 
-	'Formulario
+	'Formulario (tela inteira)
 	svForm.Initialize(0)
-	Root.AddView(svForm, 0, 56dip, width, height - 56dip)
+	Root.AddView(svForm, 0, 0, width, height - 80dip)
 
 	pnlForm = svForm.Panel
 	pnlForm.Color = Colors.Transparent
+
+	'Coloca botao na frente
+	btnSave.BringToFront
 
 	Dim y As Int = 20dip
 	Dim fieldWidth As Int = width - 40dip
@@ -113,6 +104,7 @@ Private Sub CreateUI
 	edtName.Initialize("edtName")
 	edtName.Hint = "Ex: Google, Facebook..."
 	edtName.SingleLine = True
+	edtName.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
 	pnlForm.AddView(edtName, 20dip, y, fieldWidth, fieldHeight)
 	y = y + fieldHeight + gap
 
@@ -181,18 +173,6 @@ Private Sub CreateUI
 	pnlForm.Height = y + 50dip
 End Sub
 
-Private Sub CreateLabel(text As String, size As Float, bold As Boolean) As B4XView
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = text
-	lbl.TextSize = size
-	lbl.Gravity = Gravity.CENTER
-	If bold Then
-		lbl.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
-	End If
-	Return lbl
-End Sub
-
 Private Sub CreateFieldLabel(text As String) As Label
 	Dim lbl As Label
 	lbl.Initialize("")
@@ -231,13 +211,42 @@ End Sub
 '  EVENTOS
 ' ============================================
 
-Private Sub btnBack_Click
-	B4XPages.ClosePage(Me)
-End Sub
-
 Private Sub btnSave_Click
 	ModSession.Touch
 	SaveEntry
+End Sub
+
+' ============================================
+'  AJUSTE DE TECLADO - Scroll para campo focado
+' ============================================
+
+Private Sub edtName_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtName)
+End Sub
+
+Private Sub edtUrl_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtUrl)
+End Sub
+
+Private Sub edtUsername_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtUsername)
+End Sub
+
+Private Sub edtPassword_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtPassword)
+End Sub
+
+Private Sub edtNotes_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToView(edtNotes)
+End Sub
+
+Private Sub ScrollToView(v As View)
+	'Calcula posicao do campo no painel
+	Dim targetY As Int = v.Top - 50dip 'Um pouco acima do campo
+	If targetY < 0 Then targetY = 0
+
+	'Anima o scroll ate o campo
+	svForm.ScrollPosition = targetY
 End Sub
 
 Private Sub btnShowPassword_Click
@@ -333,12 +342,6 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	pnlHeader.Color = ModTheme.Surface
-	lblTitle.TextColor = ModTheme.TextPrimary
-
-	btnBack.Color = ModTheme.ButtonSecondary
-	btnBack.TextColor = ModTheme.TextPrimary
 
 	btnSave.Color = ModTheme.Primary
 	btnSave.TextColor = Colors.White

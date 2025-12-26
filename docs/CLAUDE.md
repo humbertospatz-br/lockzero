@@ -35,6 +35,38 @@ Antes de escrever qualquer codigo ou fazer qualquer alteracao:
 
 ---
 
+## REGRA RIGIDA DE FLUXO DE TRABALHO
+
+> **⚠️ OBRIGATORIO - SEM EXCECOES ⚠️**
+
+O Claude pode compactar mensagens ou travar, perdendo contexto.
+Para NUNCA perder trabalho, seguir este fluxo SEMPRE:
+
+### 1. PLANEJAR
+- Discutir com o usuario o que sera feito
+- Entender requisitos e escopo
+- Tirar duvidas ANTES de comecar
+
+### 2. SALVAR EM TODO_LIST.md
+- **ANTES** de implementar qualquer codigo
+- Anotar TODAS as tarefas planejadas
+- Cada tarefa deve ser clara e especifica
+- Marcar status: `[ ]` pendente, `[x]` concluido
+
+### 3. EXECUTAR
+- Implementar tarefas uma a uma
+- Marcar `[x]` em TODO_LIST.md ao concluir cada uma
+- Se surgir nova tarefa, adicionar ao TODO_LIST.md primeiro
+
+### 4. COMMITAR E PUSH
+- Ao concluir um bloco de tarefas
+- Ou quando o usuario pedir (@salvar)
+- NUNCA deixar trabalho sem commit por muito tempo
+
+**Por que?** Se o Claude travar ou perder contexto, o TODO_LIST.md tera o plano completo e o progresso salvo. O proximo Claude pode continuar de onde parou.
+
+---
+
 ## DIRETRIZ DO HUMBERTO - LEI SUPREMA
 
 > **"SE ALGUEM JA FEZ, EU TAMBEM FACO."**
@@ -258,11 +290,14 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 | Termo | Significado |
 |-------|-------------|
+| Frase | Abreviacao de "frase-senha" (usar sempre assim) |
 | Frase-senha | Texto pessoal usado como chave de criptografia |
 | Grupo | Pasta que organiza senhas (ex: "Bancos") |
 | Entrada | Uma senha especifica (site + usuario + senha) |
-| Sessao | Periodo em que a frase-senha fica em memoria |
+| Sessao | Periodo em que a frase fica em memoria (ofuscada) |
 | Timeout | Tempo ate a sessao expirar automaticamente |
+| TestValue | "LOCKZERO" criptografado - usado para validar frase |
+| Salt | String aleatoria unica por grupo para criptografia |
 
 ---
 

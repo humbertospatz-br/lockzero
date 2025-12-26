@@ -13,12 +13,9 @@ Sub Class_Globals
 
 	'Parametros
 	Private CurrentGroupId As String
-	Private CurrentGroup As clsPasswordGroup
+	Private CurrentGroupName As String
 
 	'UI
-	Private pnlHeader As B4XView
-	Private lblTitle As B4XView
-	Private btnBack As Button
 	Private btnAdd As Button
 
 	Private svEntries As ScrollView
@@ -27,6 +24,9 @@ Sub Class_Globals
 	'Timer para limpar clipboard
 	Private tmrClipboard As Timer
 	Private ClipboardCountdown As Int
+
+	'Dialogs
+	Private edtPassphrase As EditText
 End Sub
 
 Public Sub Initialize
@@ -40,15 +40,16 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
-	ModSession.Touch
-
-	If CurrentGroupId <> "" Then
-		CurrentGroup = ModPasswords.GetGroupById(CurrentGroupId)
-		If CurrentGroup.IsInitialized Then
-			lblTitle.Text = CurrentGroup.Name
-		End If
+	'Define titulo na ActionBar com breadcrumb
+	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
+	If g.IsInitialized Then
+		CurrentGroupName = g.Name
+		CallSub2(Main, "SetPageTitle", ModLang.T("passwords") & " > " & CurrentGroupName)
+	Else
+		CallSub2(Main, "SetPageTitle", ModLang.T("passwords"))
 	End If
 
+	ModSession.Touch
 	LoadEntries
 End Sub
 
@@ -56,6 +57,33 @@ End Sub
 Public Sub SetParams(params As Map)
 	If params = Null Then Return
 	CurrentGroupId = params.GetDefault("groupId", "")
+End Sub
+
+'Capitalize - primeira letra de cada palavra em maiuscula
+Private Sub Capitalize(text As String) As String
+	If text.Length = 0 Then Return text
+
+	Dim result As StringBuilder
+	result.Initialize
+	Dim capitalizeNext As Boolean = True
+	Dim lower As String = text.ToLowerCase
+
+	For i = 0 To lower.Length - 1
+		Dim c As String = lower.SubString2(i, i + 1)
+		If c = " " Then
+			result.Append(c)
+			capitalizeNext = True
+		Else
+			If capitalizeNext Then
+				result.Append(c.ToUpperCase)
+				capitalizeNext = False
+			Else
+				result.Append(c)
+			End If
+		End If
+	Next
+
+	Return result.ToString
 End Sub
 
 Private Sub B4XPage_Disappear
@@ -69,26 +97,41 @@ End Sub
 Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
+	Dim headerH As Int = 50dip
 
-	'Header
-	pnlHeader = xui.CreatePanel("")
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
+	'Header com titulo e botao +
+	Dim pnlHeader As Panel
+	pnlHeader.Initialize("")
+	pnlHeader.Color = ModTheme.Surface
+	Root.AddView(pnlHeader, 0, 0, width, headerH)
 
-	btnBack.Initialize("btnBack")
-	btnBack.Text = "<"
-	pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = "SENHAS"
+	lblTitle.TextSize = 12
+	lblTitle.TextColor = ModTheme.TextMuted
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlHeader.AddView(lblTitle, 16dip, 0, width - 80dip, headerH)
 
-	lblTitle = CreateLabel("", 18, True)
-	lblTitle.SetTextAlignment("CENTER", "LEFT")
-	pnlHeader.AddView(lblTitle, 56dip, 0, width - 112dip, 56dip)
-
+	'Botao adicionar no header (circular)
 	btnAdd.Initialize("btnAdd")
 	btnAdd.Text = "+"
-	pnlHeader.AddView(btnAdd, width - 48dip, 8dip, 40dip, 40dip)
+	btnAdd.TextSize = 22
+	btnAdd.Color = ModTheme.Primary
+	btnAdd.TextColor = Colors.White
+	btnAdd.Gravity = Gravity.CENTER
+	pnlHeader.AddView(btnAdd, width - 54dip, 7dip, 36dip, 36dip)
+
+	'Separador
+	Dim sep As Panel
+	sep.Initialize("")
+	sep.Color = ModTheme.CardBorder
+	Root.AddView(sep, 0, headerH, width, 1dip)
 
 	'Lista de senhas
 	svEntries.Initialize(0)
-	Root.AddView(svEntries, 0, 56dip, width, height - 56dip)
+	Root.AddView(svEntries, 0, headerH + 1dip, width, height - headerH - 1dip)
 
 	pnlEntries = svEntries.Panel
 	pnlEntries.Color = Colors.Transparent
@@ -187,13 +230,17 @@ End Sub
 '  EVENTOS
 ' ============================================
 
-Private Sub btnBack_Click
-	B4XPages.ClosePage(Me)
-End Sub
-
 Private Sub btnAdd_Click
 	ModSession.Touch
-	'Navega para tela de adicionar senha
+	'Verifica se sessao esta ativa (frase em memoria)
+	If ModSession.IsSessionActive = False Then
+		ShowPassphraseDialog
+	Else
+		NavigateToAddPassword
+	End If
+End Sub
+
+Private Sub NavigateToAddPassword
 	Dim params As Map
 	params.Initialize
 	params.Put("groupId", CurrentGroupId)
@@ -202,6 +249,41 @@ Private Sub btnAdd_Click
 	Dim pg As PagePasswordEdit = B4XPages.GetPage("PagePasswordEdit")
 	pg.SetParams(params)
 	B4XPages.ShowPage("PagePasswordEdit")
+End Sub
+
+' ============================================
+'  DIALOGO DE FRASE-SENHA
+' ============================================
+
+Private Sub ShowPassphraseDialog
+	edtPassphrase.Initialize("")
+	edtPassphrase.Hint = ModLang.T("passphrase_hint")
+	edtPassphrase.SingleLine = True
+	edtPassphrase.InputType = Bit.Or(edtPassphrase.INPUT_TYPE_TEXT, 128) 'Password
+	edtPassphrase.Text = ""
+
+	Dim pnl As B4XView = xui.CreatePanel("")
+	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
+	pnl.Color = ModTheme.Surface
+	pnl.AddView(edtPassphrase, 10dip, 5dip, 260dip, 50dip)
+
+	Dim dialog As B4XDialog
+	dialog.Initialize(Root)
+	dialog.Title = ModLang.T("enter_passphrase")
+
+	Wait For (dialog.ShowCustom(pnl, ModLang.T("confirm"), "", ModLang.T("cancel"))) Complete (Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		Dim phrase As String = edtPassphrase.Text.Trim
+		If phrase.Length >= 8 Then
+			'Inicia sessao com frase em memoria
+			ModSession.StartSession(phrase)
+			'Agora permite criar senha
+			NavigateToAddPassword
+		Else
+			ToastMessageShow(ModLang.T("passphrase_min_8"), True)
+		End If
+	End If
 End Sub
 
 Private Sub pnlEntry_Click
@@ -351,12 +433,6 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	pnlHeader.Color = ModTheme.Surface
-	lblTitle.TextColor = ModTheme.TextPrimary
-
-	btnBack.Color = ModTheme.ButtonSecondary
-	btnBack.TextColor = ModTheme.TextPrimary
 
 	btnAdd.Color = ModTheme.Primary
 	btnAdd.TextColor = Colors.White

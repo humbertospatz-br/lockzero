@@ -12,9 +12,6 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI
-	Private pnlHeader As B4XView
-	Private lblTitle As B4XView
-	Private btnBack As Button
 	Private btnAdd As Button
 
 	Private svNotes As ScrollView
@@ -24,7 +21,6 @@ Sub Class_Globals
 
 	'Estado
 	Private CurrentGroupId As String = ""
-	Private CurrentGroupName As String = ""
 End Sub
 
 Public Sub Initialize
@@ -38,6 +34,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Define titulo na ActionBar
+	CallSub2(Main, "SetPageTitle", ModLang.T("notes"))
+
 	ModSession.Touch
 	LoadNotes
 End Sub
@@ -46,7 +45,6 @@ End Sub
 Public Sub SetParams(params As Map)
 	If params = Null Then Return
 	CurrentGroupId = params.GetDefault("groupId", "")
-	CurrentGroupName = params.GetDefault("groupName", "Notas")
 End Sub
 
 ' ============================================
@@ -56,26 +54,41 @@ End Sub
 Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
+	Dim headerH As Int = 50dip
 
-	'Header
-	pnlHeader = xui.CreatePanel("")
-	Root.AddView(pnlHeader, 0, 0, width, 56dip)
+	'Header com titulo e botao +
+	Dim pnlHeader As Panel
+	pnlHeader.Initialize("")
+	pnlHeader.Color = ModTheme.Surface
+	Root.AddView(pnlHeader, 0, 0, width, headerH)
 
-	btnBack.Initialize("btnBack")
-	btnBack.Text = "<"
-	pnlHeader.AddView(btnBack, 8dip, 8dip, 40dip, 40dip)
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = "NOTAS"
+	lblTitle.TextSize = 12
+	lblTitle.TextColor = ModTheme.TextMuted
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlHeader.AddView(lblTitle, 16dip, 0, width - 80dip, headerH)
 
-	lblTitle = CreateLabel("Notas", 18, True)
-	lblTitle.SetTextAlignment("CENTER", "LEFT")
-	pnlHeader.AddView(lblTitle, 56dip, 0, width - 112dip, 56dip)
-
+	'Botao adicionar no header (circular)
 	btnAdd.Initialize("btnAdd")
 	btnAdd.Text = "+"
-	pnlHeader.AddView(btnAdd, width - 48dip, 8dip, 40dip, 40dip)
+	btnAdd.TextSize = 22
+	btnAdd.Color = ModTheme.Primary
+	btnAdd.TextColor = Colors.White
+	btnAdd.Gravity = Gravity.CENTER
+	pnlHeader.AddView(btnAdd, width - 54dip, 7dip, 36dip, 36dip)
+
+	'Separador
+	Dim sep As Panel
+	sep.Initialize("")
+	sep.Color = ModTheme.CardBorder
+	Root.AddView(sep, 0, headerH, width, 1dip)
 
 	'Lista de notas
 	svNotes.Initialize(0)
-	Root.AddView(svNotes, 0, 56dip, width, height - 56dip)
+	Root.AddView(svNotes, 0, headerH + 1dip, width, height - headerH - 1dip)
 
 	pnlNotes = svNotes.Panel
 	pnlNotes.Color = Colors.Transparent
@@ -89,25 +102,11 @@ Private Sub CreateUI
 	Root.AddView(lblEmpty, 0, height / 2 - 20dip, width, 40dip)
 End Sub
 
-Private Sub CreateLabel(text As String, size As Float, bold As Boolean) As B4XView
-	Dim lbl As Label
-	lbl.Initialize("")
-	lbl.Text = text
-	lbl.TextSize = size
-	lbl.Gravity = Gravity.CENTER
-	If bold Then
-		lbl.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
-	End If
-	Return lbl
-End Sub
-
 ' ============================================
 '  CARREGAR NOTAS
 ' ============================================
 
 Private Sub LoadNotes
-	lblTitle.Text = CurrentGroupName
-
 	'Limpa lista
 	pnlNotes.RemoveAllViews
 
@@ -203,10 +202,6 @@ End Sub
 '  EVENTOS
 ' ============================================
 
-Private Sub btnBack_Click
-	B4XPages.ClosePage(Me)
-End Sub
-
 Private Sub btnAdd_Click
 	ModSession.Touch
 	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
@@ -220,12 +215,6 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.Background
-
-	pnlHeader.Color = ModTheme.Surface
-	lblTitle.TextColor = ModTheme.TextPrimary
-
-	btnBack.Color = ModTheme.ButtonSecondary
-	btnBack.TextColor = ModTheme.TextPrimary
 
 	btnAdd.Color = ModTheme.Primary
 	btnAdd.TextColor = Colors.White

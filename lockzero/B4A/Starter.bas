@@ -39,18 +39,18 @@ Sub Process_Globals
 	Public Const MARGIN_ITEM As Int = 12        'Espaco entre itens (dip)
 	Public Const PADDING_CARD As Int = 16       'Padding interno de cards (dip)
 
-	'=== ICONES UNICODE ===
-	Public Const ICON_EYE_OPEN As String = Chr(0x1F441)   'Olho aberto
-	Public Const ICON_EYE_CLOSED As String = Chr(0x2022) & Chr(0x2022) & Chr(0x2022) 'Pontos
-	Public Const ICON_BACK As String = Chr(0x2190)        'Seta esquerda
+	'=== ICONES UNICODE (simbolos basicos que renderizam em Android) ===
+	Public Const ICON_EYE_OPEN As String = Chr(0x25C9)    'Circulo com ponto (olho) ◉
+	Public Const ICON_EYE_CLOSED As String = Chr(0x2022) & Chr(0x2022) & Chr(0x2022) 'Pontos •••
+	Public Const ICON_BACK As String = Chr(0x25C0)        'Triangulo esquerda ◀
 	Public Const ICON_ADD As String = "+"                 'Adicionar
-	Public Const ICON_LOCK As String = Chr(0x1F512)       'Cadeado fechado
-	Public Const ICON_UNLOCK As String = Chr(0x1F513)     'Cadeado aberto
-	Public Const ICON_STAR As String = Chr(0x2605)        'Estrela favorito
-	Public Const ICON_SETTINGS As String = Chr(0x2699)    'Engrenagem
-	Public Const ICON_COPY As String = Chr(0x1F4CB)       'Copiar
-	Public Const ICON_EDIT As String = Chr(0x270E)        'Editar
-	Public Const ICON_DELETE As String = Chr(0x1F5D1)     'Lixeira
+	Public Const ICON_LOCK As String = Chr(0x25C6)        'Losango ◆
+	Public Const ICON_UNLOCK As String = Chr(0x25C7)      'Losango vazio ◇
+	Public Const ICON_STAR As String = Chr(0x2605)        'Estrela ★
+	Public Const ICON_SETTINGS As String = Chr(0x2699)    'Engrenagem ⚙
+	Public Const ICON_COPY As String = Chr(0x25A1)        'Quadrado vazio □
+	Public Const ICON_EDIT As String = Chr(0x270E)        'Lapis ✎
+	Public Const ICON_DELETE As String = Chr(0x2716)      'X grosso ✖
 
 	'=== FLAGS ===
 	Private IsInitialized As Boolean = False
