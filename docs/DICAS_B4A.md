@@ -958,5 +958,63 @@ O Android vai redimensionar a tela e o ScrollView vai permitir rolar ate o campo
 
 ---
 
-**Ultima atualizacao:** 2025-12-25
+## 27. ImageView - Gravity.FILL para Imagens (OBRIGATORIO)
+
+### Problema:
+Quando se usa `Gravity.CENTER` em ImageView, a imagem pode nao preencher o espaco corretamente, aparecendo cortada ou distorcida.
+
+### Solucao - SEMPRE usar Gravity.FILL:
+
+```vb
+Dim iv As ImageView
+iv.Initialize("")
+iv.Gravity = Gravity.FILL  ' OBRIGATORIO para imagens
+pnl.AddView(iv, x, y, width, height)
+iv.Bitmap = LoadBitmap(File.DirAssets, "imagem.png")
+```
+
+### ERRADO - Gravity.CENTER:
+```vb
+' NAO USAR para imagens
+iv.Gravity = Gravity.CENTER  ' Imagem pode ficar cortada/distorcida
+```
+
+### CORRETO - Gravity.FILL:
+```vb
+' SEMPRE usar para imagens
+iv.Gravity = Gravity.FILL  ' Imagem preenche o espaco corretamente
+```
+
+### Quando usar cada Gravity:
+
+| Gravity | Uso |
+|---------|-----|
+| `Gravity.FILL` | ImageView com imagens (PNG, JPG, etc.) |
+| `Gravity.CENTER` | Labels, Buttons, texto em geral |
+
+### Exemplo completo - Carregar icone:
+
+```vb
+Private Sub CreateIconView(parent As Panel, iconFile As String, x As Int, y As Int, size As Int)
+    Dim iv As ImageView
+    iv.Initialize("")
+    iv.Gravity = Gravity.FILL  ' IMPORTANTE!
+    parent.AddView(iv, x, y, size, size)
+
+    Try
+        iv.Bitmap = LoadBitmap(File.DirAssets, iconFile)
+    Catch
+        Log("Erro ao carregar " & iconFile & ": " & LastException.Message)
+    End Try
+End Sub
+```
+
+### REGRA DE OURO:
+
+> **SEMPRE use Gravity.FILL para ImageView.**
+> **Gravity.CENTER e para texto (Label, Button).**
+
+---
+
+**Ultima atualizacao:** 2025-12-27
 **Projeto:** LockZero (e familia Lockseed Products)

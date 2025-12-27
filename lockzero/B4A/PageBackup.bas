@@ -66,21 +66,21 @@ Private Sub CreateUI
 	lblInfo.Initialize("")
 	lblInfo.Text = "Ultimo backup:"
 	lblInfo.TextSize = 14
-	lblInfo.TextColor = ModTheme.TextSecondary
+	lblInfo.TextColor = Colors.ARGB(180, 255, 255, 255)
 	pnlContent.AddView(lblInfo, 20dip, y, btnWidth, 25dip)
 	y = y + 25dip
 
 	lblLastBackup.Initialize("")
 	lblLastBackup.Text = "Nunca"
 	lblLastBackup.TextSize = 16
-	lblLastBackup.TextColor = ModTheme.TextPrimary
+	lblLastBackup.TextColor = Colors.White
 	pnlContent.AddView(lblLastBackup, 20dip, y, btnWidth, 30dip)
 	y = y + 50dip
 
 	'Separador
 	Dim sep1 As Panel
 	sep1.Initialize("")
-	sep1.Color = ModTheme.CardBorder
+	sep1.Color = Colors.ARGB(60, 255, 255, 255)
 	pnlContent.AddView(sep1, 20dip, y, btnWidth, 1dip)
 	y = y + 20dip
 
@@ -89,7 +89,7 @@ Private Sub CreateUI
 	lblExport.Initialize("")
 	lblExport.Text = "EXPORTAR"
 	lblExport.TextSize = 12
-	lblExport.TextColor = ModTheme.TextMuted
+	lblExport.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblExport, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
@@ -102,14 +102,14 @@ Private Sub CreateUI
 	lblExportInfo.Initialize("")
 	lblExportInfo.Text = "Cria um arquivo .lockzero criptografado com todos os seus dados."
 	lblExportInfo.TextSize = 12
-	lblExportInfo.TextColor = ModTheme.TextSecondary
+	lblExportInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblExportInfo, 20dip, y, btnWidth, 40dip)
 	y = y + 50dip
 
 	'Separador
 	Dim sep2 As Panel
 	sep2.Initialize("")
-	sep2.Color = ModTheme.CardBorder
+	sep2.Color = Colors.ARGB(60, 255, 255, 255)
 	pnlContent.AddView(sep2, 20dip, y, btnWidth, 1dip)
 	y = y + 20dip
 
@@ -118,7 +118,7 @@ Private Sub CreateUI
 	lblImport.Initialize("")
 	lblImport.Text = "IMPORTAR"
 	lblImport.TextSize = 12
-	lblImport.TextColor = ModTheme.TextMuted
+	lblImport.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblImport, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
@@ -131,14 +131,14 @@ Private Sub CreateUI
 	lblImportInfo.Initialize("")
 	lblImportInfo.Text = "Restaura dados de um arquivo .lockzero. Voce precisara da frase usada ao criar o backup."
 	lblImportInfo.TextSize = 12
-	lblImportInfo.TextColor = ModTheme.TextSecondary
+	lblImportInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblImportInfo, 20dip, y, btnWidth, 50dip)
 	y = y + 60dip
 
 	'Separador
 	Dim sep3 As Panel
 	sep3.Initialize("")
-	sep3.Color = ModTheme.CardBorder
+	sep3.Color = Colors.ARGB(60, 255, 255, 255)
 	pnlContent.AddView(sep3, 20dip, y, btnWidth, 1dip)
 	y = y + 20dip
 
@@ -147,7 +147,7 @@ Private Sub CreateUI
 	lblTest.Initialize("")
 	lblTest.Text = "VERIFICAR"
 	lblTest.TextSize = 12
-	lblTest.TextColor = ModTheme.TextMuted
+	lblTest.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblTest, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
@@ -160,14 +160,14 @@ Private Sub CreateUI
 	lblTestInfo.Initialize("")
 	lblTestInfo.Text = "Verifica se o backup pode ser aberto. Nao altera seus dados atuais."
 	lblTestInfo.TextSize = 12
-	lblTestInfo.TextColor = ModTheme.TextSecondary
+	lblTestInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblTestInfo, 20dip, y, btnWidth, 40dip)
 	y = y + 60dip
 
-	'Aviso importante - fundo navy para consistencia
+	'Aviso importante - fundo escuro para consistencia
 	Dim pnlWarning As Panel
 	pnlWarning.Initialize("")
-	pnlWarning.Color = ModTheme.Primary 'Navy
+	pnlWarning.Color = ModTheme.HomeHeaderBg
 	pnlContent.AddView(pnlWarning, 20dip, y, btnWidth, 80dip)
 
 	Dim lblWarning As Label
@@ -386,14 +386,16 @@ End Sub
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
+	svContent.Color = ModTheme.HomeBg
+	pnlContent.Color = ModTheme.HomeBg
 
-	btnExport.Color = ModTheme.Primary
+	btnExport.Color = ModTheme.HomeIconBg
 	btnExport.TextColor = Colors.White
 
-	btnImport.Color = ModTheme.Success
+	btnImport.Color = ModTheme.HomeIconBg
 	btnImport.TextColor = Colors.White
 
-	btnTestRestore.Color = ModTheme.ButtonSecondary
-	btnTestRestore.TextColor = ModTheme.TextPrimary
+	btnTestRestore.Color = ModTheme.HomeHeaderBg
+	btnTestRestore.TextColor = Colors.White
 End Sub

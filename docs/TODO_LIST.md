@@ -11,6 +11,90 @@
 
 ---
 
+## PAGINAS INTERNAS - SESSAO 2025-12-27
+
+> **Baseado em:** docs/LOCKZERO — UX DEFINITIONS.MD
+> **Objetivo:** Aplicar cores da Home em todas as paginas internas
+
+### Cores a Aplicar (mesmo da Home)
+```
+HOME_BG:    #1C3A6A  RGB(28, 58, 106)   - Fundo principal de TODAS as paginas
+HEADER_BG:  #152F58  RGB(21, 47, 88)    - Headers internos
+CARD_BG:    #47526E  RGB(71, 82, 110)   - Items de lista/cards
+```
+
+### Regras UX (do documento)
+- Home sempre igual visualmente (sem indicadores de lock)
+- Tap card → verifica sessao → abre pagina OU pede frase
+- Brute force: "Temporarily locked" (sem timers visiveis)
+- Senhas sempre ocultas por padrao
+- Sem emojis, sem explicacoes longas
+- Breadcrumb no header (Passwords > Work)
+
+### Tarefas - Cores das Paginas
+- [x] [2025-12-27] PagePasswords.bas - Fundo HomeBg, header HomeHeaderBg, items HomeCardBg
+- [x] [2025-12-27] PagePasswordList.bas - Fundo HomeBg, header HomeHeaderBg, items HomeCardBg
+- [x] [2025-12-27] PagePasswordEdit.bas - Fundo HomeBg, campos com bordas sutis
+- [x] [2025-12-27] PageNotesList.bas - Fundo HomeBg, header HomeHeaderBg, items HomeCardBg
+- [x] [2025-12-27] PageNoteEdit.bas - Fundo HomeBg, campos com bordas sutis
+- [x] [2025-12-27] PageBackup.bas - Fundo HomeBg
+- [x] [2025-12-27] PageOnboarding.bas - Fundo HomeBg
+
+### Tarefas - Dialogs e Headers (2025-12-27)
+- [x] [2025-12-27] Dialog Novo Grupo - Redesenhado com overlay customizado (nao usa B4XDialog)
+- [x] [2025-12-27] Dialog Frase - Cor azul bebe removida, usa HomeHeaderBg
+- [x] [2025-12-27] Dialog Frase - Botao olho para visualizar texto
+- [x] [2025-12-27] Dialog Frase - Botao desbloquear menor (100dip)
+- [x] [2025-12-27] Headers internos - Seta voltar + breadcrumb (Tipo > Grupo)
+- [x] [2025-12-27] Botao + adicionar - Corrigido tamanho (40dip)
+- [x] [2025-12-27] Menu lateral - Cores ajustadas (HomeBg, HomeHeaderBg)
+
+### Tarefas - UX Refinamentos (2025-12-27 noite)
+- [x] [2025-12-27] Botao olho "Ver/Ocultar" - trocado de unicode para texto multilingua
+- [x] [2025-12-27] Botao "Desbloquear" truncado - aumentado para 114dip, fonte 12
+- [x] [2025-12-27] PagePasswordEdit - Adicionado botao Cancelar
+- [x] [2025-12-27] PagePasswordEdit - Removido botao gerar senha (desnecessario)
+- [x] [2025-12-27] PageNoteEdit - Adicionado botao Cancelar + scroll melhorado
+- [x] [2025-12-27] Botao "+" - Trocado de Button para Label (evita tema do sistema)
+- [x] [2025-12-27] Home - Adicionada animacao pulse nos cards (efeito visual ao clicar)
+- [x] [2025-12-27] Labels da Home - Microajuste alpha 90% para 85%, removido bold
+- [ ] [2025-12-28] Botao "Ver" cortado no dialog de frase-senha - VERIFICAR
+
+### Tarefas - Navegacao/UX (pendentes)
+- [ ] [2025-12-27] Revisar fluxo: Home → Card tap → Sessao check → Pagina/Dialog
+- [ ] [2025-12-27] Remover emojis de mensagens (se houver)
+- [ ] [2025-12-27] Padronizar mensagens curtas e factuais
+
+---
+
+## NOVA HOME - SESSAO 2025-12-27 (CONCLUIDA)
+
+> **Baseado em:** docs/LOCKZERO_HOME_DEFINITIONS.md
+
+### Paleta de Cores da Home
+```
+HOME_BG:    #1C3A6A  RGB(28, 58, 106)   - Fundo principal
+HEADER_BG:  #152F58  RGB(21, 47, 88)    - Header (mais escuro)
+CARD_BG:    #2C4F80  RGB(44, 79, 128)   - Cards 2x2
+ICON_BG:    #455A75  RGB(69, 90, 117)   - Fundo dos icones hexagonais
+```
+
+### Tarefas
+- [x] [2025-12-27] Copiar icones para pasta Files do B4A
+- [x] [2025-12-27] Atualizar ModTheme.bas com cores da Home (HomeBg, HomeHeaderBg, HomeCardBg, HomeIconBg)
+- [x] [2025-12-27] Remodelar B4XMainPage - Header fixo com logo + titulo + menu
+- [x] [2025-12-27] Implementar Grid 2x2 com cards (Senhas, Cartoes, Docs, Notas)
+- [x] [2025-12-27] Posicionar icones a 42% da altura do card
+- [x] [2025-12-27] Implementar rodape fixo com slogan e versao
+
+### Especificacoes do Layout
+- Header: 56dip altura, logo esquerda, menu ☰ direita
+- Grid: margens 18-20dip, gap 14-16dip
+- Card: cantos 12-16dip, icone a 42% altura
+- Rodape: slogan + versao + status (Free/Premium)
+
+---
+
 ## REDESIGN UX - SESSAO 2025-12-26
 
 > **Consultoria UX aplicada** - App de seguranca deve ser SOBRIO
@@ -474,4 +558,4 @@ Facebook,https://facebook.com,usuario,senha456
 - [x] Concluido
 - [-] Cancelado
 
-**Ultima atualizacao:** 2025-12-25
+**Ultima atualizacao:** 2025-12-27

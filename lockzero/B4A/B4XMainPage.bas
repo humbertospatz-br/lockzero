@@ -18,9 +18,17 @@ Sub Class_Globals
 	Private svMenu As ScrollView
 	Private MenuVisible As Boolean = False
 
-	'=== CONTEUDO PRINCIPAL ===
-	Private svMain As ScrollView
-	Private pnlMain As B4XView
+	'=== LAYOUT HOME (LOCKZERO_HOME_DEFINITIONS.md) ===
+	Private pnlHeader As Panel
+	Private pnlContent As Panel
+	Private pnlFooter As Panel
+
+	'=== CONSTANTES DE LAYOUT ===
+	Private HEADER_HEIGHT As Int = 56dip
+	Private FOOTER_HEIGHT As Int = 80dip
+	Private GRID_MARGIN As Int = 18dip
+	Private GRID_GAP As Int = 14dip
+	Private CARD_CORNER As Int = 14dip
 
 	'=== TIMER SESSAO ===
 	Private tmrSession As Timer
@@ -73,13 +81,13 @@ Private Sub CreateSideMenu
 	pnlMenuOverlay.Visible = False
 	Root.AddView(pnlMenuOverlay, 0, 0, width, height)
 
-	'Menu lateral
+	'Menu lateral - cores da Home
 	pnlMenu.Initialize("pnlMenu")
-	pnlMenu.Color = ModTheme.Surface
+	pnlMenu.Color = ModTheme.HomeBg
 	Root.AddView(pnlMenu, -menuW, 0, menuW, height)
 
 	svMenu.Initialize(0)
-	svMenu.Color = ModTheme.Surface
+	svMenu.Color = ModTheme.HomeBg
 	pnlMenu.AddView(svMenu, 0, 0, menuW, height)
 
 	RebuildMenuItems
@@ -87,15 +95,15 @@ End Sub
 
 Public Sub RebuildMenuItems
 	svMenu.Panel.RemoveAllViews
-	svMenu.Panel.Color = ModTheme.Surface
+	svMenu.Panel.Color = ModTheme.HomeBg
 
 	Dim menuW As Int = pnlMenu.Width
 	Dim top As Int = 0
 
-	'Header do menu com logo
+	'Header do menu com logo - cores da Home
 	Dim pnlMenuHeader As Panel
 	pnlMenuHeader.Initialize("")
-	pnlMenuHeader.Color = ModTheme.Primary
+	pnlMenuHeader.Color = ModTheme.HomeHeaderBg
 	svMenu.Panel.AddView(pnlMenuHeader, 0, top, menuW, 80dip)
 
 	Dim lblMenuTitle As Label
@@ -128,7 +136,7 @@ Public Sub RebuildMenuItems
 	'Separador
 	Dim pnlSep As Panel
 	pnlSep.Initialize("")
-	pnlSep.Color = ModTheme.InputBorder
+	pnlSep.Color = Colors.ARGB(60, 255, 255, 255)
 	svMenu.Panel.AddView(pnlSep, 16dip, top, btnW, 1dip)
 	top = top + 16dip
 
@@ -146,7 +154,7 @@ Private Sub AddMenuButton(txt As String, eventName As String, top As Int, w As I
 	btn.Initialize(eventName)
 	btn.Text = txt
 	btn.TextSize = Starter.FONT_BODY
-	btn.TextColor = ModTheme.TextPrimary
+	btn.TextColor = Colors.White
 	btn.Color = Colors.Transparent
 	btn.Gravity = Gravity.CENTER_VERTICAL + Gravity.LEFT
 	svMenu.Panel.AddView(btn, 16dip, top, w, h)
@@ -179,144 +187,191 @@ Private Sub pnlMenuOverlay_Click
 End Sub
 
 ' ============================================
-'  PAINEL PRINCIPAL
+'  PAINEL PRINCIPAL - LAYOUT FIXO (SEM SCROLL)
 ' ============================================
 
 Private Sub CreateMainPanel
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	svMain.Initialize(0)
-	svMain.Color = ModTheme.Background
-	Root.AddView(svMain, 0, 0, width, height)
+	'Fundo da Home
+	Root.Color = ModTheme.HomeBg
 
-	pnlMain = svMain.Panel
-	pnlMain.Color = ModTheme.Background
+	'Header fixo no topo
+	pnlHeader.Initialize("pnlHeader")
+	pnlHeader.Color = ModTheme.HomeHeaderBg
+	Root.AddView(pnlHeader, 0, 0, width, HEADER_HEIGHT)
+	CreateHeader
+
+	'Footer fixo na base
+	pnlFooter.Initialize("")
+	pnlFooter.Color = ModTheme.HomeBg
+	Root.AddView(pnlFooter, 0, height - FOOTER_HEIGHT, width, FOOTER_HEIGHT)
+	CreateFooter
+
+	'Conteudo central (entre header e footer)
+	Dim contentHeight As Int = height - HEADER_HEIGHT - FOOTER_HEIGHT
+	pnlContent.Initialize("")
+	pnlContent.Color = ModTheme.HomeBg
+	Root.AddView(pnlContent, 0, HEADER_HEIGHT, width, contentHeight)
 End Sub
 
 ' ============================================
-'  HOME - LISTA VERTICAL PROFISSIONAL
+'  HEADER - Logo + Titulo + Menu
 ' ============================================
 
-Private Sub ShowHome
-	pnlMain.RemoveAllViews
-	pnlMain.Color = ModTheme.Background
-
+Private Sub CreateHeader
 	Dim width As Int = Root.Width
-	Dim y As Int = 16dip
-	Dim margin As Int = 16dip
 
-	'Titulo da secao
-	Dim lblSection As Label
-	lblSection.Initialize("")
-	lblSection.Text = "CATEGORIAS"
-	lblSection.TextSize = 12
-	lblSection.TextColor = ModTheme.TextMuted
-	lblSection.Typeface = Typeface.DEFAULT_BOLD
-	pnlMain.AddView(lblSection, margin, y, width - margin * 2, 20dip)
-	y = y + 30dip
+	'Logo LockZero (esquerda) - Gravity.FILL para preencher corretamente
+	Dim ivLogo As ImageView
+	ivLogo.Initialize("")
+	ivLogo.Gravity = Gravity.FILL
+	pnlHeader.AddView(ivLogo, 16dip, 8dip, 40dip, 40dip)
+	Try
+		ivLogo.Bitmap = LoadBitmap(File.DirAssets, "ic_lockzero.png")
+	Catch
+		Log("Erro ao carregar ic_lockzero.png: " & LastException.Message)
+	End Try
 
-	'Lista de categorias - design vertical
-	Dim itemH As Int = 72dip
-	Dim cardWidth As Int = width - margin * 2
+	'Titulo "LockZero"
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = "LockZero"
+	lblTitle.TextSize = 20
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlHeader.AddView(lblTitle, 64dip, 0, width - 120dip, HEADER_HEIGHT)
 
-	'Senhas
-	CreateListItem("pnlPasswords", ModLang.T("passwords"), "Gerenciar senhas e credenciais", Chr(0x25C6), ModTheme.Primary, y, cardWidth, itemH, margin)
-	y = y + itemH + 8dip
+	'Botao menu (direita)
+	Dim btnMenu As Button
+	btnMenu.Initialize("btnMenu")
+	btnMenu.Text = Chr(0x2630) 'Hamburguer ☰
+	btnMenu.TextSize = 24
+	btnMenu.TextColor = Colors.White
+	btnMenu.Color = Colors.Transparent
+	pnlHeader.AddView(btnMenu, width - 56dip, 0, 56dip, HEADER_HEIGHT)
+End Sub
 
-	'Cartoes
-	CreateListItem("pnlCards", ModLang.T("cards"), "Cartoes de credito e debito", Chr(0x25A0), ModTheme.CategoryCard, y, cardWidth, itemH, margin)
-	y = y + itemH + 8dip
+' ============================================
+'  FOOTER - Slogan + Versao
+' ============================================
 
-	'Documentos
-	CreateListItem("pnlDocuments", ModLang.T("documents"), "Documentos e arquivos seguros", Chr(0x25B2), ModTheme.CategoryDocument, y, cardWidth, itemH, margin)
-	y = y + itemH + 8dip
-
-	'Notas
-	CreateListItem("pnlNotes", ModLang.T("notes"), "Notas seguras criptografadas", Chr(0x25CF), ModTheme.CategoryNote, y, cardWidth, itemH, margin)
-	y = y + itemH + 30dip
+Private Sub CreateFooter
+	Dim width As Int = Root.Width
+	Dim y As Int = 8dip
 
 	'Slogan
 	Dim lblSlogan As Label
 	lblSlogan.Initialize("")
-	lblSlogan.Text = ModLang.T("app_tagline")
+	lblSlogan.Text = "Lock and Zero Worries"
 	lblSlogan.TextSize = 14
-	lblSlogan.TextColor = ModTheme.TextMuted
-	lblSlogan.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblSlogan, 0, y, width, 30dip)
-	y = y + 40dip
+	lblSlogan.TextColor = Colors.ARGB(180, 255, 255, 255) '~70% alpha
+	lblSlogan.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlFooter.AddView(lblSlogan, 0, y, width, 22dip)
+	y = y + 22dip
+
+	'Versao/Status
+	Dim lblVersion As Label
+	lblVersion.Initialize("")
+	lblVersion.Text = "Free Version - v" & Starter.APP_VERSION
+	lblVersion.TextSize = 12
+	lblVersion.TextColor = Colors.ARGB(140, 255, 255, 255) '~55% alpha
+	lblVersion.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlFooter.AddView(lblVersion, 0, y, width, 20dip)
+	y = y + 24dip
 
 	'Timer de sessao
 	lblSessionTimer.Initialize("")
 	lblSessionTimer.Text = ""
-	lblSessionTimer.TextSize = 12
-	lblSessionTimer.TextColor = ModTheme.Primary
-	lblSessionTimer.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblSessionTimer, 0, y, width, 25dip)
-	y = y + 30dip
-
-	'Versao FREE
-	Dim lblVersion As Label
-	lblVersion.Initialize("")
-	lblVersion.Text = "FREE - v" & Starter.APP_VERSION
-	lblVersion.TextSize = 12
-	lblVersion.TextColor = ModTheme.TextMuted
-	lblVersion.Gravity = Gravity.CENTER
-	pnlMain.AddView(lblVersion, 0, y, width, 25dip)
-	y = y + 35dip
-
-	pnlMain.Height = y + 20dip
+	lblSessionTimer.TextSize = 11
+	lblSessionTimer.TextColor = Colors.ARGB(160, 255, 255, 255)
+	lblSessionTimer.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlFooter.AddView(lblSessionTimer, 0, y, width, 18dip)
 End Sub
 
-Private Sub CreateListItem(eventName As String, title As String, subtitle As String, icon As String, iconColor As Int, y As Int, w As Int, h As Int, margin As Int)
+' ============================================
+'  HOME - GRID 2x2 (LOCKZERO_HOME_DEFINITIONS.md)
+' ============================================
+
+Private Sub ShowHome
+	pnlContent.RemoveAllViews
+
+	Dim width As Int = Root.Width
+	Dim contentHeight As Int = pnlContent.Height
+
+	'Calcula tamanho dos cards
+	Dim availableWidth As Int = width - (GRID_MARGIN * 2) - GRID_GAP
+	Dim cardSize As Int = availableWidth / 2
+
+	'Calcula posicao vertical para centralizar o grid
+	Dim gridHeight As Int = (cardSize * 2) + GRID_GAP
+	Dim startY As Int = (contentHeight - gridHeight) / 2
+
+	'Linha 1: Senhas | Cartoes
+	CreateHomeCard("pnlPasswords", ModLang.T("passwords"), "ic_senha.png", GRID_MARGIN, startY, cardSize)
+	CreateHomeCard("pnlCards", ModLang.T("cards"), "ic_cartao.png", GRID_MARGIN + cardSize + GRID_GAP, startY, cardSize)
+
+	'Linha 2: Documentos | Notas
+	Dim row2Y As Int = startY + cardSize + GRID_GAP
+	CreateHomeCard("pnlDocuments", ModLang.T("documents"), "ic_doc.png", GRID_MARGIN, row2Y, cardSize)
+	CreateHomeCard("pnlNotes", ModLang.T("notes"), "ic_notas.png", GRID_MARGIN + cardSize + GRID_GAP, row2Y, cardSize)
+End Sub
+
+' ============================================
+'  CARD DA HOME - Icone + Label
+' ============================================
+
+Private Sub CreateHomeCard(eventName As String, labelText As String, iconFile As String, x As Int, y As Int, size As Int)
+	'Panel do card - usa ICON_BG RGB(69, 90, 117) #455A75
 	Dim pnl As Panel
 	pnl.Initialize(eventName)
 
 	Dim xv As B4XView = pnl
-	xv.SetColorAndBorder(ModTheme.Surface, 1dip, ModTheme.CardBorder, 12dip)
-	pnlMain.AddView(pnl, margin, y, w, h)
+	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, CARD_CORNER)
+	pnlContent.AddView(pnl, x, y, size, size)
 
-	'Avatar circular
-	Dim pnlAvatar As Panel
-	pnlAvatar.Initialize("")
+	'Tamanho do icone: 52-60% da largura do card
+	Dim iconSize As Int = size * 0.55
 
-	Dim xvAvatar As B4XView = pnlAvatar
-	xvAvatar.SetColorAndBorder(iconColor, 0, iconColor, 24dip)
-	pnl.AddView(pnlAvatar, 16dip, 12dip, 48dip, 48dip)
+	'Posicao do icone: centro vertical a 42% da altura (nao 50%)
+	Dim iconY As Int = (size * 0.42) - (iconSize / 2)
+	Dim iconX As Int = (size - iconSize) / 2
 
-	Dim lblIcon As Label
-	lblIcon.Initialize("")
-	lblIcon.Text = icon
-	lblIcon.TextSize = 22
-	lblIcon.TextColor = Colors.White
-	lblIcon.Gravity = Gravity.CENTER
-	pnlAvatar.AddView(lblIcon, 0, 0, 48dip, 48dip)
+	'ImageView do icone - Gravity.FILL para preencher corretamente
+	Dim ivIcon As ImageView
+	ivIcon.Initialize("")
+	ivIcon.Gravity = Gravity.FILL
+	pnl.AddView(ivIcon, iconX, iconY, iconSize, iconSize)
 
-	'Titulo
-	Dim lblTitle As Label
-	lblTitle.Initialize("")
-	lblTitle.Text = title
-	lblTitle.TextSize = 16
-	lblTitle.TextColor = ModTheme.TextPrimary
-	lblTitle.Typeface = Typeface.DEFAULT_BOLD
-	pnl.AddView(lblTitle, 80dip, 14dip, w - 120dip, 24dip)
+	Try
+		ivIcon.Bitmap = LoadBitmap(File.DirAssets, iconFile)
+	Catch
+		Log("Erro ao carregar " & iconFile & ": " & LastException.Message)
+		'Fallback: mostra texto
+		Dim lblFallback As Label
+		lblFallback.Initialize("")
+		lblFallback.Text = "?"
+		lblFallback.TextSize = 32
+		lblFallback.TextColor = Colors.White
+		lblFallback.Gravity = Gravity.CENTER
+		pnl.AddView(lblFallback, iconX, iconY, iconSize, iconSize)
+	End Try
 
-	'Subtitulo
-	Dim lblSubtitle As Label
-	lblSubtitle.Initialize("")
-	lblSubtitle.Text = subtitle
-	lblSubtitle.TextSize = 13
-	lblSubtitle.TextColor = ModTheme.TextSecondary
-	pnl.AddView(lblSubtitle, 80dip, 38dip, w - 120dip, 22dip)
+	'Label abaixo do icone
+	Dim lblSpace As Int = 10dip
+	Dim lblY As Int = iconY + iconSize + lblSpace
+	Dim lblH As Int = size - lblY - 8dip
 
-	'Chevron
-	Dim lblChevron As Label
-	lblChevron.Initialize("")
-	lblChevron.Text = Chr(0x203A) '›
-	lblChevron.TextSize = 24
-	lblChevron.TextColor = ModTheme.TextMuted
-	lblChevron.Gravity = Gravity.CENTER
-	pnl.AddView(lblChevron, w - 40dip, 0, 30dip, h)
+	Dim lblLabel As Label
+	lblLabel.Initialize("")
+	lblLabel.Text = labelText
+	lblLabel.TextSize = 15
+	lblLabel.TextColor = Colors.ARGB(230, 255, 255, 255) '~90% alpha
+	lblLabel.Gravity = Gravity.CENTER_HORIZONTAL
+	lblLabel.Typeface = Typeface.DEFAULT_BOLD
+	pnl.AddView(lblLabel, 0, lblY, size, lblH)
 End Sub
 
 ' ============================================
@@ -367,27 +422,63 @@ End Sub
 
 Private Sub pnlPasswords_Click
 	HideMenu
-	B4XPages.ShowPage("PagePasswords")
+	AnimatePulseAndNavigate(Sender, "PagePasswords")
 End Sub
 
 Private Sub pnlCards_Click
 	HideMenu
+	AnimatePulse(Sender)
+	Sleep(250)
 	ToastMessageShow(ModLang.T("cards") & " - " & ModLang.T("loading"), False)
 End Sub
 
 Private Sub pnlDocuments_Click
 	HideMenu
+	AnimatePulse(Sender)
+	Sleep(250)
 	ToastMessageShow(ModLang.T("documents") & " - " & ModLang.T("loading"), False)
 End Sub
 
 Private Sub pnlNotes_Click
 	HideMenu
-	NavigateToNotes
+	AnimatePulseAndNavigateNotes(Sender)
 End Sub
 
 Private Sub pnlBackup_Click
 	HideMenu
-	B4XPages.ShowPage("PageBackup")
+	AnimatePulseAndNavigate(Sender, "PageBackup")
+End Sub
+
+' ============================================
+'  ANIMACAO PULSE
+' ============================================
+
+'Efeito pulse: aumenta um pouco e volta
+Private Sub AnimatePulse(pnl As Panel)
+	Dim xv As B4XView = pnl
+	Dim l As Int = xv.Left
+	Dim t As Int = xv.Top
+	Dim w As Int = xv.Width
+	Dim h As Int = xv.Height
+
+	Dim grow As Int = 6dip
+	xv.SetLayoutAnimated(100, l - grow, t - grow, w + grow * 2, h + grow * 2)
+	Sleep(100)
+	xv.SetLayoutAnimated(100, l, t, w, h)
+End Sub
+
+'Pulse + navegar para pagina
+Private Sub AnimatePulseAndNavigate(pnl As Panel, pageName As String)
+	AnimatePulse(pnl)
+	Sleep(150)
+	B4XPages.ShowPage(pageName)
+End Sub
+
+'Pulse + navegar para notas
+Private Sub AnimatePulseAndNavigateNotes(pnl As Panel)
+	AnimatePulse(pnl)
+	Sleep(150)
+	NavigateToNotes
 End Sub
 
 Private Sub NavigateToNotes
@@ -411,7 +502,7 @@ Private Sub tmrSession_Tick
 	If ModSession.IsSessionActive Then
 		Dim remaining As String = ModSession.GetRemainingFormatted
 		lblSessionTimer.Text = ModLang.T("session_remaining") & ": " & remaining
-		lblSessionTimer.TextColor = ModTheme.Primary
+		lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255) 'Branco no fundo azul
 	Else
 		lblSessionTimer.Text = ""
 		tmrSession.Enabled = False
@@ -423,11 +514,13 @@ End Sub
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
 
-	If pnlMain.IsInitialized Then pnlMain.Color = ModTheme.Background
-	If pnlMenu.IsInitialized Then pnlMenu.Color = ModTheme.Surface
-	If svMenu.IsInitialized Then svMenu.Panel.Color = ModTheme.Surface
+	If pnlHeader.IsInitialized Then pnlHeader.Color = ModTheme.HomeHeaderBg
+	If pnlContent.IsInitialized Then pnlContent.Color = ModTheme.HomeBg
+	If pnlFooter.IsInitialized Then pnlFooter.Color = ModTheme.HomeBg
+	If pnlMenu.IsInitialized Then pnlMenu.Color = ModTheme.HomeBg
+	If svMenu.IsInitialized Then svMenu.Panel.Color = ModTheme.HomeBg
 End Sub
 
 ' ============================================

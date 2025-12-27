@@ -18,6 +18,7 @@ Sub Class_Globals
 
 	'UI
 	Private btnSave As Button
+	Private btnCancel As Button
 
 	Private svForm As ScrollView
 	Private pnlForm As B4XView
@@ -30,7 +31,6 @@ Sub Class_Globals
 	Private edtNotes As EditText
 	Private chkFavorite As CheckBox
 	Private btnShowPassword As Button
-	Private btnGenerate As Button
 
 	Private IsPasswordVisible As Boolean = False
 End Sub
@@ -75,11 +75,17 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'Botao salvar (flutuante no canto)
+	'Botao cancelar (esquerda)
+	btnCancel.Initialize("btnCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	Root.AddView(btnCancel, 10dip, height - 70dip, 90dip, 50dip)
+
+	'Botao salvar (direita)
 	btnSave.Initialize("btnSave")
 	btnSave.Text = ModLang.T("save")
 	btnSave.TextSize = 14
-	Root.AddView(btnSave, width - 90dip, height - 70dip, 80dip, 50dip)
+	Root.AddView(btnSave, width - 100dip, height - 70dip, 90dip, 50dip)
 
 	'Formulario (tela inteira)
 	svForm.Initialize(0)
@@ -88,7 +94,8 @@ Private Sub CreateUI
 	pnlForm = svForm.Panel
 	pnlForm.Color = Colors.Transparent
 
-	'Coloca botao na frente
+	'Coloca botoes na frente
+	btnCancel.BringToFront
 	btnSave.BringToFront
 
 	Dim y As Int = 20dip
@@ -140,16 +147,12 @@ Private Sub CreateUI
 	edtPassword.Hint = "Senha"
 	edtPassword.SingleLine = True
 	edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128) 'Password
-	pnlForm.AddView(edtPassword, 20dip, y, fieldWidth - 100dip, fieldHeight)
+	pnlForm.AddView(edtPassword, 20dip, y, fieldWidth - 60dip, fieldHeight)
 
 	btnShowPassword.Initialize("btnShowPassword")
-	btnShowPassword.Text = Starter.ICON_EYE_OPEN 'Olho aberto = senha oculta
-	btnShowPassword.TextSize = 18
-	pnlForm.AddView(btnShowPassword, width - 115dip, y, 45dip, fieldHeight)
-
-	btnGenerate.Initialize("btnGenerate")
-	btnGenerate.Text = "G"
-	pnlForm.AddView(btnGenerate, width - 65dip, y, 45dip, fieldHeight)
+	btnShowPassword.Text = ModLang.T("view")
+	btnShowPassword.TextSize = 11
+	pnlForm.AddView(btnShowPassword, width - 70dip, y, 50dip, fieldHeight)
 	y = y + fieldHeight + gap
 
 	'Notas
@@ -178,7 +181,7 @@ Private Sub CreateFieldLabel(text As String) As Label
 	lbl.Initialize("")
 	lbl.Text = text
 	lbl.TextSize = 13
-	lbl.TextColor = ModTheme.TextSecondary
+	lbl.TextColor = Colors.ARGB(180, 255, 255, 255)
 	Return lbl
 End Sub
 
@@ -214,6 +217,10 @@ End Sub
 Private Sub btnSave_Click
 	ModSession.Touch
 	SaveEntry
+End Sub
+
+Private Sub btnCancel_Click
+	B4XPages.ClosePage(Me)
 End Sub
 
 ' ============================================
@@ -253,21 +260,12 @@ Private Sub btnShowPassword_Click
 	IsPasswordVisible = Not(IsPasswordVisible)
 	If IsPasswordVisible Then
 		edtPassword.InputType = edtPassword.INPUT_TYPE_TEXT
-		btnShowPassword.Text = Starter.ICON_EYE_CLOSED 'Pontos = senha visivel
+		btnShowPassword.Text = ModLang.T("hide")
+		btnShowPassword.TextColor = Colors.White
 	Else
 		edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128)
-		btnShowPassword.Text = Starter.ICON_EYE_OPEN 'Olho = senha oculta
-	End If
-End Sub
-
-Private Sub btnGenerate_Click
-	'Gera senha aleatoria
-	Dim password As String = GeneratePassword(16)
-	edtPassword.Text = password
-
-	'Mostra a senha gerada
-	If IsPasswordVisible = False Then
-		btnShowPassword_Click
+		btnShowPassword.Text = ModLang.T("view")
+		btnShowPassword.TextColor = Colors.ARGB(200, 255, 255, 255)
 	End If
 End Sub
 
@@ -320,57 +318,46 @@ Private Sub SaveEntry
 End Sub
 
 ' ============================================
-'  GERADOR DE SENHA
-' ============================================
-
-Private Sub GeneratePassword(length As Int) As String
-	Dim chars As String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*"
-	Dim sb As StringBuilder
-	sb.Initialize
-
-	For i = 1 To length
-		Dim idx As Int = Rnd(0, chars.Length)
-		sb.Append(chars.CharAt(idx))
-	Next
-
-	Return sb.ToString
-End Sub
-
-' ============================================
 '  TEMA
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
+	svForm.Color = ModTheme.HomeBg
+	pnlForm.Color = ModTheme.HomeBg
 
-	btnSave.Color = ModTheme.Primary
+	btnSave.Color = ModTheme.HomeIconBg
 	btnSave.TextColor = Colors.White
 
-	'Campos
-	Dim inputDrawable As ColorDrawable = ModTheme.GetInputDrawable
-	edtName.Background = inputDrawable
-	edtName.TextColor = ModTheme.InputText
-	edtName.HintColor = ModTheme.InputHint
+	'Campos com fundo escuro e borda sutil
+	Dim cd As ColorDrawable
+	cd.Initialize2(ModTheme.HomeHeaderBg, 8dip, 1dip, Colors.ARGB(80, 255, 255, 255))
 
-	edtUrl.Background = inputDrawable
-	edtUrl.TextColor = ModTheme.InputText
-	edtUrl.HintColor = ModTheme.InputHint
+	edtName.Background = cd
+	edtName.TextColor = Colors.White
+	edtName.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	edtUsername.Background = inputDrawable
-	edtUsername.TextColor = ModTheme.InputText
-	edtUsername.HintColor = ModTheme.InputHint
+	edtUrl.Background = cd
+	edtUrl.TextColor = Colors.White
+	edtUrl.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	edtPassword.Background = inputDrawable
-	edtPassword.TextColor = ModTheme.InputText
-	edtPassword.HintColor = ModTheme.InputHint
+	edtUsername.Background = cd
+	edtUsername.TextColor = Colors.White
+	edtUsername.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	edtNotes.Background = inputDrawable
-	edtNotes.TextColor = ModTheme.InputText
-	edtNotes.HintColor = ModTheme.InputHint
+	edtPassword.Background = cd
+	edtPassword.TextColor = Colors.White
+	edtPassword.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	btnShowPassword.Color = ModTheme.ButtonSecondary
-	btnShowPassword.TextColor = ModTheme.TextPrimary
+	edtNotes.Background = cd
+	edtNotes.TextColor = Colors.White
+	edtNotes.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	btnGenerate.Color = ModTheme.Success
-	btnGenerate.TextColor = Colors.White
+	btnShowPassword.Color = ModTheme.HomeIconBg
+	btnShowPassword.TextColor = Colors.White
+
+	btnCancel.Color = ModTheme.ButtonSecondary
+	btnCancel.TextColor = Colors.White
+
+	chkFavorite.TextColor = Colors.White
 End Sub

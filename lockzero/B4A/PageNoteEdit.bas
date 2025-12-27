@@ -13,6 +13,7 @@ Sub Class_Globals
 
 	'UI
 	Private btnSave As Button
+	Private btnCancel As Button
 	Private btnDelete As Button
 
 	Private svContent As ScrollView
@@ -76,16 +77,23 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 
-	'Botoes flutuantes
+	'Botao cancelar (esquerda)
+	btnCancel.Initialize("btnCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	Root.AddView(btnCancel, 10dip, height - 70dip, 90dip, 50dip)
+
+	'Botao deletar (centro-direita, so visivel em edicao)
 	btnDelete.Initialize("btnDelete")
 	btnDelete.Text = "X"
 	btnDelete.Visible = False
 	Root.AddView(btnDelete, width - 160dip, height - 70dip, 50dip, 50dip)
 
+	'Botao salvar (direita)
 	btnSave.Initialize("btnSave")
 	btnSave.Text = ModLang.T("save")
 	btnSave.TextSize = 14
-	Root.AddView(btnSave, width - 90dip, height - 70dip, 80dip, 50dip)
+	Root.AddView(btnSave, width - 100dip, height - 70dip, 90dip, 50dip)
 
 	'Conteudo (tela inteira)
 	svContent.Initialize(0)
@@ -95,6 +103,7 @@ Private Sub CreateUI
 	pnlContent.Color = Colors.Transparent
 
 	'Coloca botoes na frente
+	btnCancel.BringToFront
 	btnDelete.BringToFront
 	btnSave.BringToFront
 
@@ -107,7 +116,7 @@ Private Sub CreateUI
 	lblTitleField.Initialize("")
 	lblTitleField.Text = "Titulo"
 	lblTitleField.TextSize = 14
-	lblTitleField.TextColor = ModTheme.TextSecondary
+	lblTitleField.TextColor = Colors.ARGB(180, 255, 255, 255)
 	pnlContent.AddView(lblTitleField, margin, y, fieldWidth, 20dip)
 	y = y + 22dip
 
@@ -124,7 +133,7 @@ Private Sub CreateUI
 	lblContentField.Initialize("")
 	lblContentField.Text = "Conteudo"
 	lblContentField.TextSize = 14
-	lblContentField.TextColor = ModTheme.TextSecondary
+	lblContentField.TextColor = Colors.ARGB(180, 255, 255, 255)
 	pnlContent.AddView(lblContentField, margin, y, fieldWidth, 20dip)
 	y = y + 22dip
 
@@ -133,8 +142,8 @@ Private Sub CreateUI
 	edtContent.SingleLine = False
 	edtContent.TextSize = 15
 	edtContent.Gravity = Gravity.TOP
-	pnlContent.AddView(edtContent, margin, y, fieldWidth, 250dip)
-	y = y + 260dip
+	pnlContent.AddView(edtContent, margin, y, fieldWidth, 180dip)
+	y = y + 190dip
 
 	'Favorito
 	chkFavorite.Initialize("chkFavorite")
@@ -148,7 +157,7 @@ Private Sub CreateUI
 	lblInfo.Initialize("")
 	lblInfo.Text = "O conteudo desta nota sera criptografado com sua frase-senha."
 	lblInfo.TextSize = 12
-	lblInfo.TextColor = ModTheme.TextMuted
+	lblInfo.TextColor = Colors.ARGB(120, 255, 255, 255)
 	lblInfo.Gravity = Gravity.CENTER_HORIZONTAL
 	pnlContent.AddView(lblInfo, margin, y, fieldWidth, 40dip)
 	y = y + 60dip
@@ -216,19 +225,34 @@ Private Sub btnSave_Click
 End Sub
 
 ' ============================================
+'  CANCELAR
+' ============================================
+
+Private Sub btnCancel_Click
+	B4XPages.ClosePage(Me)
+End Sub
+
+' ============================================
 '  AJUSTE DE TECLADO - Scroll para campo focado
 ' ============================================
 
 Private Sub edtTitle_FocusChanged(HasFocus As Boolean)
-	If HasFocus Then ScrollToView(edtTitle)
+	If HasFocus Then ScrollToView(edtTitle, False)
 End Sub
 
 Private Sub edtContent_FocusChanged(HasFocus As Boolean)
-	If HasFocus Then ScrollToView(edtContent)
+	If HasFocus Then ScrollToView(edtContent, True)
 End Sub
 
-Private Sub ScrollToView(v As View)
-	Dim targetY As Int = v.Top - 50dip
+Private Sub ScrollToView(v As View, isLargeField As Boolean)
+	Dim targetY As Int
+	If isLargeField Then
+		'Para campos grandes como notas, scroll para mostrar o topo do campo
+		'com margem extra para acomodar teclado
+		targetY = v.Top - 30dip
+	Else
+		targetY = v.Top - 50dip
+	End If
 	If targetY < 0 Then targetY = 0
 	svContent.ScrollPosition = targetY
 End Sub
@@ -254,19 +278,30 @@ End Sub
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
+	svContent.Color = ModTheme.HomeBg
+	pnlContent.Color = ModTheme.HomeBg
 
-	btnSave.Color = ModTheme.Success
+	btnSave.Color = ModTheme.HomeIconBg
 	btnSave.TextColor = Colors.White
 
-	btnDelete.Color = ModTheme.Danger
+	btnCancel.Color = ModTheme.ButtonSecondary
+	btnCancel.TextColor = Colors.White
+
+	btnDelete.Color = Colors.RGB(180, 60, 60) 'Vermelho suave
 	btnDelete.TextColor = Colors.White
 
-	edtTitle.TextColor = ModTheme.InputText
-	edtTitle.HintColor = ModTheme.InputHint
+	'Campos com fundo escuro e borda sutil
+	Dim cd As ColorDrawable
+	cd.Initialize2(ModTheme.HomeHeaderBg, 8dip, 1dip, Colors.ARGB(80, 255, 255, 255))
 
-	edtContent.TextColor = ModTheme.InputText
-	edtContent.HintColor = ModTheme.InputHint
+	edtTitle.Background = cd
+	edtTitle.TextColor = Colors.White
+	edtTitle.HintColor = Colors.ARGB(120, 255, 255, 255)
 
-	chkFavorite.TextColor = ModTheme.TextPrimary
+	edtContent.Background = cd
+	edtContent.TextColor = Colors.White
+	edtContent.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	chkFavorite.TextColor = Colors.White
 End Sub

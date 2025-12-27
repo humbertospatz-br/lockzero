@@ -54,19 +54,19 @@ End Sub
 Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
-	Dim headerH As Int = 50dip
+	Dim headerH As Int = 56dip
 
-	'Header com titulo e botao +
+	'Header com titulo e botao + (cores da Home)
 	Dim pnlHeader As Panel
 	pnlHeader.Initialize("")
-	pnlHeader.Color = ModTheme.Surface
+	pnlHeader.Color = ModTheme.HomeHeaderBg
 	Root.AddView(pnlHeader, 0, 0, width, headerH)
 
 	Dim lblTitle As Label
 	lblTitle.Initialize("")
 	lblTitle.Text = "NOTAS"
-	lblTitle.TextSize = 12
-	lblTitle.TextColor = ModTheme.TextMuted
+	lblTitle.TextSize = 14
+	lblTitle.TextColor = Colors.ARGB(200, 255, 255, 255)
 	lblTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblTitle.Gravity = Gravity.CENTER_VERTICAL
 	pnlHeader.AddView(lblTitle, 16dip, 0, width - 80dip, headerH)
@@ -75,23 +75,18 @@ Private Sub CreateUI
 	btnAdd.Initialize("btnAdd")
 	btnAdd.Text = "+"
 	btnAdd.TextSize = 22
-	btnAdd.Color = ModTheme.Primary
+	btnAdd.Color = ModTheme.HomeIconBg
 	btnAdd.TextColor = Colors.White
 	btnAdd.Gravity = Gravity.CENTER
-	pnlHeader.AddView(btnAdd, width - 54dip, 7dip, 36dip, 36dip)
+	pnlHeader.AddView(btnAdd, width - 54dip, 10dip, 36dip, 36dip)
 
-	'Separador
-	Dim sep As Panel
-	sep.Initialize("")
-	sep.Color = ModTheme.CardBorder
-	Root.AddView(sep, 0, headerH, width, 1dip)
-
-	'Lista de notas
+	'Lista de notas (sem separador, fundo continuo)
 	svNotes.Initialize(0)
-	Root.AddView(svNotes, 0, headerH + 1dip, width, height - headerH - 1dip)
+	svNotes.Color = ModTheme.HomeBg
+	Root.AddView(svNotes, 0, headerH, width, height - headerH)
 
 	pnlNotes = svNotes.Panel
-	pnlNotes.Color = Colors.Transparent
+	pnlNotes.Color = ModTheme.HomeBg
 
 	'Label vazio
 	lblEmpty.Initialize("")
@@ -140,8 +135,9 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	Dim pnl As Panel
 	pnl.Initialize("pnlNote")
 
+	'Card com cor da Home e cantos arredondados
 	Dim xv As B4XView = pnl
-	xv.SetColorAndBorder(ModTheme.CardBackground, 1dip, ModTheme.CardBorder, 8dip)
+	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 12dip)
 
 	'Titulo
 	Dim title As String = note.GetDecryptedTitle(ModSession.GetPassphrase)
@@ -151,7 +147,7 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	lblNoteTitle.Initialize("")
 	lblNoteTitle.Text = title
 	lblNoteTitle.TextSize = 16
-	lblNoteTitle.TextColor = ModTheme.TextPrimary
+	lblNoteTitle.TextColor = Colors.White
 	lblNoteTitle.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
 	pnl.AddView(lblNoteTitle, 12dip, 10dip, cardWidth - 60dip, 25dip)
 
@@ -164,7 +160,7 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	lblPreview.Initialize("")
 	lblPreview.Text = content
 	lblPreview.TextSize = 13
-	lblPreview.TextColor = ModTheme.TextSecondary
+	lblPreview.TextColor = Colors.ARGB(180, 255, 255, 255)
 	pnl.AddView(lblPreview, 12dip, 38dip, cardWidth - 60dip, 30dip)
 
 	'Favorito
@@ -173,7 +169,7 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 		lblStar.Initialize("")
 		lblStar.Text = Chr(9733) '"★"
 		lblStar.TextSize = 20
-		lblStar.TextColor = ModTheme.Warning
+		lblStar.TextColor = Colors.RGB(255, 200, 100) 'Amarelo suave
 		lblStar.Gravity = Gravity.CENTER
 		pnl.AddView(lblStar, cardWidth - 40dip, 25dip, 30dip, 30dip)
 	End If
@@ -214,10 +210,10 @@ End Sub
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
 
-	btnAdd.Color = ModTheme.Primary
+	btnAdd.Color = ModTheme.HomeIconBg
 	btnAdd.TextColor = Colors.White
 
-	lblEmpty.TextColor = ModTheme.TextMuted
+	lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
 End Sub

@@ -12,14 +12,21 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI
-	Private btnAdd As Button
+	Private btnBack As Button
+	Private lblHeaderTitle As Label
 
 	Private svGroups As ScrollView
 	Private pnlGroups As B4XView
 
-	'Dialogs
+	'Dialog Overlay
+	Private pnlOverlay As Panel
+	Private pnlDialog As Panel
 	Private edtGroupName As EditText
 	Private edtPassphrase As EditText
+	Private btnShowPass As Button
+	Private IsPassVisible As Boolean = False
+	Private CurrentDialogMode As String = "" 'add_group, unlock_group, edit_group
+	Private CurrentGroupId As String = ""
 End Sub
 
 Public Sub Initialize
@@ -47,44 +54,81 @@ End Sub
 Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
-	Dim headerH As Int = 50dip
+	Dim headerH As Int = 56dip
 
-	'Header com titulo e botao +
+	'Header com seta voltar, titulo e botao +
 	Dim pnlHeader As Panel
 	pnlHeader.Initialize("")
-	pnlHeader.Color = ModTheme.Surface
+	pnlHeader.Color = ModTheme.HomeHeaderBg
 	Root.AddView(pnlHeader, 0, 0, width, headerH)
 
-	Dim lblTitle As Label
-	lblTitle.Initialize("")
-	lblTitle.Text = "GRUPOS"
-	lblTitle.TextSize = 12
-	lblTitle.TextColor = ModTheme.TextMuted
-	lblTitle.Typeface = Typeface.DEFAULT_BOLD
-	lblTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblTitle, 16dip, 0, width - 80dip, headerH)
+	'Seta voltar
+	btnBack.Initialize("btnBack")
+	btnBack.Text = "<"
+	btnBack.TextSize = 20
+	btnBack.Color = Colors.Transparent
+	btnBack.TextColor = Colors.White
+	btnBack.Gravity = Gravity.CENTER
+	pnlHeader.AddView(btnBack, 0, 0, 50dip, headerH)
 
-	'Botao adicionar no header (circular)
-	btnAdd.Initialize("btnAdd")
-	btnAdd.Text = "+"
-	btnAdd.TextSize = 22
-	btnAdd.Color = ModTheme.Primary
-	btnAdd.TextColor = Colors.White
-	btnAdd.Gravity = Gravity.CENTER
-	pnlHeader.AddView(btnAdd, width - 54dip, 7dip, 36dip, 36dip)
+	'Titulo com breadcrumb: Senhas
+	lblHeaderTitle.Initialize("")
+	lblHeaderTitle.Text = ModLang.T("passwords")
+	lblHeaderTitle.TextSize = 16
+	lblHeaderTitle.TextColor = Colors.White
+	lblHeaderTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblHeaderTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 110dip, headerH)
 
-	'Separador
-	Dim sep As Panel
-	sep.Initialize("")
-	sep.Color = ModTheme.CardBorder
-	Root.AddView(sep, 0, headerH, width, 1dip)
+	'Botao adicionar no header - usando Label para evitar tema do sistema
+	Dim lblAdd As Label
+	lblAdd.Initialize("btnAdd")
+	lblAdd.Text = "+"
+	lblAdd.TextSize = 26
+	lblAdd.Typeface = Typeface.DEFAULT_BOLD
+	lblAdd.Gravity = Gravity.CENTER
+	lblAdd.TextColor = Colors.White
+	pnlHeader.AddView(lblAdd, width - 50dip, 8dip, 40dip, 40dip)
+
+	'Arredondar o label
+	Dim xvAdd As B4XView = lblAdd
+	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 20dip)
 
 	'Lista de grupos
 	svGroups.Initialize(0)
-	Root.AddView(svGroups, 0, headerH + 1dip, width, height - headerH - 1dip)
+	svGroups.Color = ModTheme.HomeBg
+	Root.AddView(svGroups, 0, headerH, width, height - headerH)
 
 	pnlGroups = svGroups.Panel
-	pnlGroups.Color = Colors.Transparent
+	pnlGroups.Color = ModTheme.HomeBg
+
+	'Overlay para dialogs (invisivel por padrao)
+	CreateDialogOverlay
+End Sub
+
+Private Sub CreateDialogOverlay
+	Dim width As Int = Root.Width
+	Dim height As Int = Root.Height
+
+	'Fundo escuro semi-transparente
+	pnlOverlay.Initialize("pnlOverlay")
+	pnlOverlay.Color = Colors.ARGB(180, 0, 0, 0)
+	pnlOverlay.Visible = False
+	Root.AddView(pnlOverlay, 0, 0, width, height)
+
+	'Dialog centralizado
+	Dim dialogW As Int = width - 40dip
+	Dim dialogH As Int = 220dip
+	Dim dialogX As Int = 20dip
+	Dim dialogY As Int = 80dip 'Posicao alta para nao cobrir com teclado
+
+	pnlDialog.Initialize("")
+	pnlDialog.Color = ModTheme.HomeHeaderBg
+	pnlOverlay.AddView(pnlDialog, dialogX, dialogY, dialogW, dialogH)
+
+	'Arredondar cantos do dialog
+	Dim xvDialog As B4XView = pnlDialog
+	xvDialog.SetColorAndBorder(ModTheme.HomeHeaderBg, 0, ModTheme.HomeHeaderBg, 12dip)
 End Sub
 
 Private Sub CreateLabel(text As String, size As Float, bold As Boolean) As B4XView
@@ -111,12 +155,12 @@ Private Sub LoadGroups
 	Dim groups As List = ModPasswords.GetAllGroups
 	Dim width As Int = Root.Width
 	Dim itemHeight As Int = 70dip
-	Dim y As Int = 10dip
+	Dim y As Int = 16dip
 
 	If groups.Size = 0 Then
 		'Mensagem vazia
 		Dim lblEmpty As B4XView = CreateLabel(ModLang.T("empty"), 14, False)
-		lblEmpty.TextColor = ModTheme.TextMuted
+		lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
 		pnlGroups.AddView(lblEmpty, 0, 100dip, width, 40dip)
 		pnlGroups.Height = 200dip
 		Return
@@ -126,7 +170,10 @@ Private Sub LoadGroups
 		Dim pnlItem As Panel
 		pnlItem.Initialize("pnlGroup")
 		pnlItem.Tag = g.Id
-		pnlItem.Color = ModTheme.CardBackground
+
+		'Card com cor da Home e cantos arredondados
+		Dim xvItem As B4XView = pnlItem
+		xvItem.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 12dip)
 		pnlGroups.AddView(pnlItem, 16dip, y, width - 32dip, itemHeight)
 
 		'Nome do grupo
@@ -134,9 +181,10 @@ Private Sub LoadGroups
 		lblName.Initialize("")
 		lblName.Text = g.Name
 		lblName.TextSize = 16
-		lblName.TextColor = ModTheme.TextPrimary
+		lblName.TextColor = Colors.White
+		lblName.Typeface = Typeface.DEFAULT_BOLD
 		lblName.Gravity = Gravity.CENTER_VERTICAL
-		pnlItem.AddView(lblName, 16dip, 0, width - 120dip, itemHeight)
+		pnlItem.AddView(lblName, 16dip, 0, width - 140dip, itemHeight)
 
 		'Contador de senhas
 		Dim count As Int = ModPasswords.GetEntryCountByGroup(g.Id)
@@ -144,20 +192,20 @@ Private Sub LoadGroups
 		lblCount.Initialize("")
 		lblCount.Text = count
 		lblCount.TextSize = 14
-		lblCount.TextColor = ModTheme.TextSecondary
+		lblCount.TextColor = Colors.ARGB(180, 255, 255, 255)
 		lblCount.Gravity = Gravity.CENTER
-		pnlItem.AddView(lblCount, width - 100dip, 0, 50dip, itemHeight)
+		pnlItem.AddView(lblCount, width - 110dip, 0, 40dip, itemHeight)
 
 		'Seta
 		Dim lblArrow As Label
 		lblArrow.Initialize("")
 		lblArrow.Text = ">"
 		lblArrow.TextSize = 18
-		lblArrow.TextColor = ModTheme.TextMuted
+		lblArrow.TextColor = Colors.ARGB(150, 255, 255, 255)
 		lblArrow.Gravity = Gravity.CENTER
-		pnlItem.AddView(lblArrow, width - 60dip, 0, 30dip, itemHeight)
+		pnlItem.AddView(lblArrow, width - 70dip, 0, 30dip, itemHeight)
 
-		y = y + itemHeight + 8dip
+		y = y + itemHeight + 12dip
 	Next
 
 	pnlGroups.Height = y + 20dip
@@ -167,9 +215,18 @@ End Sub
 '  EVENTOS
 ' ============================================
 
+Private Sub btnBack_Click
+	B4XPages.ClosePage(Me)
+End Sub
+
 Private Sub btnAdd_Click
 	ModSession.Touch
 	ShowAddGroupDialog
+End Sub
+
+Private Sub pnlOverlay_Click
+	'Fecha dialog ao clicar fora
+	HideDialog
 End Sub
 
 Private Sub pnlGroup_Click
@@ -205,62 +262,95 @@ Private Sub ShowUnlockGroupDialog(groupId As String)
 		Return
 	End If
 
-	edtPassphrase.Initialize("")
+	CurrentDialogMode = "unlock_group"
+	CurrentGroupId = groupId
+	IsPassVisible = False
+
+	'Configura dialog
+	Dim dialogW As Int = Root.Width - 40dip
+	pnlDialog.RemoveAllViews
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = g.Name
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24dip)
+
+	'Subtitulo
+	Dim lblSub As Label
+	lblSub.Initialize("")
+	lblSub.Text = ModLang.T("enter_passphrase")
+	lblSub.TextSize = 12
+	lblSub.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblSub.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblSub, 0, 36dip, dialogW, 20dip)
+
+	'Campo de frase com botao olho
+	Dim pnlInput As Panel
+	pnlInput.Initialize("")
+	pnlInput.Color = ModTheme.HomeBg
+	pnlDialog.AddView(pnlInput, 16dip, 65dip, dialogW - 32dip, 50dip)
+
+	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(edtPassphrase.INPUT_TYPE_TEXT, 128)
+	edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
 	edtPassphrase.Text = ""
+	edtPassphrase.TextColor = Colors.White
+	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 50dip)
 
-	'Mostra tentativas restantes se ja houve falhas
+	'Botao Ver/Ocultar
+	btnShowPass.Initialize("btnShowPass")
+	btnShowPass.Text = ModLang.T("view")
+	btnShowPass.TextSize = 11
+	btnShowPass.Color = Colors.Transparent
+	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+	btnShowPass.Gravity = Gravity.CENTER
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 48dip, 5dip, 40dip, 40dip)
+
+	'Tentativas falhas
 	Dim attempts As Int = ModSecurity.GetFailedAttempts(groupId)
-	Dim hintText As String = ""
 	If attempts > 0 Then
-		hintText = attempts & " " & ModLang.T("failed_attempts")
+		Dim lblWarn As Label
+		lblWarn.Initialize("")
+		lblWarn.Text = attempts & " " & ModLang.T("failed_attempts")
+		lblWarn.TextSize = 11
+		lblWarn.TextColor = ModTheme.Warning
+		lblWarn.Gravity = Gravity.CENTER_HORIZONTAL
+		pnlDialog.AddView(lblWarn, 0, 120dip, dialogW, 18dip)
 	End If
 
-	Dim pnl As B4XView = xui.CreatePanel("")
-	Dim pnlHeight As Int = 60dip
-	If hintText <> "" Then pnlHeight = 85dip
+	'Botoes
+	Dim btnCancel As Button
+	btnCancel.Initialize("btnDialogCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	btnCancel.Color = Colors.Transparent
+	btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
+	pnlDialog.AddView(btnCancel, 16dip, 145dip, 100dip, 40dip)
 
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, pnlHeight)
-	pnl.Color = ModTheme.Surface
-	pnl.AddView(edtPassphrase, 10dip, 5dip, 260dip, 50dip)
+	Dim btnOk As Button
+	btnOk.Initialize("btnDialogOk")
+	btnOk.Text = ModLang.T("unlock")
+	btnOk.TextSize = 12
+	btnOk.Color = ModTheme.HomeIconBg
+	btnOk.TextColor = Colors.White
+	pnlDialog.AddView(btnOk, dialogW - 130dip, 145dip, 114dip, 40dip)
 
-	If hintText <> "" Then
-		Dim lblHint As Label
-		lblHint.Initialize("")
-		lblHint.Text = hintText
-		lblHint.TextSize = 11
-		lblHint.TextColor = ModTheme.Warning
-		pnl.AddView(lblHint, 10dip, 58dip, 260dip, 20dip)
-	End If
+	'Ajusta altura do dialog
+	Dim dialogH As Int = 195dip
+	If attempts > 0 Then dialogH = 195dip
+	pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dialogW, dialogH)
 
-	Dim dialog As B4XDialog
-	dialog.Initialize(Root)
-	dialog.Title = g.Name & " - " & ModLang.T("enter_passphrase")
-
-	Wait For (dialog.ShowCustom(pnl, ModLang.T("unlock"), "", ModLang.T("cancel"))) Complete (Result As Int)
-
-	If Result = xui.DialogResponse_Positive Then
-		Dim phrase As String = edtPassphrase.Text.Trim
-
-		'Valida frase com TestValue do grupo
-		If g.ValidatePhrase(phrase) Then
-			'Frase correta - reseta tentativas e inicia sessao
-			ModSecurity.ResetFailedAttempts(groupId)
-			ModSession.StartSession(phrase)
-			NavigateToGroup(groupId)
-		Else
-			'Frase incorreta - registra tentativa
-			Dim delay As Int = ModSecurity.RegisterFailedAttempt(groupId)
-			If delay > 0 Then
-				Dim timeStr As String = ModSecurity.FormatDelay(delay)
-				ToastMessageShow(ModLang.T("wrong_passphrase") & " - " & ModLang.T("wait_timeout") & " " & timeStr, True)
-			Else
-				ToastMessageShow(ModLang.T("wrong_passphrase"), True)
-			End If
-		End If
-	End If
+	'Mostra overlay
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+	edtPassphrase.RequestFocus
 End Sub
 
 Private Sub NavigateToGroup(groupId As String)
@@ -285,76 +375,103 @@ End Sub
 ' ============================================
 
 Private Sub ShowAddGroupDialog
-	'Prepara campos
-	edtGroupName.Initialize("")
-	edtGroupName.Hint = ModLang.T("group_name_hint")
-	edtGroupName.SingleLine = True
-	edtGroupName.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
-	edtGroupName.Text = ""
+	CurrentDialogMode = "add_group"
+	CurrentGroupId = ""
+	IsPassVisible = False
 
-	edtPassphrase.Initialize("")
-	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(edtPassphrase.INPUT_TYPE_TEXT, 128) 'Password
-	edtPassphrase.Text = ""
+	'Configura dialog
+	Dim dialogW As Int = Root.Width - 40dip
+	pnlDialog.RemoveAllViews
 
-	'Labels
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("new_group")
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24dip)
+
+	'Label nome do grupo
 	Dim lblName As Label
 	lblName.Initialize("")
 	lblName.Text = ModLang.T("group_name_hint")
 	lblName.TextSize = 12
-	lblName.TextColor = ModTheme.TextSecondary
+	lblName.TextColor = Colors.ARGB(180, 255, 255, 255)
+	pnlDialog.AddView(lblName, 16dip, 45dip, dialogW - 32dip, 18dip)
 
+	'Campo nome do grupo
+	edtGroupName.Initialize("edtGroupName")
+	edtGroupName.Hint = ModLang.T("group_name_hint")
+	edtGroupName.SingleLine = True
+	edtGroupName.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
+	edtGroupName.Text = ""
+	edtGroupName.TextColor = Colors.White
+	edtGroupName.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	Dim pnlName As Panel
+	pnlName.Initialize("")
+	pnlName.Color = ModTheme.HomeBg
+	pnlDialog.AddView(pnlName, 16dip, 65dip, dialogW - 32dip, 46dip)
+	pnlName.AddView(edtGroupName, 8dip, 0, dialogW - 32dip - 16dip, 46dip)
+
+	'Label frase
 	Dim lblPhrase As Label
 	lblPhrase.Initialize("")
 	lblPhrase.Text = ModLang.T("passphrase_hint")
 	lblPhrase.TextSize = 12
-	lblPhrase.TextColor = ModTheme.TextSecondary
+	lblPhrase.TextColor = Colors.ARGB(180, 255, 255, 255)
+	pnlDialog.AddView(lblPhrase, 16dip, 120dip, dialogW - 32dip, 18dip)
 
-	'Cria painel com nome + frase
-	Dim pnl As B4XView = xui.CreatePanel("")
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 160dip)
-	pnl.Color = ModTheme.Surface
-	pnl.AddView(lblName, 10dip, 5dip, 260dip, 18dip)
-	pnl.AddView(edtGroupName, 10dip, 25dip, 260dip, 50dip)
-	pnl.AddView(lblPhrase, 10dip, 85dip, 260dip, 18dip)
-	pnl.AddView(edtPassphrase, 10dip, 105dip, 260dip, 50dip)
+	'Campo frase com botao olho
+	Dim pnlInput As Panel
+	pnlInput.Initialize("")
+	pnlInput.Color = ModTheme.HomeBg
+	pnlDialog.AddView(pnlInput, 16dip, 140dip, dialogW - 32dip, 46dip)
 
-	'Mostra dialogo
-	Dim dialog As B4XDialog
-	dialog.Initialize(Root)
-	dialog.Title = ModLang.T("new_group")
+	edtPassphrase.Initialize("edtPassphrase")
+	edtPassphrase.Hint = ModLang.T("passphrase_hint")
+	edtPassphrase.SingleLine = True
+	edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
+	edtPassphrase.Text = ""
+	edtPassphrase.TextColor = Colors.White
+	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 46dip)
 
-	Wait For (dialog.ShowCustom(pnl, ModLang.T("save"), "", ModLang.T("cancel"))) Complete (Result As Int)
+	'Botao Ver/Ocultar
+	btnShowPass.Initialize("btnShowPass")
+	btnShowPass.Text = ModLang.T("view")
+	btnShowPass.TextSize = 11
+	btnShowPass.Color = Colors.Transparent
+	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+	btnShowPass.Gravity = Gravity.CENTER
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 48dip, 3dip, 40dip, 40dip)
 
-	If Result = xui.DialogResponse_Positive Then
-		Dim groupName As String = edtGroupName.Text.Trim
-		Dim phrase As String = edtPassphrase.Text.Trim
+	'Botoes
+	Dim btnCancel As Button
+	btnCancel.Initialize("btnDialogCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	btnCancel.Color = Colors.Transparent
+	btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
+	pnlDialog.AddView(btnCancel, 16dip, 200dip, 100dip, 40dip)
 
-		'Valida
-		If groupName.Length = 0 Then
-			ToastMessageShow(ModLang.T("error_empty_field"), True)
-			Return
-		End If
-		If phrase.Length < 8 Then
-			ToastMessageShow(ModLang.T("passphrase_min_8"), True)
-			Return
-		End If
+	Dim btnOk As Button
+	btnOk.Initialize("btnDialogOk")
+	btnOk.Text = ModLang.T("save")
+	btnOk.TextSize = 13
+	btnOk.Color = ModTheme.HomeIconBg
+	btnOk.TextColor = Colors.White
+	pnlDialog.AddView(btnOk, dialogW - 116dip, 200dip, 100dip, 40dip)
 
-		'Cria grupo com TestValue
-		Dim g As clsPasswordGroup
-		g.Initialize
-		g.Name = groupName
-		g.GenerateSalt
-		g.CreateTestValue(phrase) 'Criptografa "LOCKZERO" com a frase
-		ModPasswords.SaveGroup(g)
+	'Ajusta altura do dialog
+	pnlDialog.SetLayoutAnimated(0, 20dip, 60dip, dialogW, 250dip)
 
-		'Inicia sessao com a frase
-		ModSession.StartSession(phrase)
-
-		LoadGroups
-		ToastMessageShow(ModLang.T("success"), False)
-	End If
+	'Mostra overlay
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+	edtGroupName.RequestFocus
 End Sub
 
 Private Sub ShowGroupOptions(groupId As String)
@@ -376,36 +493,69 @@ Private Sub ShowEditGroupDialog(groupId As String)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(groupId)
 	If g.IsInitialized = False Then Return
 
-	'Prepara EditText com nome atual
-	edtGroupName.Initialize("")
+	CurrentDialogMode = "edit_group"
+	CurrentGroupId = groupId
+
+	'Configura dialog
+	Dim dialogW As Int = Root.Width - 40dip
+	pnlDialog.RemoveAllViews
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("edit_group")
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24dip)
+
+	'Label nome
+	Dim lblName As Label
+	lblName.Initialize("")
+	lblName.Text = ModLang.T("group_name_hint")
+	lblName.TextSize = 12
+	lblName.TextColor = Colors.ARGB(180, 255, 255, 255)
+	pnlDialog.AddView(lblName, 16dip, 45dip, dialogW - 32dip, 18dip)
+
+	'Campo nome
+	Dim pnlName As Panel
+	pnlName.Initialize("")
+	pnlName.Color = ModTheme.HomeBg
+	pnlDialog.AddView(pnlName, 16dip, 65dip, dialogW - 32dip, 46dip)
+
+	edtGroupName.Initialize("edtGroupName")
 	edtGroupName.Text = g.Name
 	edtGroupName.SingleLine = True
-	edtGroupName.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
+	edtGroupName.InputType = Bit.Or(1, 8192)
+	edtGroupName.TextColor = Colors.White
+	edtGroupName.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlName.AddView(edtGroupName, 8dip, 0, dialogW - 32dip - 16dip, 46dip)
 
-	'Cria painel customizado
-	Dim pnl As B4XView = xui.CreatePanel("")
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
-	pnl.Color = ModTheme.Surface
-	pnl.AddView(edtGroupName, 10dip, 5dip, 260dip, 50dip)
+	'Botoes
+	Dim btnCancel As Button
+	btnCancel.Initialize("btnDialogCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	btnCancel.Color = Colors.Transparent
+	btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
+	pnlDialog.AddView(btnCancel, 16dip, 125dip, 100dip, 40dip)
 
-	'Mostra dialogo
-	Dim dialog As B4XDialog
-	dialog.Initialize(Root)
-	dialog.Title = ModLang.T("edit_group")
+	Dim btnOk As Button
+	btnOk.Initialize("btnDialogOk")
+	btnOk.Text = ModLang.T("save")
+	btnOk.TextSize = 13
+	btnOk.Color = ModTheme.HomeIconBg
+	btnOk.TextColor = Colors.White
+	pnlDialog.AddView(btnOk, dialogW - 116dip, 125dip, 100dip, 40dip)
 
-	Wait For (dialog.ShowCustom(pnl, ModLang.T("save"), "", ModLang.T("cancel"))) Complete (Result As Int)
+	'Ajusta altura do dialog
+	pnlDialog.SetLayoutAnimated(0, 20dip, 100dip, dialogW, 175dip)
 
-	If Result = xui.DialogResponse_Positive Then
-		Dim groupName As String = edtGroupName.Text.Trim
-		If groupName.Length > 0 Then
-			g.Name = groupName
-			ModPasswords.SaveGroup(g)
-			LoadGroups
-			ToastMessageShow(ModLang.T("success"), False)
-		Else
-			ToastMessageShow(ModLang.T("error_empty_field"), True)
-		End If
-	End If
+	'Mostra overlay
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+	edtGroupName.RequestFocus
 End Sub
 
 Private Sub ConfirmDeleteGroup(groupId As String)
@@ -427,10 +577,133 @@ Private Sub ConfirmDeleteGroup(groupId As String)
 End Sub
 
 ' ============================================
+'  EVENTOS DO DIALOG
+' ============================================
+
+Private Sub btnShowPass_Click
+	IsPassVisible = Not(IsPassVisible)
+	If IsPassVisible Then
+		edtPassphrase.InputType = 1 'TEXT visivel
+		btnShowPass.Text = ModLang.T("hide")
+		btnShowPass.TextColor = Colors.White
+	Else
+		edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
+		btnShowPass.Text = ModLang.T("view")
+		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+	End If
+	'Mantem cursor no final
+	edtPassphrase.SelectionStart = edtPassphrase.Text.Length
+End Sub
+
+Private Sub btnDialogCancel_Click
+	HideDialog
+End Sub
+
+Private Sub btnDialogOk_Click
+	Select CurrentDialogMode
+		Case "add_group"
+			ProcessAddGroup
+		Case "unlock_group"
+			ProcessUnlockGroup
+		Case "edit_group"
+			ProcessEditGroup
+	End Select
+End Sub
+
+Private Sub HideDialog
+	pnlOverlay.Visible = False
+	CurrentDialogMode = ""
+	'Esconde teclado
+	Dim ime As IME
+	ime.Initialize("")
+	ime.HideKeyboard
+End Sub
+
+Private Sub ProcessAddGroup
+	Dim groupName As String = edtGroupName.Text.Trim
+	Dim phrase As String = edtPassphrase.Text.Trim
+
+	'Valida
+	If groupName.Length = 0 Then
+		ToastMessageShow(ModLang.T("error_empty_field"), True)
+		Return
+	End If
+	If phrase.Length < 8 Then
+		ToastMessageShow(ModLang.T("passphrase_min_8"), True)
+		Return
+	End If
+
+	'Cria grupo com TestValue
+	Dim g As clsPasswordGroup
+	g.Initialize
+	g.Name = groupName
+	g.GenerateSalt
+	g.CreateTestValue(phrase)
+	ModPasswords.SaveGroup(g)
+
+	'Inicia sessao com a frase
+	ModSession.StartSession(phrase)
+
+	HideDialog
+	LoadGroups
+	ToastMessageShow(ModLang.T("success"), False)
+End Sub
+
+Private Sub ProcessUnlockGroup
+	Dim phrase As String = edtPassphrase.Text.Trim
+	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
+
+	If g.IsInitialized = False Then
+		HideDialog
+		Return
+	End If
+
+	'Valida frase com TestValue do grupo
+	If g.ValidatePhrase(phrase) Then
+		'Frase correta - reseta tentativas e inicia sessao
+		ModSecurity.ResetFailedAttempts(CurrentGroupId)
+		ModSession.StartSession(phrase)
+		HideDialog
+		NavigateToGroup(CurrentGroupId)
+	Else
+		'Frase incorreta - registra tentativa
+		Dim delay As Int = ModSecurity.RegisterFailedAttempt(CurrentGroupId)
+		If delay > 0 Then
+			Dim timeStr As String = ModSecurity.FormatDelay(delay)
+			ToastMessageShow(ModLang.T("wrong_passphrase") & " - " & ModLang.T("wait_timeout") & " " & timeStr, True)
+			HideDialog
+		Else
+			ToastMessageShow(ModLang.T("wrong_passphrase"), True)
+		End If
+		edtPassphrase.Text = ""
+	End If
+End Sub
+
+Private Sub ProcessEditGroup
+	Dim groupName As String = edtGroupName.Text.Trim
+	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
+
+	If g.IsInitialized = False Then
+		HideDialog
+		Return
+	End If
+
+	If groupName.Length > 0 Then
+		g.Name = groupName
+		ModPasswords.SaveGroup(g)
+		HideDialog
+		LoadGroups
+		ToastMessageShow(ModLang.T("success"), False)
+	Else
+		ToastMessageShow(ModLang.T("error_empty_field"), True)
+	End If
+End Sub
+
+' ============================================
 '  TEMA
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
 End Sub
 

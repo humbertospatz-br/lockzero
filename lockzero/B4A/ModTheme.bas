@@ -26,6 +26,26 @@ Public Sub ToggleTheme
 End Sub
 
 ' ============================================
+'  CORES DA HOME (LOCKZERO_HOME_DEFINITIONS.md)
+' ============================================
+
+Public Sub HomeBg As Int
+	Return Colors.RGB(28, 58, 106) '#1C3A6A - Fundo principal da Home
+End Sub
+
+Public Sub HomeHeaderBg As Int
+	Return Colors.RGB(21, 47, 88) '#152F58 - Header (mais escuro)
+End Sub
+
+Public Sub HomeCardBg As Int
+	Return Colors.RGB(44, 79, 128) '#2C4F80 - Cards 2x2
+End Sub
+
+Public Sub HomeIconBg As Int
+	Return Colors.RGB(71, 82, 110) '#47526E - Fundo dos icones (igual ao fundo das imagens)
+End Sub
+
+' ============================================
 '  CORES PRIMARIAS (Navy profundo)
 ' ============================================
 

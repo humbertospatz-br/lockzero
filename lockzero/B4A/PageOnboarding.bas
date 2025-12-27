@@ -159,9 +159,9 @@ End Sub
 Private Sub chkUnderstand_CheckedChange(Checked As Boolean)
 	btnWarningNext.Enabled = Checked
 	If Checked Then
-		btnWarningNext.Color = ModTheme.Primary
+		btnWarningNext.Color = ModTheme.HomeIconBg
 	Else
-		btnWarningNext.Color = ModTheme.ButtonDisabled
+		btnWarningNext.Color = ModTheme.HomeHeaderBg
 	End If
 End Sub
 
@@ -193,28 +193,28 @@ End Sub
 ' ============================================
 
 Private Sub ApplyTheme
-	Root.Color = ModTheme.Background
+	Root.Color = ModTheme.HomeBg
 
 	'Welcome
-	pnlWelcome.Color = ModTheme.Background
-	lblWelcomeTitle.TextColor = ModTheme.Primary
-	lblWelcomeText.TextColor = ModTheme.TextPrimary
-	btnWelcomeNext.Color = ModTheme.Primary
+	pnlWelcome.Color = ModTheme.HomeBg
+	lblWelcomeTitle.TextColor = Colors.White
+	lblWelcomeText.TextColor = Colors.ARGB(200, 255, 255, 255)
+	btnWelcomeNext.Color = ModTheme.HomeIconBg
 	btnWelcomeNext.TextColor = Colors.White
 
 	'Warning
-	pnlWarning.Color = ModTheme.Background
-	lblWarningTitle.TextColor = ModTheme.Warning
-	lblWarningText.TextColor = ModTheme.TextPrimary
-	chkUnderstand.TextColor = ModTheme.TextPrimary
-	btnWarningNext.Color = ModTheme.ButtonDisabled
+	pnlWarning.Color = ModTheme.HomeBg
+	lblWarningTitle.TextColor = Colors.RGB(255, 200, 100) 'Amarelo suave
+	lblWarningText.TextColor = Colors.ARGB(200, 255, 255, 255)
+	chkUnderstand.TextColor = Colors.White
+	btnWarningNext.Color = ModTheme.HomeHeaderBg
 	btnWarningNext.TextColor = Colors.White
 
 	'Complete
-	pnlComplete.Color = ModTheme.Background
-	lblCompleteTitle.TextColor = ModTheme.Success
-	lblCompleteText.TextColor = ModTheme.TextPrimary
-	btnStart.Color = ModTheme.Primary
+	pnlComplete.Color = ModTheme.HomeBg
+	lblCompleteTitle.TextColor = Colors.RGB(100, 200, 150) 'Verde suave
+	lblCompleteText.TextColor = Colors.ARGB(200, 255, 255, 255)
+	btnStart.Color = ModTheme.HomeIconBg
 	btnStart.TextColor = Colors.White
 End Sub
 
