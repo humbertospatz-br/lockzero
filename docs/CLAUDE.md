@@ -38,6 +38,7 @@ Antes de escrever qualquer codigo ou fazer qualquer alteracao:
 ## REGRA RIGIDA DE FLUXO DE TRABALHO
 
 > **⚠️ OBRIGATORIO - SEM EXCECOES ⚠️**
+> **⚠️ NAO EXISTE MEMORIA ENTRE SESSOES - TODO_LIST.md E O BACKUP ⚠️**
 
 O Claude pode compactar mensagens ou travar, perdendo contexto.
 Para NUNCA perder trabalho, seguir este fluxo SEMPRE:
@@ -58,12 +59,88 @@ Para NUNCA perder trabalho, seguir este fluxo SEMPRE:
 - Marcar `[x]` em TODO_LIST.md ao concluir cada uma
 - Se surgir nova tarefa, adicionar ao TODO_LIST.md primeiro
 
-### 4. COMMITAR E PUSH
+### 4. AGUARDAR FEEDBACK
+- Usuario compila e testa
+- Usuario reporta resultado
+- NAO assumir que funcionou sem feedback
+
+### 5. SALVAR EM TODO_LIST.md
+- Atualizar status das tarefas
+- Adicionar novas tarefas se necessario
+- Manter historico de progresso
+
+### 6. COMMITAR E PUSH
 - Ao concluir um bloco de tarefas
 - Ou quando o usuario pedir (@salvar)
 - NUNCA deixar trabalho sem commit por muito tempo
 
 **Por que?** Se o Claude travar ou perder contexto, o TODO_LIST.md tera o plano completo e o progresso salvo. O proximo Claude pode continuar de onde parou.
+
+> **REGRA DE OURO:** PLANEJAR → SALVAR TODO_LIST → EXECUTAR → FEEDBACK → SALVAR TODO_LIST
+
+---
+
+## REGRAS OBRIGATORIAS DE CODIGO
+
+> **⚠️ ANTES DE ESCREVER QUALQUER LINHA DE CODIGO ⚠️**
+
+### 1. Tamanhos de Fonte - SEMPRE usar constantes
+
+```
+NUNCA: lblTitle.TextSize = 14
+SEMPRE: lblTitle.TextSize = Starter.FONT_BODY
+```
+
+**Constantes disponiveis em Starter.bas:**
+| Constante | Valor | Uso |
+|-----------|-------|-----|
+| `Starter.FONT_TITLE` | 22 | Titulos de pagina |
+| `Starter.FONT_SUBTITLE` | 18 | Subtitulos, headers |
+| `Starter.FONT_BODY` | 15 | Texto principal |
+| `Starter.FONT_LABEL` | 13 | Labels de campo |
+| `Starter.FONT_CAPTION` | 12 | Textos pequenos, hints |
+| `Starter.FONT_BUTTON` | 14 | Texto de botoes |
+| `Starter.FONT_INPUT` | 15 | Texto em campos |
+
+### 2. Alturas - SEMPRE usar constantes
+
+```
+NUNCA: pnlHeader.Height = 56dip
+SEMPRE: pnlHeader.Height = Starter.HEIGHT_HEADER
+```
+
+**Constantes disponiveis:**
+| Constante | Valor | Uso |
+|-----------|-------|-----|
+| `Starter.HEIGHT_HEADER` | 56dip | Altura do header |
+| `Starter.HEIGHT_BUTTON` | 48dip | Altura de botao |
+| `Starter.HEIGHT_INPUT` | 48dip | Altura de EditText |
+| `Starter.HEIGHT_ITEM` | 72dip | Item de lista |
+
+### 3. Textos - SEMPRE usar ModLang.T()
+
+```
+NUNCA: lblTitle.Text = "Configuracoes"
+SEMPRE: lblTitle.Text = ModLang.T("settings")
+```
+
+- Adicionar chave em LoadPortuguese E LoadEnglish
+- Nunca deixar texto hardcoded no codigo
+
+### 4. Cores - SEMPRE usar ModTheme.*
+
+```
+NUNCA: pnl.Color = Colors.RGB(28, 58, 106)
+SEMPRE: pnl.Color = ModTheme.HomeBg
+```
+
+### 5. Checklist antes de salvar arquivo
+
+- [ ] TextSize usa Starter.FONT_*?
+- [ ] Heights usam Starter.HEIGHT_*?
+- [ ] Textos usam ModLang.T()?
+- [ ] Cores usam ModTheme.*?
+- [ ] Tarefa esta marcada em TODO_LIST.md?
 
 ---
 
@@ -229,13 +306,15 @@ SEMPRE: ModLang.GetText("chave_do_texto")
 ### Ao iniciar sessao:
 
 1. Ler este documento (CLAUDE.md)
-2. Verificar TODO_LIST.md para tarefas pendentes
-3. Verificar HISTORICO.md para contexto recente
-4. **OBRIGATORIO - Exibir mensagem:**
+2. Ler `docs/agentes/SOFTWARE_BEST.md` (boas praticas de arquitetura e DevOps)
+3. Ler `docs/DICAS_B4A.md` (dicas essenciais de desenvolvimento B4A)
+4. Verificar TODO_LIST.md para tarefas pendentes
+5. Verificar HISTORICO.md para contexto recente
+6. **OBRIGATORIO - Exibir mensagem:**
    ```
    "Shalom Humberto, arquivos lidos e pronto para o trabalho!"
    ```
-5. Perguntar: "Em que posso ajudar hoje?"
+7. Perguntar: "Em que posso ajudar hoje?"
 
 ### Comando @salvar:
 

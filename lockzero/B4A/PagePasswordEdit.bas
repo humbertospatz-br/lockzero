@@ -48,6 +48,9 @@ End Sub
 Private Sub B4XPage_Appear
 	ModSession.Touch
 
+	'Reseta scroll para o topo
+	svForm.ScrollPosition = 0
+
 	IsEditMode = (CurrentEntryId <> "")
 
 	'Define titulo na ActionBar
@@ -78,14 +81,14 @@ Private Sub CreateUI
 	'Botao cancelar (esquerda)
 	btnCancel.Initialize("btnCancel")
 	btnCancel.Text = ModLang.T("cancel")
-	btnCancel.TextSize = 13
-	Root.AddView(btnCancel, 10dip, height - 70dip, 90dip, 50dip)
+	btnCancel.TextSize = Starter.FONT_BUTTON
+	Root.AddView(btnCancel, 10dip, height - 70dip, 90dip, 48dip)  'Starter.HEIGHT_BUTTON
 
 	'Botao salvar (direita)
 	btnSave.Initialize("btnSave")
 	btnSave.Text = ModLang.T("save")
-	btnSave.TextSize = 14
-	Root.AddView(btnSave, width - 100dip, height - 70dip, 90dip, 50dip)
+	btnSave.TextSize = Starter.FONT_BUTTON
+	Root.AddView(btnSave, width - 100dip, height - 70dip, 90dip, 48dip)  'Starter.HEIGHT_BUTTON
 
 	'Formulario (tela inteira)
 	svForm.Initialize(0)
@@ -100,7 +103,7 @@ Private Sub CreateUI
 
 	Dim y As Int = 20dip
 	Dim fieldWidth As Int = width - 40dip
-	Dim fieldHeight As Int = 50dip
+	Dim fieldHeight As Int = 48dip  'Starter.HEIGHT_INPUT
 	Dim gap As Int = 20dip
 
 	'Nome
@@ -109,7 +112,7 @@ Private Sub CreateUI
 	y = y + 22dip
 
 	edtName.Initialize("edtName")
-	edtName.Hint = "Ex: Google, Facebook..."
+	edtName.Hint = ModLang.T("site_name_hint")
 	edtName.SingleLine = True
 	edtName.InputType = Bit.Or(1, 8192) 'TEXT + CAP_WORDS
 	pnlForm.AddView(edtName, 20dip, y, fieldWidth, fieldHeight)
@@ -133,7 +136,7 @@ Private Sub CreateUI
 	y = y + 22dip
 
 	edtUsername.Initialize("edtUsername")
-	edtUsername.Hint = "Email ou usuario"
+	edtUsername.Hint = ModLang.T("username_hint")
 	edtUsername.SingleLine = True
 	pnlForm.AddView(edtUsername, 20dip, y, fieldWidth, fieldHeight)
 	y = y + fieldHeight + gap
@@ -144,15 +147,15 @@ Private Sub CreateUI
 	y = y + 22dip
 
 	edtPassword.Initialize("edtPassword")
-	edtPassword.Hint = "Senha"
+	edtPassword.Hint = ModLang.T("password_hint")
 	edtPassword.SingleLine = True
 	edtPassword.InputType = Bit.Or(edtPassword.INPUT_TYPE_TEXT, 128) 'Password
-	pnlForm.AddView(edtPassword, 20dip, y, fieldWidth - 60dip, fieldHeight)
+	pnlForm.AddView(edtPassword, 20dip, y, fieldWidth - 75dip, fieldHeight)
 
 	btnShowPassword.Initialize("btnShowPassword")
 	btnShowPassword.Text = ModLang.T("view")
-	btnShowPassword.TextSize = 11
-	pnlForm.AddView(btnShowPassword, width - 70dip, y, 50dip, fieldHeight)
+	btnShowPassword.TextSize = Starter.FONT_CAPTION
+	pnlForm.AddView(btnShowPassword, width - 85dip, y, 65dip, fieldHeight)
 	y = y + fieldHeight + gap
 
 	'Notas
@@ -161,26 +164,27 @@ Private Sub CreateUI
 	y = y + 22dip
 
 	edtNotes.Initialize("edtNotes")
-	edtNotes.Hint = "Observacoes (opcional)"
+	edtNotes.Hint = ModLang.T("notes_hint")
 	edtNotes.SingleLine = False
 	pnlForm.AddView(edtNotes, 20dip, y, fieldWidth, 100dip)
 	y = y + 100dip + gap
 
 	'Favorito
 	chkFavorite.Initialize("chkFavorite")
-	chkFavorite.Text = "Favorito"
+	chkFavorite.Text = ModLang.T("favorite")
 	chkFavorite.TextColor = ModTheme.TextPrimary
 	pnlForm.AddView(chkFavorite, 20dip, y, fieldWidth, 40dip)
 	y = y + 60dip
 
-	pnlForm.Height = y + 50dip
+	'Padding extra para scroll com teclado aberto
+	pnlForm.Height = y + 300dip
 End Sub
 
 Private Sub CreateFieldLabel(text As String) As Label
 	Dim lbl As Label
 	lbl.Initialize("")
 	lbl.Text = text
-	lbl.TextSize = 13
+	lbl.TextSize = Starter.FONT_LABEL
 	lbl.TextColor = Colors.ARGB(180, 255, 255, 255)
 	Return lbl
 End Sub
@@ -356,7 +360,7 @@ Private Sub ApplyTheme
 	btnShowPassword.Color = ModTheme.HomeIconBg
 	btnShowPassword.TextColor = Colors.White
 
-	btnCancel.Color = ModTheme.ButtonSecondary
+	btnCancel.Color = ModTheme.HomeHeaderBg
 	btnCancel.TextColor = Colors.White
 
 	chkFavorite.TextColor = Colors.White

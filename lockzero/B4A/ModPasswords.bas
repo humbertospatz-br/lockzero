@@ -20,7 +20,10 @@ End Sub
 
 Public Sub Init
 	If IsLoaded Then Return
+	ForceReload
+End Sub
 
+Public Sub ForceReload
 	Groups.Initialize
 	Entries.Initialize
 	LoadFromDisk
@@ -41,6 +44,9 @@ Private Sub LoadFromDisk
 
 	Try
 		Dim json As String = File.ReadString(File.DirInternal, FILE_NAME)
+		Log("=== DEBUG JSON ===")
+		Log(json)
+		Log("=== FIM DEBUG ===")
 		If json.Length = 0 Then Return
 
 		Dim parser As JSONParser

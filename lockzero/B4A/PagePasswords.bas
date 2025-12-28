@@ -233,19 +233,30 @@ Private Sub pnlGroup_Click
 	Dim pnl As Panel = Sender
 	Dim groupId As String = pnl.Tag
 
-	ModSession.Touch
+	Log("=== pnlGroup_Click ===")
+	Log("GroupId: " & groupId)
 
-	'Verifica se sessao ativa E se a frase confere com este grupo
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(groupId)
-	If g.IsInitialized = False Then Return
+	If g.IsInitialized = False Then
+		Log("ERRO: Grupo nao inicializado!")
+		Return
+	End If
 
-	'Se grupo antigo sem TestValue, navega direto (compatibilidade)
-	If g.TestValue = "" Then
+	Log("Grupo: " & g.Name)
+	Log("Salt: " & g.Salt)
+	Log("TestValue: " & g.TestValue)
+	Log("Sessao ativa: " & ModSession.IsSessionActive)
+
+	'Se sessao ativa, navega direto
+	If ModSession.IsSessionActive Then
+		Log("Sessao ativa - navegando direto")
+		ModSession.Touch
 		NavigateToGroup(groupId)
 		Return
 	End If
 
-	'Precisa validar frase
+	'Sessao inativa - SEMPRE pede frase
+	Log("Sessao inativa - mostrando dialog")
 	ShowUnlockGroupDialog(groupId)
 End Sub
 
@@ -307,11 +318,11 @@ Private Sub ShowUnlockGroupDialog(groupId As String)
 	'Botao Ver/Ocultar
 	btnShowPass.Initialize("btnShowPass")
 	btnShowPass.Text = ModLang.T("view")
-	btnShowPass.TextSize = 11
+	btnShowPass.TextSize = Starter.FONT_CAPTION
 	btnShowPass.Color = Colors.Transparent
 	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	btnShowPass.Gravity = Gravity.CENTER
-	pnlInput.AddView(btnShowPass, dialogW - 32dip - 48dip, 5dip, 40dip, 40dip)
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 5dip, 60dip, 40dip)
 
 	'Tentativas falhas
 	Dim attempts As Int = ModSecurity.GetFailedAttempts(groupId)
@@ -442,11 +453,11 @@ Private Sub ShowAddGroupDialog
 	'Botao Ver/Ocultar
 	btnShowPass.Initialize("btnShowPass")
 	btnShowPass.Text = ModLang.T("view")
-	btnShowPass.TextSize = 11
+	btnShowPass.TextSize = Starter.FONT_CAPTION
 	btnShowPass.Color = Colors.Transparent
 	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	btnShowPass.Gravity = Gravity.CENTER
-	pnlInput.AddView(btnShowPass, dialogW - 32dip - 48dip, 3dip, 40dip, 40dip)
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 3dip, 60dip, 40dip)
 
 	'Botoes
 	Dim btnCancel As Button
@@ -628,8 +639,11 @@ Private Sub ProcessAddGroup
 		ToastMessageShow(ModLang.T("error_empty_field"), True)
 		Return
 	End If
-	If phrase.Length < 8 Then
-		ToastMessageShow(ModLang.T("passphrase_min_8"), True)
+
+	'Valida forca da frase (10 chars unicos sem espacos)
+	Dim phraseError As String = ModSecurity.GetPassphraseError(phrase)
+	If phraseError.Length > 0 Then
+		ToastMessageShow(phraseError, True)
 		Return
 	End If
 
@@ -641,8 +655,8 @@ Private Sub ProcessAddGroup
 	g.CreateTestValue(phrase)
 	ModPasswords.SaveGroup(g)
 
-	'Inicia sessao com a frase
-	ModSession.StartSession(phrase)
+	'Inicia sessao com a frase (categoria: passwords)
+	ModSession.StartSessionWithCategory(phrase, "passwords")
 
 	HideDialog
 	LoadGroups
@@ -660,9 +674,9 @@ Private Sub ProcessUnlockGroup
 
 	'Valida frase com TestValue do grupo
 	If g.ValidatePhrase(phrase) Then
-		'Frase correta - reseta tentativas e inicia sessao
+		'Frase correta - reseta tentativas e inicia sessao (categoria: passwords)
 		ModSecurity.ResetFailedAttempts(CurrentGroupId)
-		ModSession.StartSession(phrase)
+		ModSession.StartSessionWithCategory(phrase, "passwords")
 		HideDialog
 		NavigateToGroup(CurrentGroupId)
 	Else

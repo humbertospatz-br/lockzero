@@ -11,6 +11,143 @@
 
 ---
 
+## URGENTE - PageBackup ClassCastException (2025-12-28)
+
+> **Origem:** Bug critico ao clicar em "Create Backup"
+> **Status:** PENDENTE - Continuar amanha
+
+### Problema
+O erro `ClassCastException: BALayout cannot be cast to android.graphics.Bitmap` ainda ocorre em `ShowExportDialog`. O codigo antigo com `xui.Msgbox2Async` passando panel como ultimo parametro ainda existe.
+
+### Solucao Necessaria
+- [ ] [2025-12-28] **Remover todo codigo xui.Msgbox2Async com panel** em PageBackup.bas
+- [ ] [2025-12-28] **Implementar CreatePhraseDialog** - dialog customizado com overlay
+- [ ] [2025-12-28] **Verificar ShowPhraseDialog** - NullPointerException indica que dialog nao foi criado
+- [ ] [2025-12-28] **Chamar CreatePhraseDialog no B4XPage_Created** - antes de qualquer uso
+- [ ] [2025-12-28] **Testar Export/Import/Restore** - todos usam o dialog de frase
+
+### Arquivos a Modificar
+- `PageBackup.bas` - Substituir xui.Msgbox2Async por dialog customizado
+
+### Referencia
+- Dica #28 em DICAS_B4A.md - xui.Msgbox2Async parametros
+- Dica #29 em DICAS_B4A.md - Dialog customizado com campo de entrada
+
+---
+
+## SESSAO E CONFIGURACOES v0.1.1 (2025-12-28)
+
+> **Origem:** Melhorias de UX e Configuracoes
+> **Status:** IMPLEMENTADO
+
+### Implementado
+- [x] [2025-12-28] **Timer de sessao no header** - Mostra contador regressivo MM:SS
+  - Cor muda para amarelo quando < 60s
+  - Clicavel para bloquear sessao manualmente
+  - Implementado em PagePasswordList.bas e B4XMainPage.bas
+
+- [x] [2025-12-28] **Modo de frase-senha** - Unica ou por categoria
+  - ModSecurity: GetUseSinglePassphrase / SetUseSinglePassphrase
+  - ModSession: StartSessionWithCategory, GetSessionCategoryName, NeedsPassphraseForCategory
+  - Na Home mostra nome da categoria quando em modo multi-frase
+
+- [x] [2025-12-28] **PageSettings.bas** - Tela completa de configuracoes
+  - Idioma (PT/EN) com dialog de selecao
+  - Timer (1, 2, 3 minutos)
+  - Modo frase-senha (unica/por categoria)
+  - PIN de acesso (checkbox + criar/remover)
+  - Biometria (checkbox on/off)
+  - Secao Sobre com versao
+
+- [x] [2025-12-28] **Navegacao para Settings** - Menu lateral abre PageSettings
+
+---
+
+## SEGURANCA - MELHORIAS v0.1.1 (2025-12-28)
+
+> **Origem:** Revisao de seguranca pre-lancamento
+> **Prioridade:** ALTA - Implementar antes de ter usuarios
+
+### ALTA PRIORIDADE (Seguranca Critica)
+
+- [x] [2025-12-28] **PBKDF2** - Trocar SHA-256 simples por PBKDF2 (100.000 iteracoes)
+  - Arquivo: `ModSecurity.bas`
+  - Funcoes: `EncryptWithSalt`, `DecryptWithSalt`
+  - Motivo: SHA-256 simples permite ~1M tentativas/segundo. PBKDF2 reduz para ~10/segundo
+  - **IMPLEMENTADO** - DeriveKeyPBKDF2 com 100.000 iteracoes HMAC-SHA256
+
+- [ ] [2025-12-28] **TestValue dinamico** - Usar hash do salt ao inves de "LOCKZERO" fixo
+  - Arquivo: `clsPasswordGroup.bas`
+  - Motivo: Known-plaintext attack - atacante sabe que descriptografado = "LOCKZERO"
+  - Solucao: TestValue = Encrypt(frase, SHA256(salt)) → validar descriptografado = SHA256(salt)
+
+- [ ] [2025-12-28] **Auto-lock em background** - Encerrar sessao quando app vai para segundo plano
+  - Arquivo: `Main.bas` ou `Starter.bas`
+  - Evento: `Activity_Pause` deve chamar `ModSession.EndSession` ou pausar timer
+  - Motivo: Se usuario minimiza app, sessao deve expirar por seguranca
+
+- [ ] [2025-12-28] **Confirmacao de exclusao** - Re-digitar frase para deletar grupo/senha
+  - Arquivos: `PagePasswords.bas`, `PagePasswordList.bas`
+  - Motivo: Operacoes destrutivas devem exigir confirmacao forte
+
+### MEDIA PRIORIDADE (UX/Funcionalidade)
+
+- [ ] [2025-12-28] **Contador de itens nos cards** - Mostrar quantidade em cada categoria da Home
+  - Arquivo: `B4XMainPage.bas`
+  - Exemplo: "Senhas (12)" ou badge com numero
+  - Motivo: Usuario sabe rapidamente quantos itens tem
+
+### DOCUMENTACAO (Ja implementado, precisa documentar)
+
+- [x] [2025-12-28] **Sessao unica global** - Comportamento correto (uma frase por vez)
+  - Ao trocar de grupo com frase diferente, sessao anterior encerra
+  - Isso e seguranca, nao bug - documentar em SPEC
+
+- [x] [2025-12-28] **Backup com versao** - Ja implementado em ModBackup.bas
+  - `BACKUP_VERSION = 1` e `appVersion` ja existem no JSON
+  - Verificacao na importacao ja existe
+
+---
+
+## CORRECOES UI - SESSAO 2025-12-28
+
+> **Origem:** Feedback visual do usuario
+> **Prioridade:** ALTA - Polimento antes de lancamento
+
+### PageBackup - Localização
+- [x] [2025-12-28] Usar ModLang.T() em todos os textos (sem hardcode)
+  - Chaves adicionadas em ModLang.bas (backup_*)
+  - PageBackup.bas atualizado
+
+### PagePasswordEdit - Problemas
+- [x] [2025-12-28] Botao Ver/Ocultar cortado - aumentado para 65dip
+- [ ] [2025-12-28] Campo Nota fica abaixo do teclado - padding aumentado para 300dip
+- [ ] [2025-12-28] Botao Cancelar sem contraste - mudar cor
+- [ ] [2025-12-28] **NORMALIZAR** - TextSize usar Starter.FONT_*
+- [ ] [2025-12-28] **NORMALIZAR** - Textos usar ModLang.T() (hints hardcoded)
+
+### PageOnboarding - Textos
+- [ ] [2025-12-28] Trocar "ZERO Assinatura" por "Sem mensalidades"
+- [ ] [2025-12-28] Remover/mudar "Esqueceu sua senha..." (sem frase backup nao adianta)
+
+### Home - Ajustes
+- [ ] [2025-12-28] Slogan - adicionar traducao entre parenteses em outras linguas
+- [ ] [2025-12-28] Botao "+" quadrado em vez de redondo
+
+### NORMALIZACAO GLOBAL (novo)
+- [x] [2025-12-28] PagePasswordEdit.bas - normalizar TextSize e textos
+- [x] [2025-12-28] PageBackup.bas - normalizar TextSize
+- [ ] [2025-12-28] PagePasswords.bas - verificar normalizacao
+- [ ] [2025-12-28] PagePasswordList.bas - verificar normalizacao
+- [ ] [2025-12-28] B4XMainPage.bas - verificar normalizacao
+
+### IDIOMAS FUTUROS
+- [ ] [2025-12-28] Adicionar suporte Espanhol (ES) em ModLang.bas
+- [ ] [2025-12-28] Adicionar suporte Hebraico (HE) em ModLang.bas
+- [ ] [2025-12-28] Slogan traduzido em parenteses para ES e HE
+
+---
+
 ## PAGINAS INTERNAS - SESSAO 2025-12-27
 
 > **Baseado em:** docs/LOCKZERO — UX DEFINITIONS.MD
@@ -410,17 +547,18 @@ Facebook,https://facebook.com,usuario,senha456
 
 ---
 
-## FASE 9: CONFIGURACOES (PENDENTE)
+## FASE 9: CONFIGURACOES (EM PROGRESSO)
 
 ### Tela de Configuracoes
-- [ ] [2025-12-25] PageSettings.bas
-- [ ] [2025-12-25] Selecao de idioma (PT/EN)
-- [ ] [2025-12-25] Selecao de tema (claro/escuro)
-- [ ] [2025-12-25] Tempo de sessao (30s a 30min)
+- [x] [2025-12-28] PageSettings.bas - CRIADO com todas opcoes
+- [x] [2025-12-28] Selecao de idioma (PT/EN)
+- [ ] [2025-12-25] Selecao de tema (claro/escuro) - aguardando implementacao tema claro
+- [x] [2025-12-28] Tempo de sessao (1, 2, 3 minutos)
 - [ ] [2025-12-25] Tempo de limpeza clipboard (15s, 30s, 1min, nunca)
 - [ ] [2025-12-25] Bloqueio ao minimizar app (sim/nao)
-- [ ] [2025-12-25] PIN de acesso (opcional)
-- [ ] [2025-12-25] Biometria (FaceID/Fingerprint)
+- [x] [2025-12-28] PIN de acesso (checkbox + dialogs create/remove)
+- [x] [2025-12-28] Biometria (checkbox on/off)
+- [x] [2025-12-28] Modo frase-senha (unica ou por categoria)
 
 ### Seguranca Adicional
 - [x] [2025-12-25] Delay progressivo por tentativas falhas
@@ -510,6 +648,7 @@ Facebook,https://facebook.com,usuario,senha456
 | PageOnboarding.bas | OK | Primeiro uso |
 | PageNotesList.bas | OK | Lista de notas |
 | PageNoteEdit.bas | OK | Criar/editar nota |
+| PageSettings.bas | OK | Configuracoes do app |
 
 ### Documentacao:
 | Arquivo | Status | Descricao |
@@ -558,4 +697,4 @@ Facebook,https://facebook.com,usuario,senha456
 - [x] Concluido
 - [-] Cancelado
 
-**Ultima atualizacao:** 2025-12-27
+**Ultima atualizacao:** 2025-12-28

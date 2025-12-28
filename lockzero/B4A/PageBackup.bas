@@ -11,6 +11,10 @@ Sub Class_Globals
 	Private Root As B4XView
 	Private xui As XUI
 
+	'Header
+	Private btnBack As Button
+	Private lblHeaderTitle As Label
+
 	'UI
 	Private svContent As ScrollView
 	Private pnlContent As B4XView
@@ -18,10 +22,24 @@ Sub Class_Globals
 	Private lblLastBackup As Label
 	Private btnExport As Button
 	Private btnImport As Button
+	Private btnImportText As Button
 	Private btnTestRestore As Button
 
-	'Dialogs
+	'Dialog de frase
+	Private pnlOverlay As Panel
+	Private pnlPhraseDialog As Panel
 	Private edtPhrase As EditText
+	Private btnPhraseOk As Button
+	Private btnPhraseCancel As Button
+	Private CurrentDialogMode As String 'export, import, test
+	Private CurrentBackupFolder As String
+	Private CurrentBackupFileName As String
+
+	'Import Text Dialog
+	Private pnlImportTextDialog As Panel
+	Private edtImportText As EditText
+	Private btnImportTextOk As Button
+	Private btnImportTextCancel As Button
 End Sub
 
 Public Sub Initialize
@@ -49,30 +67,56 @@ End Sub
 Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
+	Dim headerH As Int = 56dip
 
-	'Conteudo (tela inteira)
+	'Header
+	Dim pnlHeader As Panel
+	pnlHeader.Initialize("")
+	pnlHeader.Color = ModTheme.HomeHeaderBg
+	Root.AddView(pnlHeader, 0, 0, width, headerH)
+
+	'Seta voltar
+	btnBack.Initialize("btnBack")
+	btnBack.Text = "<"
+	btnBack.TextSize = 20
+	btnBack.Color = Colors.Transparent
+	btnBack.TextColor = Colors.White
+	btnBack.Gravity = Gravity.CENTER
+	pnlHeader.AddView(btnBack, 0, 0, 50dip, headerH)
+
+	'Titulo
+	lblHeaderTitle.Initialize("")
+	lblHeaderTitle.Text = ModLang.T("backup")
+	lblHeaderTitle.TextSize = 16
+	lblHeaderTitle.TextColor = Colors.White
+	lblHeaderTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblHeaderTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 60dip, headerH)
+
+	'Conteudo (abaixo do header)
 	svContent.Initialize(0)
-	Root.AddView(svContent, 0, 0, width, height)
+	svContent.Color = ModTheme.HomeBg
+	Root.AddView(svContent, 0, headerH, width, height - headerH)
 
 	pnlContent = svContent.Panel
-	pnlContent.Color = Colors.Transparent
+	pnlContent.Color = ModTheme.HomeBg
 
 	Dim y As Int = 20dip
 	Dim btnWidth As Int = width - 40dip
-	Dim btnHeight As Int = 50dip
+	Dim btnHeight As Int = 48dip  'Starter.HEIGHT_BUTTON
 
 	'Info do ultimo backup
 	Dim lblInfo As Label
 	lblInfo.Initialize("")
-	lblInfo.Text = "Ultimo backup:"
-	lblInfo.TextSize = 14
+	lblInfo.Text = ModLang.T("backup_last")
+	lblInfo.TextSize = Starter.FONT_BUTTON
 	lblInfo.TextColor = Colors.ARGB(180, 255, 255, 255)
 	pnlContent.AddView(lblInfo, 20dip, y, btnWidth, 25dip)
 	y = y + 25dip
 
 	lblLastBackup.Initialize("")
-	lblLastBackup.Text = "Nunca"
-	lblLastBackup.TextSize = 16
+	lblLastBackup.Text = ModLang.T("backup_never")
+	lblLastBackup.TextSize = Starter.FONT_BODY
 	lblLastBackup.TextColor = Colors.White
 	pnlContent.AddView(lblLastBackup, 20dip, y, btnWidth, 30dip)
 	y = y + 50dip
@@ -87,21 +131,21 @@ Private Sub CreateUI
 	'Secao Exportar
 	Dim lblExport As Label
 	lblExport.Initialize("")
-	lblExport.Text = "EXPORTAR"
-	lblExport.TextSize = 12
+	lblExport.Text = ModLang.T("backup_export")
+	lblExport.TextSize = Starter.FONT_CAPTION
 	lblExport.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblExport, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
 	btnExport.Initialize("btnExport")
-	btnExport.Text = "Criar Backup Agora"
+	btnExport.Text = ModLang.T("backup_create")
 	pnlContent.AddView(btnExport, 20dip, y, btnWidth, btnHeight)
 	y = y + btnHeight + 10dip
 
 	Dim lblExportInfo As Label
 	lblExportInfo.Initialize("")
-	lblExportInfo.Text = "Cria um arquivo .lockzero criptografado com todos os seus dados."
-	lblExportInfo.TextSize = 12
+	lblExportInfo.Text = ModLang.T("backup_create_info")
+	lblExportInfo.TextSize = Starter.FONT_CAPTION
 	lblExportInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblExportInfo, 20dip, y, btnWidth, 40dip)
 	y = y + 50dip
@@ -116,21 +160,26 @@ Private Sub CreateUI
 	'Secao Importar
 	Dim lblImport As Label
 	lblImport.Initialize("")
-	lblImport.Text = "IMPORTAR"
-	lblImport.TextSize = 12
+	lblImport.Text = ModLang.T("backup_import")
+	lblImport.TextSize = Starter.FONT_CAPTION
 	lblImport.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblImport, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
 	btnImport.Initialize("btnImport")
-	btnImport.Text = "Restaurar Backup"
+	btnImport.Text = ModLang.T("backup_restore")
 	pnlContent.AddView(btnImport, 20dip, y, btnWidth, btnHeight)
+	y = y + btnHeight + 10dip
+
+	btnImportText.Initialize("btnImportText")
+	btnImportText.Text = ModLang.T("backup_paste")
+	pnlContent.AddView(btnImportText, 20dip, y, btnWidth, btnHeight)
 	y = y + btnHeight + 10dip
 
 	Dim lblImportInfo As Label
 	lblImportInfo.Initialize("")
-	lblImportInfo.Text = "Restaura dados de um arquivo .lockzero. Voce precisara da frase usada ao criar o backup."
-	lblImportInfo.TextSize = 12
+	lblImportInfo.Text = ModLang.T("backup_restore_info")
+	lblImportInfo.TextSize = Starter.FONT_CAPTION
 	lblImportInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblImportInfo, 20dip, y, btnWidth, 50dip)
 	y = y + 60dip
@@ -145,21 +194,21 @@ Private Sub CreateUI
 	'Testar Restore
 	Dim lblTest As Label
 	lblTest.Initialize("")
-	lblTest.Text = "VERIFICAR"
-	lblTest.TextSize = 12
+	lblTest.Text = ModLang.T("backup_verify")
+	lblTest.TextSize = Starter.FONT_CAPTION
 	lblTest.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblTest, 20dip, y, btnWidth, 20dip)
 	y = y + 25dip
 
 	btnTestRestore.Initialize("btnTestRestore")
-	btnTestRestore.Text = "Testar Backup"
+	btnTestRestore.Text = ModLang.T("backup_test")
 	pnlContent.AddView(btnTestRestore, 20dip, y, btnWidth, btnHeight)
 	y = y + btnHeight + 10dip
 
 	Dim lblTestInfo As Label
 	lblTestInfo.Initialize("")
-	lblTestInfo.Text = "Verifica se o backup pode ser aberto. Nao altera seus dados atuais."
-	lblTestInfo.TextSize = 12
+	lblTestInfo.Text = ModLang.T("backup_test_info")
+	lblTestInfo.TextSize = Starter.FONT_CAPTION
 	lblTestInfo.TextColor = Colors.ARGB(150, 255, 255, 255)
 	pnlContent.AddView(lblTestInfo, 20dip, y, btnWidth, 40dip)
 	y = y + 60dip
@@ -172,8 +221,8 @@ Private Sub CreateUI
 
 	Dim lblWarning As Label
 	lblWarning.Initialize("")
-	lblWarning.Text = "DICA: Use uma oracao, trecho de musica ou frase que voce ja conhece de cor. Assim nao precisa anotar!"
-	lblWarning.TextSize = 13
+	lblWarning.Text = ModLang.T("backup_tip")
+	lblWarning.TextSize = Starter.FONT_LABEL
 	lblWarning.TextColor = Colors.White
 	lblWarning.Gravity = Gravity.CENTER
 	lblWarning.Typeface = Typeface.DEFAULT_BOLD
@@ -181,6 +230,117 @@ Private Sub CreateUI
 	y = y + 100dip
 
 	pnlContent.Height = y + 20dip
+
+	'Cria dialog overlay para frase
+	CreatePhraseDialog
+End Sub
+
+Private Sub CreatePhraseDialog
+	'Overlay escuro
+	pnlOverlay.Initialize("pnlOverlay")
+	pnlOverlay.Color = Colors.ARGB(180, 0, 0, 0)
+	Root.AddView(pnlOverlay, 0, 0, Root.Width, Root.Height)
+	pnlOverlay.Visible = False
+
+	'Dialog box
+	Dim dialogW As Int = Root.Width - 40dip
+	Dim dialogH As Int = 180dip
+
+	pnlPhraseDialog.Initialize("")
+	pnlPhraseDialog.Color = ModTheme.HomeHeaderBg
+	pnlOverlay.AddView(pnlPhraseDialog, 20dip, 100dip, dialogW, dialogH)
+
+	'Titulo (sera definido dinamicamente)
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("backup_phrase_hint")
+	lblTitle.TextSize = Starter.FONT_BODY
+	lblTitle.TextColor = Colors.White
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	lblTitle.Tag = "lblPhraseTitle"
+	pnlPhraseDialog.AddView(lblTitle, 10dip, 15dip, dialogW - 20dip, 30dip)
+
+	'Campo de frase
+	edtPhrase.Initialize("edtPhrase")
+	edtPhrase.Hint = ModLang.T("backup_phrase_hint")
+	edtPhrase.SingleLine = True
+	edtPhrase.InputType = Bit.Or(1, 128) 'Password
+	edtPhrase.TextColor = Colors.White
+	edtPhrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	Dim cd As ColorDrawable
+	cd.Initialize2(ModTheme.HomeBg, 8dip, 1dip, Colors.ARGB(80, 255, 255, 255))
+	edtPhrase.Background = cd
+
+	pnlPhraseDialog.AddView(edtPhrase, 20dip, 55dip, dialogW - 40dip, 50dip)
+
+	'Botoes
+	btnPhraseCancel.Initialize("btnPhraseCancel")
+	btnPhraseCancel.Text = ModLang.T("cancel")
+	btnPhraseCancel.TextSize = Starter.FONT_BUTTON
+	btnPhraseCancel.Color = Colors.Gray
+	btnPhraseCancel.TextColor = Colors.White
+	pnlPhraseDialog.AddView(btnPhraseCancel, 20dip, 120dip, 100dip, 45dip)
+
+	btnPhraseOk.Initialize("btnPhraseOk")
+	btnPhraseOk.Text = ModLang.T("confirm")
+	btnPhraseOk.TextSize = Starter.FONT_BUTTON
+	btnPhraseOk.Color = ModTheme.HomeIconBg
+	btnPhraseOk.TextColor = Colors.White
+	pnlPhraseDialog.AddView(btnPhraseOk, dialogW - 120dip, 120dip, 100dip, 45dip)
+End Sub
+
+Private Sub ShowPhraseDialog(mode As String, title As String)
+	CurrentDialogMode = mode
+	edtPhrase.Text = ""
+
+	'Atualiza titulo
+	For i = 0 To pnlPhraseDialog.NumberOfViews - 1
+		Dim v As View = pnlPhraseDialog.GetView(i)
+		If v.Tag = "lblPhraseTitle" Then
+			Dim lbl As Label = v
+			lbl.Text = title
+		End If
+	Next
+
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+	edtPhrase.RequestFocus
+End Sub
+
+Private Sub HidePhraseDialog
+	pnlOverlay.Visible = False
+	Dim ime As IME
+	ime.Initialize("")
+	ime.HideKeyboard
+End Sub
+
+Private Sub pnlOverlay_Click
+	HidePhraseDialog
+End Sub
+
+Private Sub btnPhraseCancel_Click
+	HidePhraseDialog
+End Sub
+
+Private Sub btnPhraseOk_Click
+	Dim phrase As String = edtPhrase.Text.Trim
+
+	If phrase.Length < 6 Then
+		ToastMessageShow(ModLang.T("backup_phrase_min"), True)
+		Return
+	End If
+
+	HidePhraseDialog
+
+	Select CurrentDialogMode
+		Case "export"
+			DoExport(phrase)
+		Case "import"
+			DoImportWithPhrase(phrase)
+		Case "test"
+			DoTestWithPhrase(phrase)
+	End Select
 End Sub
 
 ' ============================================
@@ -192,7 +352,7 @@ Private Sub UpdateLastBackupInfo
 		lblLastBackup.Text = ModBackup.GetLastBackupTimeFormatted
 		lblLastBackup.TextColor = ModTheme.Success
 	Else
-		lblLastBackup.Text = "Nenhum backup realizado"
+		lblLastBackup.Text = ModLang.T("backup_never")
 		lblLastBackup.TextColor = ModTheme.Danger
 	End If
 End Sub
@@ -200,6 +360,10 @@ End Sub
 ' ============================================
 '  EVENTOS
 ' ============================================
+
+Private Sub btnBack_Click
+	B4XPages.ClosePage(Me)
+End Sub
 
 Private Sub btnExport_Click
 	ModSession.Touch
@@ -221,92 +385,75 @@ End Sub
 ' ============================================
 
 Private Sub ShowExportDialog
-	edtPhrase.Initialize("")
-	edtPhrase.Hint = "Frase para proteger o backup"
-	edtPhrase.SingleLine = True
-	edtPhrase.InputType = Bit.Or(edtPhrase.INPUT_TYPE_TEXT, 128)
-
-	Dim pnl As B4XView = xui.CreatePanel("")
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 50dip)
-	pnl.AddView(edtPhrase, 0, 0, 280dip, 50dip)
-
-	Wait For (xui.Msgbox2Async("Digite uma frase para proteger o backup:", "Criar Backup", ModLang.T("save"), "", ModLang.T("cancel"), pnl)) Msgbox_Result(Result As Int)
-
-	If Result = xui.DialogResponse_Positive Then
-		Dim phrase As String = edtPhrase.Text.Trim
-
-		If phrase.Length < 6 Then
-			ToastMessageShow("Frase deve ter no minimo 6 caracteres", True)
-			Return
-		End If
-
-		DoExport(phrase)
-	End If
+	ShowPhraseDialog("export", ModLang.T("backup_phrase_hint"))
 End Sub
 
 Private Sub DoExport(phrase As String)
-	'Usa pasta de downloads ou externa
-	Dim folder As String = File.DirRootExternal
-	If File.ExternalWritable = False Then
-		folder = File.DirInternal
-	End If
+	'Usa pasta interna do app (nao precisa permissao)
+	Dim folder As String = File.DirInternal
 
 	Dim path As String = ModBackup.ExportBackup(phrase, folder)
 
 	If path <> "" Then
 		UpdateLastBackupInfo
-		xui.MsgboxAsync("Backup criado com sucesso!" & CRLF & CRLF & "Salvo em:" & CRLF & path, "Sucesso")
+
+		'Pergunta se quer compartilhar
+		Wait For (xui.Msgbox2Async(ModLang.T("backup_success") & CRLF & CRLF & ModLang.T("backup_share_question"), ModLang.T("success"), ModLang.T("share"), "", ModLang.T("no"), Null)) Msgbox_Result(Result As Int)
+
+		If Result = xui.DialogResponse_Positive Then
+			ShareBackupContent(folder, path)
+		End If
 	Else
-		xui.MsgboxAsync("Erro ao criar backup", "Erro")
+		xui.MsgboxAsync(ModLang.T("backup_error"), ModLang.T("error"))
 	End If
 End Sub
 
-Private Sub ShowImportDialog
-	'Lista backups disponiveis
-	Dim folder As String = File.DirRootExternal
-	If File.ExternalWritable = False Then
-		folder = File.DirInternal
-	End If
+Private Sub ShareBackupContent(folder As String, fullPath As String)
+	Try
+		'Extrai nome do arquivo do caminho completo
+		Dim fileName As String = fullPath.SubString(fullPath.LastIndexOf("/") + 1)
 
-	Dim backups As List = ModBackup.ListBackups(folder)
+		'Le conteudo do arquivo
+		Dim backupContent As String = File.ReadString(folder, fileName)
+
+		'Compartilha como texto (igual LockSeed)
+		Dim shareIntent As Intent
+		shareIntent.Initialize(shareIntent.ACTION_SEND, "")
+		shareIntent.SetType("text/plain")
+		shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup - " & DateTime.Date(DateTime.Now))
+		shareIntent.PutExtra("android.intent.extra.TEXT", backupContent)
+		StartActivity(shareIntent)
+	Catch
+		Log("ShareBackupContent erro: " & LastException)
+		ToastMessageShow(ModLang.T("share_error"), True)
+	End Try
+End Sub
+
+Private Sub ShowImportDialog
+	'Lista backups na pasta interna
+	CurrentBackupFolder = File.DirInternal
+
+	Dim backups As List = ModBackup.ListBackups(CurrentBackupFolder)
 
 	If backups.Size = 0 Then
-		xui.MsgboxAsync("Nenhum arquivo .lockzero encontrado em:" & CRLF & folder, "Nenhum backup")
+		xui.MsgboxAsync(ModLang.T("backup_none_found") & ":" & CRLF & CurrentBackupFolder, ModLang.T("backup"))
 		Return
 	End If
 
 	'Por simplicidade, usa o mais recente
-	'TODO: permitir escolher
 	Dim latest As Map = backups.Get(backups.Size - 1)
-	Dim fileName As String = latest.Get("fileName")
+	CurrentBackupFileName = latest.Get("fileName")
 
-	'Pede a frase
-	edtPhrase.Initialize("")
-	edtPhrase.Hint = "Frase do backup"
-	edtPhrase.SingleLine = True
-	edtPhrase.InputType = Bit.Or(edtPhrase.INPUT_TYPE_TEXT, 128)
+	ShowPhraseDialog("import", CurrentBackupFileName & CRLF & ModLang.T("backup_enter_phrase"))
+End Sub
 
-	Dim pnl As B4XView = xui.CreatePanel("")
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 50dip)
-	pnl.AddView(edtPhrase, 0, 0, 280dip, 50dip)
-
-	Wait For (xui.Msgbox2Async("Arquivo: " & fileName & CRLF & CRLF & "Digite a frase usada ao criar o backup:", "Restaurar Backup", "Restaurar", "", ModLang.T("cancel"), pnl)) Msgbox_Result(Result As Int)
-
-	If Result = xui.DialogResponse_Positive Then
-		Dim phrase As String = edtPhrase.Text.Trim
-
-		If phrase.Length < 1 Then
-			ToastMessageShow("Digite a frase", True)
-			Return
-		End If
-
-		DoImport(phrase, folder, fileName)
-	End If
+Private Sub DoImportWithPhrase(phrase As String)
+	DoImport(phrase, CurrentBackupFolder, CurrentBackupFileName)
 End Sub
 
 Private Sub DoImport(phrase As String, folder As String, fileName As String)
 	'Confirma antes de importar
-	Wait For (xui.Msgbox2Async("ATENCAO: Isso ira adicionar os dados do backup aos seus dados atuais." & CRLF & CRLF & "Deseja continuar?", "Confirmar", "Sim, restaurar", "", ModLang.T("cancel"), Null)) Msgbox_Result(DialogResult As Int)
+	Wait For (xui.Msgbox2Async(ModLang.T("backup_confirm_restore") & CRLF & CRLF & ModLang.T("backup_continue"), ModLang.T("confirm"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(DialogResult As Int)
 
 	If DialogResult <> xui.DialogResponse_Positive Then Return
 
@@ -314,47 +461,35 @@ Private Sub DoImport(phrase As String, folder As String, fileName As String)
 
 	If importResult.Get("success") = True Then
 		Dim stats As Map = importResult.Get("stats")
-		Dim msg As String = "Backup restaurado!" & CRLF & CRLF
-		msg = msg & "Grupos: " & stats.Get("groupsImported") & CRLF
-		msg = msg & "Senhas: " & stats.Get("entriesImported") & CRLF
-		msg = msg & "Notas: " & stats.GetDefault("notesImported", 0)
-		xui.MsgboxAsync(msg, "Sucesso")
+		Dim msg As String = ModLang.T("backup_restored") & CRLF & CRLF
+		msg = msg & ModLang.T("backup_groups") & " " & stats.Get("groupsImported") & CRLF
+		msg = msg & ModLang.T("backup_entries") & " " & stats.Get("entriesImported") & CRLF
+		msg = msg & ModLang.T("backup_notes") & " " & stats.GetDefault("notesImported", 0)
+		xui.MsgboxAsync(msg, ModLang.T("success"))
 	Else
-		xui.MsgboxAsync(importResult.Get("message"), "Erro")
+		xui.MsgboxAsync(importResult.Get("message"), ModLang.T("error"))
 	End If
 End Sub
 
 Private Sub ShowTestDialog
-	Dim folder As String = File.DirRootExternal
-	If File.ExternalWritable = False Then
-		folder = File.DirInternal
-	End If
+	'Lista backups na pasta interna
+	CurrentBackupFolder = File.DirInternal
 
-	Dim backups As List = ModBackup.ListBackups(folder)
+	Dim backups As List = ModBackup.ListBackups(CurrentBackupFolder)
 
 	If backups.Size = 0 Then
-		xui.MsgboxAsync("Nenhum arquivo .lockzero encontrado", "Nenhum backup")
+		xui.MsgboxAsync(ModLang.T("backup_none_found"), ModLang.T("backup"))
 		Return
 	End If
 
 	Dim latest As Map = backups.Get(backups.Size - 1)
-	Dim fileName As String = latest.Get("fileName")
+	CurrentBackupFileName = latest.Get("fileName")
 
-	edtPhrase.Initialize("")
-	edtPhrase.Hint = "Frase do backup"
-	edtPhrase.SingleLine = True
-	edtPhrase.InputType = Bit.Or(edtPhrase.INPUT_TYPE_TEXT, 128)
+	ShowPhraseDialog("test", CurrentBackupFileName & CRLF & ModLang.T("backup_enter_phrase"))
+End Sub
 
-	Dim pnl As B4XView = xui.CreatePanel("")
-	pnl.SetLayoutAnimated(0, 0, 0, 280dip, 50dip)
-	pnl.AddView(edtPhrase, 0, 0, 280dip, 50dip)
-
-	Wait For (xui.Msgbox2Async("Arquivo: " & fileName & CRLF & CRLF & "Digite a frase para testar:", "Testar Backup", "Testar", "", ModLang.T("cancel"), pnl)) Msgbox_Result(Result As Int)
-
-	If Result = xui.DialogResponse_Positive Then
-		Dim phrase As String = edtPhrase.Text.Trim
-		DoTest(phrase, folder, fileName)
-	End If
+Private Sub DoTestWithPhrase(phrase As String)
+	DoTest(phrase, CurrentBackupFolder, CurrentBackupFileName)
 End Sub
 
 Private Sub DoTest(phrase As String, folder As String, fileName As String)
@@ -367,17 +502,17 @@ Private Sub DoTest(phrase As String, folder As String, fileName As String)
 		DateTime.DateFormat = "dd/MM/yyyy HH:mm"
 		Dim dateStr As String = DateTime.Date(createdAt)
 
-		Dim msg As String = "Backup VALIDO!" & CRLF & CRLF
-		msg = msg & "Criado em: " & dateStr & CRLF
+		Dim msg As String = ModLang.T("backup_valid") & CRLF & CRLF
+		msg = msg & ModLang.T("backup_created_at") & " " & dateStr & CRLF
 		If stats <> Null Then
-			msg = msg & "Grupos: " & stats.GetDefault("totalGroups", 0) & CRLF
-			msg = msg & "Senhas: " & stats.GetDefault("totalEntries", 0) & CRLF
-			msg = msg & "Notas: " & stats.GetDefault("totalNotes", 0)
+			msg = msg & ModLang.T("backup_groups") & " " & stats.GetDefault("totalGroups", 0) & CRLF
+			msg = msg & ModLang.T("backup_entries") & " " & stats.GetDefault("totalEntries", 0) & CRLF
+			msg = msg & ModLang.T("backup_notes") & " " & stats.GetDefault("totalNotes", 0)
 		End If
 
-		xui.MsgboxAsync(msg, "Teste OK")
+		xui.MsgboxAsync(msg, ModLang.T("backup_test_ok"))
 	Else
-		xui.MsgboxAsync("Frase incorreta ou arquivo corrompido", "Teste FALHOU")
+		xui.MsgboxAsync(ModLang.T("backup_test_failed"), ModLang.T("error"))
 	End If
 End Sub
 
@@ -396,6 +531,126 @@ Private Sub ApplyTheme
 	btnImport.Color = ModTheme.HomeIconBg
 	btnImport.TextColor = Colors.White
 
+	btnImportText.Color = ModTheme.HomeHeaderBg
+	btnImportText.TextColor = Colors.White
+
 	btnTestRestore.Color = ModTheme.HomeHeaderBg
 	btnTestRestore.TextColor = Colors.White
+End Sub
+
+' ============================================
+'  IMPORT TEXT DIALOG
+' ============================================
+
+Private Sub CreateImportTextDialog
+	pnlImportTextDialog.Initialize("")
+	pnlImportTextDialog.Color = Colors.ARGB(180, 0, 0, 0)
+	Root.AddView(pnlImportTextDialog, 0, 0, Root.Width, Root.Height)
+	pnlImportTextDialog.Visible = False
+
+	Dim boxW As Int = Root.Width - 40dip
+	Dim boxH As Int = 350dip
+	Dim boxL As Int = 20dip
+	Dim boxT As Int = (Root.Height - boxH) / 2
+
+	Dim pnlBox As Panel
+	pnlBox.Initialize("")
+	pnlBox.Color = ModTheme.HomeHeaderBg
+	pnlImportTextDialog.AddView(pnlBox, boxL, boxT, boxW, boxH)
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("backup_paste_instructions")
+	lblTitle.TextSize = Starter.FONT_BODY
+	lblTitle.TextColor = Colors.White
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlBox.AddView(lblTitle, 15dip, 15dip, boxW - 30dip, 50dip)
+
+	'Campo de texto para colar
+	edtImportText.Initialize("edtImportText")
+	edtImportText.Hint = ModLang.T("backup_paste_hint")
+	edtImportText.SingleLine = False
+	edtImportText.Gravity = Gravity.TOP
+	edtImportText.TextSize = Starter.FONT_CAPTION
+	edtImportText.TextColor = Colors.White
+	edtImportText.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	Dim cd As ColorDrawable
+	cd.Initialize2(ModTheme.HomeBg, 8dip, 1dip, Colors.ARGB(80, 255, 255, 255))
+	edtImportText.Background = cd
+
+	pnlBox.AddView(edtImportText, 15dip, 70dip, boxW - 30dip, 200dip)
+
+	'Botoes
+	Dim btnW As Int = 100dip
+
+	btnImportTextCancel.Initialize("btnImportTextCancel")
+	btnImportTextCancel.Text = ModLang.T("cancel")
+	btnImportTextCancel.TextSize = Starter.FONT_BUTTON
+	btnImportTextCancel.Color = Colors.Gray
+	btnImportTextCancel.TextColor = Colors.White
+	pnlBox.AddView(btnImportTextCancel, 15dip, boxH - 60dip, btnW, 45dip)
+
+	btnImportTextOk.Initialize("btnImportTextOk")
+	btnImportTextOk.Text = ModLang.T("backup_restore")
+	btnImportTextOk.TextSize = Starter.FONT_BUTTON
+	btnImportTextOk.Color = ModTheme.HomeIconBg
+	btnImportTextOk.TextColor = Colors.White
+	pnlBox.AddView(btnImportTextOk, boxW - btnW - 15dip, boxH - 60dip, btnW, 45dip)
+End Sub
+
+Private Sub btnImportText_Click
+	ModSession.Touch
+	ShowImportTextDialog
+End Sub
+
+Private Sub ShowImportTextDialog
+	If pnlImportTextDialog.IsInitialized = False Then
+		CreateImportTextDialog
+	End If
+	edtImportText.Text = ""
+	pnlImportTextDialog.Visible = True
+	pnlImportTextDialog.BringToFront
+End Sub
+
+Private Sub HideImportTextDialog
+	pnlImportTextDialog.Visible = False
+	edtImportText.Text = ""
+End Sub
+
+Private Sub btnImportTextCancel_Click
+	HideImportTextDialog
+End Sub
+
+Private Sub btnImportTextOk_Click
+	Dim backupText As String = edtImportText.Text.Trim
+
+	If backupText = "" Then
+		ToastMessageShow(ModLang.T("backup_paste_empty"), True)
+		Return
+	End If
+
+	'Valida se e JSON valido
+	Try
+		Dim parser As JSONParser
+		parser.Initialize(backupText)
+		Dim backupMap As Map = parser.NextObject
+		If backupMap.ContainsKey("version") = False Or backupMap.ContainsKey("data") = False Then
+			ToastMessageShow(ModLang.T("backup_invalid"), True)
+			Return
+		End If
+	Catch
+		ToastMessageShow(ModLang.T("backup_invalid"), True)
+		Return
+	End Try
+
+	HideImportTextDialog
+
+	'Salva como arquivo temporario e pede a frase
+	CurrentBackupFolder = File.DirInternal
+	CurrentBackupFileName = "pasted_backup_" & DateTime.Now & ".lockzero"
+	File.WriteString(CurrentBackupFolder, CurrentBackupFileName, backupText)
+
+	ShowPhraseDialog("import", ModLang.T("backup_enter_phrase"))
 End Sub

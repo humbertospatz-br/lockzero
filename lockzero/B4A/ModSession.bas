@@ -20,6 +20,10 @@ Sub Process_Globals
 
 	'Estado
 	Private IsUnlocked As Boolean = False
+
+	'Categoria da sessao (passwords, cards, documents, notes, wifi)
+	'Usado quando configuracao "frase por categoria" esta ativa
+	Private SessionCategory As String = ""
 End Sub
 
 ' ============================================
@@ -29,6 +33,12 @@ End Sub
 'Inicia sessao com frase
 'A frase fica ofuscada em memoria (XOR) - outros apps nao conseguem ler
 Public Sub StartSession(phrase As String)
+	StartSessionWithCategory(phrase, "")
+End Sub
+
+'Inicia sessao com frase e categoria especifica
+'category: "passwords", "cards", "documents", "notes", "wifi" ou "" para global
+Public Sub StartSessionWithCategory(phrase As String, category As String)
 	'Gera salt aleatorio para esta sessao
 	SessionSalt = ModSecurity.GenerateRandomSalt
 
@@ -38,7 +48,13 @@ Public Sub StartSession(phrase As String)
 	SessionStartTime = DateTime.Now
 	LastActivityTime = DateTime.Now
 	IsUnlocked = True
-	Log("ModSession: Sessao iniciada (frase ofuscada)")
+	SessionCategory = category
+
+	If category <> "" Then
+		Log("ModSession: Sessao iniciada para categoria: " & category)
+	Else
+		Log("ModSession: Sessao iniciada (global)")
+	End If
 End Sub
 
 'Ofusca/desofusca string com XOR (mesma funcao para ambos)
@@ -95,6 +111,7 @@ Public Sub EndSession
 	SessionStartTime = 0
 	LastActivityTime = 0
 	IsUnlocked = False
+	SessionCategory = ""
 	Log("ModSession: Sessao encerrada")
 End Sub
 
@@ -142,6 +159,57 @@ End Sub
 'Verifica se esta desbloqueado (alias)
 Public Sub IsLocked As Boolean
 	Return Not(IsSessionActive)
+End Sub
+
+'Retorna categoria da sessao atual
+Public Sub GetSessionCategory As String
+	If IsSessionActive = False Then Return ""
+	Return SessionCategory
+End Sub
+
+'Retorna nome amigavel da categoria (para exibir na UI)
+Public Sub GetSessionCategoryName As String
+	If IsSessionActive = False Then Return ""
+	If SessionCategory = "" Then Return ""
+
+	Select SessionCategory
+		Case "passwords": Return ModLang.T("passwords")
+		Case "cards": Return ModLang.T("cards")
+		Case "documents": Return ModLang.T("documents")
+		Case "notes": Return ModLang.T("notes")
+		Case "wifi": Return ModLang.T("wifi")
+		Case Else: Return SessionCategory
+	End Select
+End Sub
+
+'Verifica se sessao e valida para uma categoria especifica
+'Se "frase unica" estiver ativo, qualquer sessao ativa e valida
+'Se "frase por categoria", verifica se categoria confere
+Public Sub IsSessionValidForCategory(category As String) As Boolean
+	If IsSessionActive = False Then Return False
+
+	'Se usa frase unica, qualquer sessao serve
+	If ModSecurity.GetUseSinglePassphrase Then Return True
+
+	'Se usa frase por categoria, verifica se confere
+	Return SessionCategory = category Or SessionCategory = ""
+End Sub
+
+'Verifica se deve pedir frase ao entrar em uma categoria
+'Retorna True se precisa pedir frase
+Public Sub NeedsPassphraseForCategory(category As String) As Boolean
+	'Se nao tem sessao ativa, precisa
+	If IsSessionActive = False Then Return True
+
+	'Se usa frase unica, nao precisa (ja tem sessao)
+	If ModSecurity.GetUseSinglePassphrase Then Return False
+
+	'Se usa frase por categoria, verifica se e a mesma categoria
+	If SessionCategory = category Then Return False
+
+	'Categoria diferente: encerra sessao atual e precisa nova frase
+	EndSession
+	Return True
 End Sub
 
 ' ============================================

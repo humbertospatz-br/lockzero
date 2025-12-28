@@ -12,6 +12,142 @@ Sub Process_Globals
 	Private Const SETTINGS_FILE As String = "lockzero_settings.dat"
 	Private Const PIN_FILE As String = "lockzero_pin.dat"
 	Private Const ATTEMPTS_FILE As String = "lockzero_attempts.json"
+
+	'PBKDF2 - Key Derivation Function
+	'100.000 iteracoes = ~10 tentativas/segundo (vs ~1M com SHA-256)
+	Private Const PBKDF2_ITERATIONS As Int = 100000
+	Private Const PBKDF2_KEY_LENGTH As Int = 256  'bits
+End Sub
+
+' ============================================
+'  NORMALIZACAO DE FRASE-SENHA
+' ============================================
+'
+' DOCUMENTACAO INTERNA - NAO DIVULGAR AO USUARIO
+' ================================================
+' A frase-senha do usuario passa por normalizacao antes de ser usada
+' na criptografia. Isso segue a mesma logica do LockSeed.
+'
+' REGRAS DE NORMALIZACAO:
+' 1. Remove todos os espacos da frase
+' 2. Converte tudo para minusculas (A=a, case-insensitive)
+' 3. Converte caracteres acentuados para ASCII (a→a, c→c, etc)
+' 4. Extrai os 10 PRIMEIROS caracteres UNICOS da frase
+' 5. Esses 10 chars sao usados como chave para criptografia
+'
+' EXEMPLOS:
+' - "Minha avo nasceu em 1950" → "minhavonsc" (tudo minusculo, sem espacos/acentos, 10 unicos)
+' - "AAAaaa123" → "a123" (apenas 4 unicos - REJEITADO)
+' - "Hello World 123" → "helowrd123" (10 unicos)
+' - "SENHA123" e "senha123" → mesma chave "senha123"
+'
+' VALIDACAO:
+' - Frase deve ter no minimo 8 caracteres (antes de normalizar)
+' - Apos normalizar, deve resultar em pelo menos 10 chars unicos
+' - Se nao atingir 10 unicos, mostra mensagem generica "Frase muito curta"
+' - NUNCA revelar ao usuario que precisa de 10 chars diferentes
+'
+' SEGURANCA:
+' - Mensagem de erro e sempre generica para nao revelar a logica
+' - Usuario so ve "Frase muito curta" independente do motivo
+' ================================================
+
+'Normaliza frase: minusculas, remove acentos/espacos, pega 10 primeiros chars unicos
+'Ex: "Minha avó nasceu" → "minhavonsc"
+Public Sub NormalizePassphrase(phrase As String) As String
+	If phrase.Length = 0 Then Return ""
+
+	'Remove espacos, converte para minusculas, remove acentos
+	Dim cleaned As String = RemoveAccents(phrase.Replace(" ", "").ToLowerCase)
+
+	'Pega os 10 primeiros caracteres unicos
+	Dim unique As String = GetUniqueChars(cleaned, 10)
+
+	Log("NormalizePassphrase: '" & phrase & "' → '" & unique & "'")
+	Return unique
+End Sub
+
+'Valida se frase tem pelo menos 10 caracteres unicos (case-insensitive, sem espacos)
+Public Sub ValidatePassphraseStrength(phrase As String) As Boolean
+	Dim cleaned As String = RemoveAccents(phrase.Replace(" ", "").ToLowerCase)
+	Dim unique As String = GetUniqueChars(cleaned, 10)
+	Return unique.Length >= 10
+End Sub
+
+'Retorna mensagem de erro se frase for fraca, ou "" se OK
+'Nota: Mensagem generica para nao revelar logica interna
+Public Sub GetPassphraseError(phrase As String) As String
+	If phrase.Length < 8 Then
+		Return ModLang.T("passphrase_too_short")
+	End If
+
+	Dim cleaned As String = RemoveAccents(phrase.Replace(" ", "").ToLowerCase)
+	Dim unique As String = GetUniqueChars(cleaned, 10)
+
+	If unique.Length < 10 Then
+		Return ModLang.T("passphrase_too_short")
+	End If
+
+	Return "" 'OK
+End Sub
+
+'Remove acentos convertendo para ASCII
+Private Sub RemoveAccents(text As String) As String
+	Dim result As StringBuilder
+	result.Initialize
+
+	For i = 0 To text.Length - 1
+		Dim c As Char = text.CharAt(i)
+		Dim code As Int = Asc(c)
+
+		'Converte acentuados para ASCII
+		Select code
+			'Maiusculas acentuadas
+			Case 192, 193, 194, 195, 196, 197: result.Append("A") 'À Á Â Ã Ä Å
+			Case 199: result.Append("C") 'Ç
+			Case 200, 201, 202, 203: result.Append("E") 'È É Ê Ë
+			Case 204, 205, 206, 207: result.Append("I") 'Ì Í Î Ï
+			Case 209: result.Append("N") 'Ñ
+			Case 210, 211, 212, 213, 214: result.Append("O") 'Ò Ó Ô Õ Ö
+			Case 217, 218, 219, 220: result.Append("U") 'Ù Ú Û Ü
+			Case 221: result.Append("Y") 'Ý
+			'Minusculas acentuadas
+			Case 224, 225, 226, 227, 228, 229: result.Append("a") 'à á â ã ä å
+			Case 231: result.Append("c") 'ç
+			Case 232, 233, 234, 235: result.Append("e") 'è é ê ë
+			Case 236, 237, 238, 239: result.Append("i") 'ì í î ï
+			Case 241: result.Append("n") 'ñ
+			Case 242, 243, 244, 245, 246: result.Append("o") 'ò ó ô õ ö
+			Case 249, 250, 251, 252: result.Append("u") 'ù ú û ü
+			Case 253, 255: result.Append("y") 'ý ÿ
+			Case Else
+				'Mantem apenas ASCII imprimivel (32-126)
+				If code >= 32 And code <= 126 Then
+					result.Append(c)
+				End If
+		End Select
+	Next
+
+	Return result.ToString
+End Sub
+
+'Retorna os N primeiros caracteres unicos da string
+Private Sub GetUniqueChars(text As String, count As Int) As String
+	Dim result As StringBuilder
+	result.Initialize
+	Dim seen As String = ""
+
+	For i = 0 To text.Length - 1
+		If result.Length >= count Then Exit
+
+		Dim c As String = text.CharAt(i)
+		If seen.Contains(c) = False Then
+			result.Append(c)
+			seen = seen & c
+		End If
+	Next
+
+	Return result.ToString
 End Sub
 
 ' ============================================
@@ -19,13 +155,21 @@ End Sub
 ' ============================================
 
 'Criptografa texto com frase-senha (AES-256-CBC)
+'A frase é normalizada automaticamente (10 chars unicos)
 Public Sub Encrypt(passPhrase As String, plainText As String) As String
 	If passPhrase.Length < 1 Or plainText.Length < 1 Then Return ""
 
+	'Normaliza a frase para 10 chars unicos
+	Dim normalizedPhrase As String = NormalizePassphrase(passPhrase)
+	If normalizedPhrase.Length < 10 Then
+		Log("Encrypt: Frase muito fraca!")
+		Return ""
+	End If
+
 	Try
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(passPhrase.GetBytes("UTF8"), "SHA-256")
-		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(passPhrase).GetBytes("UTF8"), "MD5")
+		Dim keyBytes() As Byte = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
+		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -48,8 +192,16 @@ Public Sub Encrypt(passPhrase As String, plainText As String) As String
 End Sub
 
 'Descriptografa texto com frase-senha (AES-256-CBC)
+'A frase é normalizada automaticamente (10 chars unicos)
 Public Sub Decrypt(passPhrase As String, encText As String) As String
 	If passPhrase.Length < 1 Or encText.Length < 1 Then Return ""
+
+	'Normaliza a frase para 10 chars unicos
+	Dim normalizedPhrase As String = NormalizePassphrase(passPhrase)
+	If normalizedPhrase.Length < 10 Then
+		Log("Decrypt: Frase muito fraca!")
+		Return ""
+	End If
 
 	Try
 		'Verifica prefixo AES
@@ -58,8 +210,8 @@ Public Sub Decrypt(passPhrase As String, encText As String) As String
 		Dim encData As String = encText.SubString(4)
 
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(passPhrase.GetBytes("UTF8"), "SHA-256")
-		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(passPhrase).GetBytes("UTF8"), "MD5")
+		Dim keyBytes() As Byte = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
+		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
 
 		Dim su As StringUtils
 		Dim encrypted() As Byte = su.DecodeBase64(encData)
@@ -88,10 +240,40 @@ Public Sub IsEncrypted(value As String) As Boolean
 End Sub
 
 ' ============================================
-'  CRIPTOGRAFIA COM SALT (POR GRUPO)
+'  CRIPTOGRAFIA COM SALT (POR GRUPO) - PBKDF2
 ' ============================================
 
-'Criptografa com salt aleatorio do grupo
+'Deriva chave usando PBKDF2 (100.000 iteracoes)
+'Retorna array de 32 bytes (256 bits) para AES-256
+Private Sub DeriveKeyPBKDF2(passPhrase As String, salt As String) As Byte()
+	'Converter senha para char array usando JavaObject (mais seguro)
+	Dim joPass As JavaObject = passPhrase
+	Dim passChars() As Char = joPass.RunMethod("toCharArray", Null)
+
+	'Converter salt para bytes
+	Dim saltBytes() As Byte = salt.GetBytes("UTF8")
+
+	'Criar PBEKeySpec com senha, salt, iteracoes e tamanho da chave
+	Dim keySpec As JavaObject
+	keySpec.InitializeNewInstance("javax.crypto.spec.PBEKeySpec", _
+		Array(passChars, saltBytes, PBKDF2_ITERATIONS, PBKDF2_KEY_LENGTH))
+
+	'Obter SecretKeyFactory para PBKDF2WithHmacSHA256
+	Dim factory As JavaObject
+	factory = factory.InitializeStatic("javax.crypto.SecretKeyFactory").RunMethod("getInstance", _
+		Array("PBKDF2WithHmacSHA256"))
+
+	'Gerar a chave
+	Dim secretKey As JavaObject = factory.RunMethod("generateSecret", Array(keySpec))
+	Dim keyBytes() As Byte = secretKey.RunMethod("getEncoded", Null)
+
+	'Limpar a spec (seguranca)
+	keySpec.RunMethod("clearPassword", Null)
+
+	Return keyBytes
+End Sub
+
+'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC)
 'passPhrase: frase ou PIN do grupo
 'salt: salt aleatorio do grupo (hex string)
 'plainText: texto a criptografar
@@ -99,11 +281,11 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 	If passPhrase.Length < 1 Or plainText.Length < 1 Or salt.Length < 1 Then Return ""
 
 	Try
-		'Combina frase com salt para derivar chave
-		Dim combined As String = passPhrase & ":" & salt
+		'Deriva chave com PBKDF2 (100.000 iteracoes)
+		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
 
+		'IV derivado do salt (16 bytes para AES)
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(combined.GetBytes("UTF8"), "SHA-256")
 		Dim ivBytes() As Byte = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
 
 		Dim c As Cipher
@@ -126,7 +308,7 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 	End Try
 End Sub
 
-'Descriptografa com salt do grupo
+'Descriptografa com salt do grupo (PBKDF2 + AES-256-CBC)
 Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As String) As String
 	If passPhrase.Length < 1 Or encText.Length < 1 Or salt.Length < 1 Then Return ""
 
@@ -134,10 +316,11 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 		If encText.StartsWith("AES:") = False Then Return ""
 		Dim encData As String = encText.SubString(4)
 
-		Dim combined As String = passPhrase & ":" & salt
+		'Deriva chave com PBKDF2 (100.000 iteracoes)
+		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
 
+		'IV derivado do salt
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(combined.GetBytes("UTF8"), "SHA-256")
 		Dim ivBytes() As Byte = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
 
 		Dim su As StringUtils
@@ -455,6 +638,20 @@ End Sub
 
 Public Sub GetClipboardTimeout As Int
 	Return GetSetting("clipboardTimeout", 30)
+End Sub
+
+' ============================================
+'  FRASE UNICA OU POR CATEGORIA
+' ============================================
+
+'True = mesma frase para todas categorias (sessao continua)
+'False = frase diferente por categoria (encerra sessao ao trocar)
+Public Sub SetUseSinglePassphrase(use As Boolean)
+	SetSetting("singlePassphrase", use)
+End Sub
+
+Public Sub GetUseSinglePassphrase As Boolean
+	Return GetSetting("singlePassphrase", True)  'Padrao: frase unica
 End Sub
 
 ' ============================================

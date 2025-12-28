@@ -36,17 +36,19 @@ Public Sub GenerateSalt
 	Salt = ModSecurity.GenerateRandomSalt
 End Sub
 
-'Cria TestValue criptografando "LOCKZERO" com a frase
+'Cria TestValue criptografando "LOCKZERO" com a frase normalizada
 'Chamar ao criar grupo, depois de GenerateSalt
 Public Sub CreateTestValue(phrase As String)
-	TestValue = ModSecurity.EncryptWithSalt(phrase, Salt, "LOCKZERO")
+	Dim normalizedPhrase As String = ModSecurity.NormalizePassphrase(phrase)
+	TestValue = ModSecurity.EncryptWithSalt(normalizedPhrase, Salt, "LOCKZERO")
 End Sub
 
-'Valida se a frase esta correta
+'Valida se a frase esta correta (normaliza antes de validar)
 'Retorna True se descriptografar TestValue = "LOCKZERO"
 Public Sub ValidatePhrase(phrase As String) As Boolean
 	If TestValue = "" Or Salt = "" Then Return False
-	Dim decrypted As String = ModSecurity.DecryptWithSalt(phrase, Salt, TestValue)
+	Dim normalizedPhrase As String = ModSecurity.NormalizePassphrase(phrase)
+	Dim decrypted As String = ModSecurity.DecryptWithSalt(normalizedPhrase, Salt, TestValue)
 	Return decrypted = "LOCKZERO"
 End Sub
 

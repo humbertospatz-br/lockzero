@@ -19,6 +19,10 @@ End Sub
 
 Public Sub Init
 	If mInitialized Then Return
+	ForceReload
+End Sub
+
+Public Sub ForceReload
 	Notes.Initialize
 	LoadNotes
 	mInitialized = True

@@ -32,10 +32,15 @@ Sub Class_Globals
 	Private edtPassphrase As EditText
 	Private btnShowPass As Button
 	Private IsPassVisible As Boolean = False
+
+	'Timer de sessao no header
+	Private lblSessionTimer As Label
+	Private tmrSession As Timer
 End Sub
 
 Public Sub Initialize
 	tmrClipboard.Initialize("tmrClipboard", 1000)
+	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -45,17 +50,32 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
-	'Atualiza titulo do header com breadcrumb (Senhas > NomeGrupo)
+	'SEGURANCA: Verifica se sessao esta ativa antes de mostrar senhas
+	If ModSession.IsSessionActive = False Then
+		Log("PagePasswordList: Sessao inativa - redirecionando")
+		B4XPages.ClosePage(Me)
+		Return
+	End If
+
+	'Atualiza titulo do header com breadcrumb (Senhas → NomeGrupo)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
 	If g.IsInitialized Then
 		CurrentGroupName = g.Name
-		lblHeaderTitle.Text = ModLang.T("passwords") & " > " & CurrentGroupName
+		lblHeaderTitle.Text = ModLang.T("passwords") & " → " & CurrentGroupName
 	Else
 		lblHeaderTitle.Text = ModLang.T("passwords")
 	End If
 
 	ModSession.Touch
+
+	'Reseta scroll para o topo
+	svEntries.ScrollPosition = 0
+
 	LoadEntries
+
+	'Inicia timer de sessao
+	UpdateSessionTimer
+	tmrSession.Enabled = True
 End Sub
 
 'Recebe parametros da pagina anterior
@@ -93,6 +113,7 @@ End Sub
 
 Private Sub B4XPage_Disappear
 	tmrClipboard.Enabled = False
+	tmrSession.Enabled = False
 End Sub
 
 ' ============================================
@@ -119,14 +140,26 @@ Private Sub CreateUI
 	btnBack.Gravity = Gravity.CENTER
 	pnlHeader.AddView(btnBack, 0, 0, 50dip, headerH)
 
-	'Titulo com breadcrumb: Senhas > NomeGrupo
+	'Titulo com breadcrumb: Senhas → NomeGrupo
 	lblHeaderTitle.Initialize("")
 	lblHeaderTitle.Text = ModLang.T("passwords")
 	lblHeaderTitle.TextSize = 16
 	lblHeaderTitle.TextColor = Colors.White
 	lblHeaderTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblHeaderTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 110dip, headerH)
+	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 170dip, headerH)
+
+	'Timer de sessao (toque para bloquear)
+	lblSessionTimer.Initialize("lblSessionTimer")
+	lblSessionTimer.Text = "00:00"
+	lblSessionTimer.TextSize = 12
+	lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
+	lblSessionTimer.Gravity = Gravity.CENTER
+	pnlHeader.AddView(lblSessionTimer, width - 110dip, 12dip, 55dip, 32dip)
+
+	'Fundo arredondado para o timer (indica que e clicavel)
+	Dim xvTimer As B4XView = lblSessionTimer
+	xvTimer.SetColorAndBorder(Colors.ARGB(60, 255, 255, 255), 0, Colors.Transparent, 8dip)
 
 	'Botao adicionar no header - usando Label para evitar tema do sistema
 	Dim lblAdd As Label
@@ -337,11 +370,11 @@ Private Sub ShowPassphraseDialog
 
 	btnShowPass.Initialize("btnShowPass")
 	btnShowPass.Text = ModLang.T("view")
-	btnShowPass.TextSize = 11
+	btnShowPass.TextSize = Starter.FONT_CAPTION
 	btnShowPass.Color = Colors.Transparent
 	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	btnShowPass.Gravity = Gravity.CENTER
-	pnlInput.AddView(btnShowPass, dialogW - 32dip - 48dip, 5dip, 40dip, 40dip)
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 5dip, 60dip, 40dip)
 
 	'Botoes
 	Dim btnCancel As Button
@@ -388,7 +421,7 @@ End Sub
 Private Sub btnDialogOk_Click
 	Dim phrase As String = edtPassphrase.Text.Trim
 	If phrase.Length >= 8 Then
-		ModSession.StartSession(phrase)
+		ModSession.StartSessionWithCategory(phrase, "passwords")
 		HideDialog
 		NavigateToAddPassword
 	Else
@@ -472,6 +505,50 @@ Private Sub tmrClipboard_Tick
 End Sub
 
 ' ============================================
+'  TIMER DE SESSAO
+' ============================================
+
+Private Sub tmrSession_Tick
+	UpdateSessionTimer
+
+	'Verifica se sessao expirou
+	If ModSession.IsSessionActive = False Then
+		tmrSession.Enabled = False
+		ToastMessageShow(ModLang.T("session_expired"), True)
+		B4XPages.ClosePage(Me)
+	End If
+End Sub
+
+Private Sub UpdateSessionTimer
+	If ModSession.IsSessionActive Then
+		lblSessionTimer.Text = ModSession.GetRemainingFormatted
+
+		'Muda cor quando tempo baixo (< 60s)
+		Dim remaining As Int = ModSession.GetRemainingSeconds
+		If remaining < 60 Then
+			lblSessionTimer.TextColor = ModTheme.Warning
+		Else
+			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
+		End If
+	Else
+		lblSessionTimer.Text = "00:00"
+		lblSessionTimer.TextColor = ModTheme.Danger
+	End If
+End Sub
+
+'Toque no timer bloqueia a sessao e volta para HOME
+Private Sub lblSessionTimer_Click
+	Wait For (xui.Msgbox2Async(ModLang.T("lock_confirm_msg"), ModLang.T("lock"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		ModSession.Lock
+		tmrSession.Enabled = False
+		ToastMessageShow(ModLang.T("locked"), False)
+		B4XPages.ShowPageAndRemovePreviousPages("mainpage")
+	End If
+End Sub
+
+' ============================================
 '  DIALOGS
 ' ============================================
 
@@ -499,7 +576,7 @@ Private Sub ShowEntryDetails(entryId As String)
 		details = details & CRLF & ModLang.T("note") & ": " & notes
 	End If
 
-	Wait For (xui.Msgbox2Async(details, e.GetDisplayName, ModLang.T("copy"), ModLang.T("edit"), ModLang.T("close"), Null)) Msgbox_Result(Result As Int)
+	Wait For (xui.Msgbox2Async(details, e.GetDisplayName, ModLang.T("copy"), ModLang.T("close"), ModLang.T("edit"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
 		CopyPassword(entryId)

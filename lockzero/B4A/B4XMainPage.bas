@@ -53,10 +53,13 @@ Private Sub B4XPage_Appear
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", "LockZero")
 
-	'Atualiza menu (caso idioma tenha mudado)
+	'Atualiza menu, cards e footer (caso idioma tenha mudado)
 	RebuildMenuItems
+	ShowHome
+	RefreshFooter
 
-	'Inicia timer de sessao se ativa
+	'Atualiza display de sessao e inicia timer se ativa
+	UpdateSessionDisplay
 	If ModSession.IsSessionActive Then
 		tmrSession.Enabled = True
 	End If
@@ -265,7 +268,7 @@ Private Sub CreateFooter
 	'Slogan
 	Dim lblSlogan As Label
 	lblSlogan.Initialize("")
-	lblSlogan.Text = "Lock and Zero Worries"
+	lblSlogan.Text = ModLang.T("app_tagline")
 	lblSlogan.TextSize = 14
 	lblSlogan.TextColor = Colors.ARGB(180, 255, 255, 255) '~70% alpha
 	lblSlogan.Gravity = Gravity.CENTER_HORIZONTAL
@@ -275,20 +278,25 @@ Private Sub CreateFooter
 	'Versao/Status
 	Dim lblVersion As Label
 	lblVersion.Initialize("")
-	lblVersion.Text = "Free Version - v" & Starter.APP_VERSION
+	lblVersion.Text = ModLang.T("free_version") & " - v" & Starter.APP_VERSION
 	lblVersion.TextSize = 12
 	lblVersion.TextColor = Colors.ARGB(140, 255, 255, 255) '~55% alpha
 	lblVersion.Gravity = Gravity.CENTER_HORIZONTAL
 	pnlFooter.AddView(lblVersion, 0, y, width, 20dip)
 	y = y + 24dip
 
-	'Timer de sessao
-	lblSessionTimer.Initialize("")
+	'Timer de sessao (clicavel para bloquear)
+	lblSessionTimer.Initialize("lblSessionTimer")
 	lblSessionTimer.Text = ""
 	lblSessionTimer.TextSize = 11
 	lblSessionTimer.TextColor = Colors.ARGB(160, 255, 255, 255)
 	lblSessionTimer.Gravity = Gravity.CENTER_HORIZONTAL
 	pnlFooter.AddView(lblSessionTimer, 0, y, width, 18dip)
+End Sub
+
+Private Sub RefreshFooter
+	pnlFooter.RemoveAllViews
+	CreateFooter
 End Sub
 
 ' ============================================
@@ -408,7 +416,7 @@ End Sub
 
 Private Sub mnuSettings_Click
 	HideMenu
-	ToastMessageShow(ModLang.T("settings") & " - " & ModLang.T("loading"), False)
+	B4XPages.ShowPage("PageSettings")
 End Sub
 
 Private Sub mnuBackup_Click
@@ -499,13 +507,45 @@ End Sub
 ' ============================================
 
 Private Sub tmrSession_Tick
+	UpdateSessionDisplay
+End Sub
+
+Private Sub UpdateSessionDisplay
 	If ModSession.IsSessionActive Then
 		Dim remaining As String = ModSession.GetRemainingFormatted
-		lblSessionTimer.Text = ModLang.T("session_remaining") & ": " & remaining
-		lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255) 'Branco no fundo azul
+		Dim categoryName As String = ModSession.GetSessionCategoryName
+
+		'Se usa frase por categoria e tem categoria, mostra o nome
+		If ModSecurity.GetUseSinglePassphrase = False And categoryName <> "" Then
+			lblSessionTimer.Text = categoryName & " • " & remaining & " ◀"
+		Else
+			lblSessionTimer.Text = remaining & " ◀"
+		End If
+
+		'Cor amarela quando tempo baixo (< 60s)
+		Dim remainingSecs As Int = ModSession.GetRemainingSeconds
+		If remainingSecs < 60 Then
+			lblSessionTimer.TextColor = ModTheme.Warning
+		Else
+			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
+		End If
 	Else
 		lblSessionTimer.Text = ""
 		tmrSession.Enabled = False
+	End If
+End Sub
+
+'Clique no timer bloqueia a sessao
+Private Sub lblSessionTimer_Click
+	If ModSession.IsSessionActive = False Then Return
+
+	Wait For (xui.Msgbox2Async(ModLang.T("lock_confirm_msg"), ModLang.T("lock"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		ModSession.Lock
+		tmrSession.Enabled = False
+		lblSessionTimer.Text = ""
+		ToastMessageShow(ModLang.T("locked"), False)
 	End If
 End Sub
 

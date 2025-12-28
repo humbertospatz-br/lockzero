@@ -1016,5 +1016,582 @@ End Sub
 
 ---
 
-**Ultima atualizacao:** 2025-12-27
+## 28. xui.Msgbox2Async - Parametros Corretos
+
+### ATENCAO - ClassCastException!
+
+O ultimo parametro de `xui.Msgbox2Async` e para **BITMAP (icone)**, NAO para panel customizado!
+
+### ERRO - Passa panel como ultimo parametro:
+```vb
+' ERRADO - Causa ClassCastException
+Dim pnl As B4XView = xui.CreatePanel("")
+' ... adiciona campos ao pnl ...
+Wait For (xui.Msgbox2Async("", "Titulo", "OK", "", "Cancelar", pnl, False)) Msgbox_Result(Result As Int)
+
+' Erro: java.lang.ClassCastException: anywheresoftware.b4a.BALayout cannot be cast to android.graphics.Bitmap
+```
+
+### CORRETO - Usar Null se nao precisa de icone:
+```vb
+' CORRETO - Null para sem icone
+Wait For (xui.Msgbox2Async("Mensagem", "Titulo", "OK", "", "Cancelar", Null, False)) Msgbox_Result(Result As Int)
+```
+
+### Assinatura do Msgbox2Async:
+```
+Msgbox2Async(Message, Title, Positive, Cancel, Negative, Icon As Bitmap, Cancelable)
+```
+
+| Parametro | Tipo | Descricao |
+|-----------|------|-----------|
+| Message | String | Texto da mensagem |
+| Title | String | Titulo do dialog |
+| Positive | String | Texto botao positivo ("OK", "Sim") |
+| Cancel | String | Texto botao cancel (ou "") |
+| Negative | String | Texto botao negativo ("Nao", "Cancelar") |
+| Icon | **Bitmap** | Icone do dialog (ou **Null**) |
+| Cancelable | Boolean | Se pode fechar tocando fora |
+
+### Se precisar de campos de entrada:
+Use dialog customizado com overlay (ver dica #29).
+
+---
+
+## 29. Dialog Customizado com Campo de Entrada
+
+### Quando usar:
+- Dialog que precisa de EditText para input
+- Dialog com multiplos campos
+- Controle total sobre aparencia
+
+### Padrao - Overlay + Dialog Panel:
+
+```vb
+' Globals
+Private pnlOverlay As Panel
+Private pnlDialog As Panel
+Private edtInput As EditText
+Private btnDialogOk As Button
+Private btnDialogCancel As Button
+
+' Criar o dialog (chamar no B4XPage_Created)
+Private Sub CreateCustomDialog
+    'Overlay escuro
+    pnlOverlay.Initialize("pnlOverlay")
+    pnlOverlay.Color = Colors.ARGB(180, 0, 0, 0)  ' Preto semi-transparente
+    Root.AddView(pnlOverlay, 0, 0, Root.Width, Root.Height)
+    pnlOverlay.Visible = False
+
+    'Dialog box centralizado
+    Dim dialogW As Int = Root.Width - 40dip
+    Dim dialogH As Int = 200dip
+    Dim dialogX As Int = 20dip
+    Dim dialogY As Int = (Root.Height - dialogH) / 2
+
+    pnlDialog.Initialize("")
+    pnlDialog.Color = Colors.White
+    pnlOverlay.AddView(pnlDialog, dialogX, dialogY, dialogW, dialogH)
+
+    'Titulo
+    Dim lblTitle As Label
+    lblTitle.Initialize("")
+    lblTitle.Text = "Digite sua frase"
+    lblTitle.TextSize = Starter.FONT_SUBTITLE
+    lblTitle.TextColor = Colors.Black
+    lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+    pnlDialog.AddView(lblTitle, 16dip, 16dip, dialogW - 32dip, 30dip)
+
+    'Campo de entrada
+    edtInput.Initialize("")
+    edtInput.Hint = "Sua frase aqui"
+    edtInput.TextSize = Starter.FONT_INPUT
+    edtInput.InputType = Bit.Or(edtInput.INPUT_TYPE_TEXT, 128) 'Password
+    pnlDialog.AddView(edtInput, 16dip, 56dip, dialogW - 32dip, Starter.HEIGHT_INPUT)
+
+    'Botao Cancelar
+    btnDialogCancel.Initialize("btnDialogCancel")
+    btnDialogCancel.Text = ModLang.T("cancel")
+    btnDialogCancel.TextSize = Starter.FONT_BUTTON
+    pnlDialog.AddView(btnDialogCancel, 16dip, dialogH - 60dip, (dialogW - 48dip) / 2, Starter.HEIGHT_BUTTON)
+
+    'Botao OK
+    btnDialogOk.Initialize("btnDialogOk")
+    btnDialogOk.Text = ModLang.T("ok")
+    btnDialogOk.TextSize = Starter.FONT_BUTTON
+    pnlDialog.AddView(btnDialogOk, dialogW / 2 + 8dip, dialogH - 60dip, (dialogW - 48dip) / 2, Starter.HEIGHT_BUTTON)
+End Sub
+
+' Mostrar dialog
+Private Sub ShowDialog
+    edtInput.Text = ""
+    pnlOverlay.Visible = True
+    pnlOverlay.BringToFront
+End Sub
+
+' Esconder dialog
+Private Sub HideDialog
+    pnlOverlay.Visible = False
+End Sub
+
+' Eventos dos botoes
+Private Sub btnDialogOk_Click
+    Dim inputValue As String = edtInput.Text.Trim
+    If inputValue.Length > 0 Then
+        HideDialog
+        ProcessInput(inputValue)
+    End If
+End Sub
+
+Private Sub btnDialogCancel_Click
+    HideDialog
+End Sub
+
+' Fechar ao tocar no overlay (opcional)
+Private Sub pnlOverlay_Click
+    HideDialog
+End Sub
+```
+
+### Vantagens:
+- Controle total sobre layout e estilo
+- Pode adicionar multiplos campos
+- Funciona sem problemas de cast
+- Consistente com o tema do app
+
+### Dica - Modos de dialog:
+Se o mesmo dialog e usado para varias acoes, use uma variavel de modo:
+
+```vb
+Private CurrentMode As String ' "export", "import", "verify"
+
+Private Sub ShowDialogForExport
+    CurrentMode = "export"
+    lblTitle.Text = "Exportar Backup"
+    ShowDialog
+End Sub
+
+Private Sub ShowDialogForImport
+    CurrentMode = "import"
+    lblTitle.Text = "Importar Backup"
+    ShowDialog
+End Sub
+
+Private Sub btnDialogOk_Click
+    Select CurrentMode
+        Case "export"
+            DoExport(edtInput.Text)
+        Case "import"
+            DoImport(edtInput.Text)
+    End Select
+    HideDialog
+End Sub
+```
+
+---
+
+## 30. FileProvider - Complicacoes e Alternativas
+
+### Problema:
+Compartilhar arquivos do armazenamento interno (File.DirInternal) requer FileProvider no Android moderno.
+
+### Configuracao do FileProvider:
+Requer:
+1. Biblioteca `contentresolver`
+2. Configuracao no Manifest
+3. Classe FileProvider no codigo
+
+### Manifest necessario:
+```vb
+AddApplicationText(
+  <provider
+  android:name="androidx.core.content.FileProvider"
+  android:authorities="$PACKAGE$.provider"
+  android:exported="false"
+  android:grantUriPermissions="true">
+  <meta-data
+  android:name="android.support.FILE_PROVIDER_PATHS"
+  android:resource="@xml/provider_paths"/>
+  </provider>
+)
+
+CreateResource(xml, provider_paths,
+   <files-path name="name" path="shared" />
+)
+```
+
+### Codigo para compartilhar arquivo:
+```vb
+Public Sub GetFileUri(FileName As String) As Object
+    Dim jFile As JavaObject
+    jFile.InitializeNewInstance("java.io.File", Array(SharedFolder, FileName))
+
+    Dim fp As JavaObject
+    Dim ctx As JavaObject
+    ctx.InitializeContext
+    fp.InitializeStatic("androidx.core.content.FileProvider")
+    Return fp.RunMethod("getUriForFile", Array(ctx, Application.PackageName & ".provider", jFile))
+End Sub
+
+Sub ShareFile(FileName As String)
+    Dim shareIntent As Intent
+    shareIntent.Initialize(shareIntent.ACTION_SEND, "")
+    shareIntent.SetType("text/plain")
+    shareIntent.PutExtra("android.intent.extra.STREAM", GetFileUri(FileName))
+    shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
+    StartActivity(shareIntent)
+End Sub
+```
+
+### PROBLEMA COMUM - App crasha ao inicializar:
+Se o FileProvider nao estiver configurado corretamente, o app **NAO ABRE** e nao mostra log util.
+
+### ALTERNATIVA RECOMENDADA - Compartilhar como texto:
+Para backups JSON ou dados textuais, e mais simples compartilhar como texto:
+
+```vb
+Sub ShareBackupAsText(backupContent As String)
+    Dim shareIntent As Intent
+    shareIntent.Initialize(shareIntent.ACTION_SEND, "")
+    shareIntent.SetType("text/plain")
+    shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup")
+    shareIntent.PutExtra("android.intent.extra.TEXT", backupContent)
+    StartActivity(shareIntent)
+End Sub
+```
+
+### Quando usar cada abordagem:
+
+| Situacao | Abordagem |
+|----------|-----------|
+| Backup JSON pequeno/medio | Compartilhar como TEXTO |
+| Arquivos binarios (imagens) | FileProvider necessario |
+| PDFs ou documentos | FileProvider necessario |
+| Texto grande (pode funcionar) | Tentar texto primeiro |
+
+### RECOMENDACAO:
+> **Comece com compartilhamento de texto. So use FileProvider se realmente necessario.**
+> **FileProvider adiciona complexidade e pontos de falha.**
+
+---
+
+## 31. Conflitos de Nomes de Variaveis
+
+### Problema:
+Alguns nomes de variaveis conflitam com classes/objetos do B4A, causando erros de compilacao.
+
+### Exemplos de conflitos:
+
+| Nome Conflitante | Conflita com | Usar em vez |
+|------------------|--------------|-------------|
+| `file` | Objeto `File` | `jFile`, `dataFile` |
+| `root` | `Root` em B4XPage | `rootMap`, `backupMap` |
+| `context` | Classe Context | `ctx`, `appContext` |
+| `type` | Palavra reservada | `itemType`, `entryType` |
+| `result` | Palavra reservada | `dialogResult`, `retVal` |
+
+### ERRADO:
+```vb
+' Erro - 'file' conflita com File
+Dim file As JavaObject
+file.InitializeNewInstance("java.io.File", ...)
+
+' Erro - 'root' conflita com Root do B4XPage
+Dim root As Map
+root.Initialize
+```
+
+### CORRETO:
+```vb
+' OK - nome diferente
+Dim jFile As JavaObject
+jFile.InitializeNewInstance("java.io.File", ...)
+
+' OK - nome diferente
+Dim backupMap As Map
+backupMap.Initialize
+```
+
+### Regra:
+> **Se der erro de compilacao estranho, verifique se o nome da variavel conflita com algo do B4A.**
+
+---
+
+## 32. Botao Flutuante '+' (FAB)
+
+### Criando botao '+' arredondado:
+
+```vb
+Private Sub CreateAddButton
+    Dim lblAdd As Label
+    lblAdd.Initialize("btnAdd")
+    lblAdd.Text = "+"
+    lblAdd.TextSize = 28
+    lblAdd.Typeface = Typeface.DEFAULT_BOLD
+    lblAdd.Gravity = Gravity.CENTER
+    lblAdd.Color = ModTheme.GetPrimaryColor
+    lblAdd.TextColor = Colors.White
+
+    ' Posicao no canto inferior direito
+    Dim btnSize As Int = 56dip
+    Dim margin As Int = 16dip
+    Root.AddView(lblAdd, Root.Width - btnSize - margin, Root.Height - btnSize - margin, btnSize, btnSize)
+
+    ' Arredondar para ficar circular
+    Dim xvAdd As B4XView = lblAdd
+    xvAdd.SetColorAndBorder(ModTheme.GetPrimaryColor, 0, ModTheme.GetPrimaryColor, btnSize / 2)
+End Sub
+
+Private Sub btnAdd_Click
+    ' Acao ao clicar no +
+    ShowAddDialog
+End Sub
+```
+
+### Por que usar Label em vez de Button:
+- Button herda estilo do sistema (pode ficar diferente em cada dispositivo)
+- Label permite controle total da aparencia
+- Facil de fazer circular com `SetColorAndBorder`
+
+### Posicionamento FAB padrao:
+```vb
+' Canto inferior direito
+x = Root.Width - btnSize - 16dip
+y = Root.Height - btnSize - 16dip
+
+' Canto inferior esquerdo
+x = 16dip
+y = Root.Height - btnSize - 16dip
+
+' Centro inferior
+x = (Root.Width - btnSize) / 2
+y = Root.Height - btnSize - 16dip
+```
+
+---
+
+## 33. Inicializacao de Idioma
+
+### Problema:
+O idioma precisa ser configurado ANTES de qualquer tela ser mostrada.
+
+### Solucao - Inicializar no Starter.bas:
+
+```vb
+' Starter.bas - Service_Create
+Sub Service_Create
+    ' Carregar idioma salvo ou detectar do sistema
+    Dim savedLang As String = GetSetting("language", "")
+
+    If savedLang = "" Then
+        ' Detectar idioma do sistema
+        Dim loc As JavaObject
+        loc.InitializeStatic("java.util.Locale")
+        Dim defaultLoc As JavaObject = loc.RunMethod("getDefault", Null)
+        Dim lang As String = defaultLoc.RunMethod("getLanguage", Null)
+
+        If lang = "pt" Then
+            savedLang = "pt"
+        Else
+            savedLang = "en"
+        End If
+        SaveSetting("language", savedLang)
+    End If
+
+    ' Inicializar ModLang com o idioma
+    ModLang.Init(savedLang)
+End Sub
+```
+
+### ModLang.Init:
+```vb
+' ModLang.bas
+Private CurrentLanguage As String = "pt"
+Private Texts As Map
+
+Public Sub Init(lang As String)
+    CurrentLanguage = lang
+    Texts.Initialize
+
+    Select CurrentLanguage
+        Case "pt"
+            LoadPortuguese
+        Case "en"
+            LoadEnglish
+        Case Else
+            LoadEnglish
+    End Select
+End Sub
+
+Public Sub T(key As String) As String
+    If Texts.ContainsKey(key) Then
+        Return Texts.Get(key)
+    End If
+    Return key ' Retorna a chave se nao encontrar
+End Sub
+```
+
+### Ordem de inicializacao:
+1. **Starter.Service_Create** - Carrega idioma salvo
+2. **ModLang.Init** - Carrega textos do idioma
+3. **Activity_Create** - Pode usar ModLang.T() normalmente
+
+### Trocar idioma em runtime:
+```vb
+Sub ChangeLanguage(newLang As String)
+    ModLang.Init(newLang)
+    SaveSetting("language", newLang)
+
+    ' Recarregar pagina atual ou toda a UI
+    RefreshUI
+End Sub
+```
+
+---
+
+## 34. Biometria / Leitura Digital
+
+### Biblioteca necessaria:
+- `Fingerprint2` (B4A)
+
+### Verificar se dispositivo suporta:
+```vb
+Private fp As Fingerprint2
+
+Sub CheckBiometricSupport As Boolean
+    fp.Initialize("fp")
+
+    If fp.IsHardwareDetected = False Then
+        Log("Hardware biometrico nao detectado")
+        Return False
+    End If
+
+    If fp.HasEnrolledFingerprints = False Then
+        Log("Nenhuma digital cadastrada")
+        Return False
+    End If
+
+    Return True
+End Sub
+```
+
+### Solicitar autenticacao:
+```vb
+Sub RequestBiometric
+    If CheckBiometricSupport = False Then
+        ' Fallback para senha/frase
+        ShowPassphraseDialog
+        Return
+    End If
+
+    fp.StartListening("fp")
+    ToastMessageShow("Toque no sensor", False)
+End Sub
+
+Sub fp_Success
+    ' Autenticacao bem sucedida
+    Log("Biometria OK!")
+    UnlockApp
+End Sub
+
+Sub fp_Failed(ErrorCode As Int, Help As String)
+    Log("Biometria falhou: " & Help)
+
+    Select ErrorCode
+        Case fp.ERROR_LOCKOUT
+            ToastMessageShow("Muitas tentativas. Tente mais tarde.", True)
+        Case Else
+            ToastMessageShow("Tente novamente", False)
+    End Select
+End Sub
+
+Sub fp_NonRecoverableError(ErrorCode As Int, Help As String)
+    Log("Erro nao recuperavel: " & Help)
+    ' Fallback para senha
+    ShowPassphraseDialog
+End Sub
+```
+
+### Manifest (opcional - garantir API):
+```vb
+AddManifestText(<uses-permission android:name="android.permission.USE_BIOMETRIC"/>)
+AddManifestText(<uses-permission android:name="android.permission.USE_FINGERPRINT"/>)
+```
+
+### Fluxo recomendado:
+1. Verificar se biometria esta disponivel
+2. Se sim, mostrar opcao "Usar digital"
+3. Se falhar, fazer fallback para frase-senha
+4. Sempre ter opcao manual disponivel
+
+---
+
+## 35. Salvar e Carregar Configuracoes (Settings)
+
+### Pattern usado no LockZero:
+
+```vb
+' ModSecurity.bas ou Starter.bas
+
+Public Sub SaveSetting(key As String, value As String)
+    File.WriteString(File.DirInternal, "settings_" & key & ".txt", value)
+End Sub
+
+Public Sub GetSetting(key As String, defaultValue As String) As String
+    Dim fileName As String = "settings_" & key & ".txt"
+    If File.Exists(File.DirInternal, fileName) Then
+        Return File.ReadString(File.DirInternal, fileName)
+    End If
+    Return defaultValue
+End Sub
+```
+
+### Uso:
+```vb
+' Salvar
+ModSecurity.SaveSetting("language", "pt")
+ModSecurity.SaveSetting("theme", "dark")
+ModSecurity.SaveSetting("timeout", "3")
+
+' Carregar
+Dim lang As String = ModSecurity.GetSetting("language", "pt")
+Dim theme As String = ModSecurity.GetSetting("theme", "light")
+Dim timeout As Int = ModSecurity.GetSetting("timeout", "5")
+```
+
+### Alternativa - Um arquivo JSON:
+```vb
+Private SettingsMap As Map
+
+Public Sub LoadSettings
+    SettingsMap.Initialize
+    If File.Exists(File.DirInternal, "settings.json") Then
+        Dim parser As JSONParser
+        parser.Initialize(File.ReadString(File.DirInternal, "settings.json"))
+        SettingsMap = parser.NextObject
+    End If
+End Sub
+
+Public Sub SaveSettings
+    Dim gen As JSONGenerator
+    gen.Initialize(SettingsMap)
+    File.WriteString(File.DirInternal, "settings.json", gen.ToString)
+End Sub
+
+Public Sub GetSetting(key As String, defaultValue As String) As String
+    If SettingsMap.ContainsKey(key) Then
+        Return SettingsMap.Get(key)
+    End If
+    Return defaultValue
+End Sub
+
+Public Sub SaveSetting(key As String, value As String)
+    SettingsMap.Put(key, value)
+    SaveSettings
+End Sub
+```
+
+---
+
+**Ultima atualizacao:** 2025-12-28
 **Projeto:** LockZero (e familia Lockseed Products)
