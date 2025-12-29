@@ -500,41 +500,6 @@ Private Sub SaveAttempts(attempts As Map)
 End Sub
 
 ' ============================================
-'  PIN DE ACESSO
-' ============================================
-
-Public Sub HasPIN As Boolean
-	Return File.Exists(File.DirInternal, PIN_FILE)
-End Sub
-
-Public Sub SavePIN(pin As String)
-	Dim su As StringUtils
-	Dim data() As Byte = pin.GetBytes("UTF8")
-	Dim encoded As String = su.EncodeBase64(data)
-	File.WriteString(File.DirInternal, PIN_FILE, encoded)
-End Sub
-
-Public Sub ValidatePIN(inputPin As String) As Boolean
-	If HasPIN = False Then Return False
-
-	Try
-		Dim encoded As String = File.ReadString(File.DirInternal, PIN_FILE)
-		Dim su As StringUtils
-		Dim data() As Byte = su.DecodeBase64(encoded)
-		Dim savedPin As String = BytesToString(data, 0, data.Length, "UTF8")
-		Return inputPin = savedPin
-	Catch
-		Return False
-	End Try
-End Sub
-
-Public Sub RemovePIN
-	If File.Exists(File.DirInternal, PIN_FILE) Then
-		File.Delete(File.DirInternal, PIN_FILE)
-	End If
-End Sub
-
-' ============================================
 '  CONFIGURACOES
 ' ============================================
 
@@ -662,8 +627,6 @@ End Sub
 ' ============================================
 '  PIN DE ACESSO (4-8 digitos)
 ' ============================================
-
-Private Const PIN_FILE As String = "lockzero_pin.dat"
 
 'Verifica se PIN esta configurado
 Public Sub HasPIN As Boolean
