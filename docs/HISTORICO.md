@@ -1,10 +1,46 @@
-# HISTORICO DE DESENVOLVIMENTO - LOCKPASS
+# HISTORICO DE DESENVOLVIMENTO - LOCKZERO
 
 **Arquivo:** HISTORICO.md
 **Regras:**
 - Entradas em ordem cronologica DECRESCENTE (mais recente primeiro)
 - Formato: [DATA HORA] - Titulo
 - Incluir arquivos alterados e observacoes
+
+---
+
+## 2025-12-29
+
+### [2025-12-29 14:00] - Importacao CSV + Performance + Bug Fixes
+
+**Descricao:** Implementacao de importacao CSV do Chrome/Edge/Safari + otimizacoes de performance
+
+**Importacao CSV:**
+- PageImportCSV.bas - Tela completa para importar senhas de navegadores
+- Intent-filter para arquivos .csv (compartilhar do WhatsApp, email, etc)
+- Parser CSV automatico (detecta colunas name, url, username, password, note)
+- Selecao de grupo destino (existente ou criar novo)
+- Preview de todas entradas antes de importar
+- Validacao de frase-senha
+- Log de linhas ignoradas (dados vazios)
+
+**Performance:**
+- Cache de frase normalizada em ModSession
+  - NormalizedPhraseCache armazena frase ja processada
+  - EncryptWithNormalized e DecryptWithNormalized em ModSecurity
+  - Evita recalcular NormalizePassphrase a cada encrypt/decrypt
+  - Resultado: Lista com 100 senhas agora chama Normalize 1x em vez de 100x
+
+**Bug Fixes:**
+- Intent duplicado corrigido (Activity_Resume reprocessava mesmo arquivo)
+  - LastProcessedIntentUri guarda URI do ultimo intent processado
+
+**Arquivos modificados:**
+- ModSession.bas - Cache de frase normalizada
+- ModSecurity.bas - EncryptWithNormalized, DecryptWithNormalized
+- lockzero.b4a - LastProcessedIntentUri para evitar intent duplicado
+- PageImportCSV.bas - Pequenos ajustes
+- docs/TODO_LIST.md - Atualizado com CSV implementado
+- docs/HISTORICO.md - Este arquivo
 
 ---
 

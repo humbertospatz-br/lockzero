@@ -63,7 +63,6 @@ Public Sub NormalizePassphrase(phrase As String) As String
 	'Pega os 10 primeiros caracteres unicos
 	Dim unique As String = GetUniqueChars(cleaned, 10)
 
-	Log("NormalizePassphrase: '" & phrase & "' → '" & unique & "'")
 	Return unique
 End Sub
 
@@ -161,10 +160,13 @@ Public Sub Encrypt(passPhrase As String, plainText As String) As String
 
 	'Normaliza a frase para 10 chars unicos
 	Dim normalizedPhrase As String = NormalizePassphrase(passPhrase)
-	If normalizedPhrase.Length < 10 Then
-		Log("Encrypt: Frase muito fraca!")
-		Return ""
-	End If
+	Return EncryptWithNormalized(normalizedPhrase, plainText)
+End Sub
+
+'Criptografa texto com frase JA NORMALIZADA (10 chars)
+'Usa esta versao quando a frase ja foi normalizada (ex: cache de sessao)
+Public Sub EncryptWithNormalized(normalizedPhrase As String, plainText As String) As String
+	If normalizedPhrase.Length < 10 Or plainText.Length < 1 Then Return ""
 
 	Try
 		Dim md As MessageDigest
@@ -198,10 +200,13 @@ Public Sub Decrypt(passPhrase As String, encText As String) As String
 
 	'Normaliza a frase para 10 chars unicos
 	Dim normalizedPhrase As String = NormalizePassphrase(passPhrase)
-	If normalizedPhrase.Length < 10 Then
-		Log("Decrypt: Frase muito fraca!")
-		Return ""
-	End If
+	Return DecryptWithNormalized(normalizedPhrase, encText)
+End Sub
+
+'Descriptografa texto com frase JA NORMALIZADA (10 chars)
+'Usa esta versao quando a frase ja foi normalizada (ex: cache de sessao)
+Public Sub DecryptWithNormalized(normalizedPhrase As String, encText As String) As String
+	If normalizedPhrase.Length < 10 Or encText.Length < 1 Then Return ""
 
 	Try
 		'Verifica prefixo AES

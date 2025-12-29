@@ -11,9 +11,36 @@
 
 ---
 
+## CONCLUIDO - Importacao CSV e Performance (2025-12-29)
+
+> **Origem:** Importacao de senhas do Chrome/Edge/Safari + otimizacoes
+> **Status:** CONCLUIDO
+
+### Importacao CSV (Chrome, Edge, Safari, Firefox)
+- [x] [2025-12-29] **PageImportCSV.bas** - Tela completa de importacao CSV
+- [x] [2025-12-29] **Intent-filter para CSV** - App recebe arquivos .csv via compartilhamento
+- [x] [2025-12-29] **Parser CSV** - Detecta colunas automaticamente (name, url, username, password, note)
+- [x] [2025-12-29] **Selecao de grupo destino** - Escolher grupo existente ou criar novo
+- [x] [2025-12-29] **Preview de entradas** - Lista todas entradas antes de importar
+- [x] [2025-12-29] **Validacao de frase** - Pede frase-senha antes de importar
+- [x] [2025-12-29] **Importacao em lote** - Importa todas entradas de uma vez
+- [x] [2025-12-29] **Log de linhas ignoradas** - Mostra quais linhas tinham dados vazios
+
+### Performance
+- [x] [2025-12-29] **Cache de frase normalizada** - NormalizePassphrase chamada 1x por sessao
+  - ModSession: NormalizedPhraseCache armazena frase normalizada
+  - ModSecurity: EncryptWithNormalized e DecryptWithNormalized evitam recalculo
+  - Resultado: Lista com 100 senhas chama Normalize 1x em vez de 100x
+
+### Correcoes
+- [x] [2025-12-29] **Intent duplicado** - Evita reprocessar mesmo arquivo no Activity_Resume
+  - LastProcessedIntentUri guarda URI do ultimo intent processado
+
+---
+
 ## CONCLUIDO - Backup e Import via Intent (2025-12-29)
 
-> **Origem:** Implementacao completa do sistema de backup
+> **Origem:** Implementacao completa do sistema de backup .lockzero
 > **Status:** CONCLUIDO
 
 ### Implementado
@@ -512,14 +539,14 @@ updatedAt: Long
 - [x] [2025-12-25] Backup criptografado .lockzero
 
 ### Importar
-- [ ] [2025-12-25] Importar de CSV
+- [x] [2025-12-29] Importar de CSV (Chrome, Edge, Safari, Firefox)
 - [ ] [2025-12-25] Importar de JSON
 - [x] [2025-12-25] Restaurar backup .lockzero
 
 ### Telas
 - [x] [2025-12-25] PageBackup.bas (export/import .lockzero)
+- [x] [2025-12-29] PageImportCSV.bas (importar CSV de navegadores)
 - [ ] [2025-12-25] PageExport.bas (CSV/JSON)
-- [ ] [2025-12-25] PageImport.bas (CSV/JSON)
 
 ### Formato CSV (Compatibilidade Navegadores)
 

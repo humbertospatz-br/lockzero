@@ -14,6 +14,9 @@ Sub Process_Globals
 	Private PhraseObfuscated As String
 	Private SessionSalt As String
 
+	'Cache da frase normalizada (evita recalcular a cada encrypt/decrypt)
+	Private NormalizedPhraseCache As String
+
 	'Controle de tempo
 	Private SessionStartTime As Long
 	Private LastActivityTime As Long
@@ -44,6 +47,9 @@ Public Sub StartSessionWithCategory(phrase As String, category As String)
 
 	'Ofusca a frase (XOR com salt)
 	PhraseObfuscated = Obfuscate(phrase, SessionSalt)
+
+	'Cache da frase normalizada (evita recalcular a cada encrypt/decrypt)
+	NormalizedPhraseCache = ModSecurity.NormalizePassphrase(phrase)
 
 	SessionStartTime = DateTime.Now
 	LastActivityTime = DateTime.Now
@@ -97,6 +103,14 @@ Public Sub GetPassphrase As String
 	Return ""
 End Sub
 
+'Retorna frase normalizada (cacheada, evita recalcular)
+Public Sub GetNormalizedPassphrase As String
+	If IsSessionActive Then
+		Return NormalizedPhraseCache
+	End If
+	Return ""
+End Sub
+
 'Registra atividade (reseta timer de inatividade)
 Public Sub Touch
 	If IsUnlocked Then
@@ -108,6 +122,7 @@ End Sub
 Public Sub EndSession
 	PhraseObfuscated = ""
 	SessionSalt = ""
+	NormalizedPhraseCache = ""
 	SessionStartTime = 0
 	LastActivityTime = 0
 	IsUnlocked = False
@@ -216,16 +231,18 @@ End Sub
 '  CRIPTOGRAFIA COM SESSAO
 ' ============================================
 
-'Criptografa usando frase da sessao
+'Criptografa usando frase da sessao (usa cache normalizado)
 Public Sub Encrypt(plainText As String) As String
 	If IsSessionActive = False Then Return ""
-	Return ModSecurity.Encrypt(GetPassphrase, plainText)
+	'Usa frase normalizada cacheada (evita recalcular)
+	Return ModSecurity.EncryptWithNormalized(NormalizedPhraseCache, plainText)
 End Sub
 
-'Descriptografa usando frase da sessao
+'Descriptografa usando frase da sessao (usa cache normalizado)
 Public Sub Decrypt(encText As String) As String
 	If IsSessionActive = False Then Return ""
-	Return ModSecurity.Decrypt(GetPassphrase, encText)
+	'Usa frase normalizada cacheada (evita recalcular)
+	Return ModSecurity.DecryptWithNormalized(NormalizedPhraseCache, encText)
 End Sub
 
 'Verifica se frase esta correta (descriptografando um valor de teste)

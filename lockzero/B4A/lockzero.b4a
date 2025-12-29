@@ -24,15 +24,16 @@ Module1=B4XMainPage
 Module10=ModSession
 Module11=ModTheme
 Module12=PageBackup
-Module13=PageNoteEdit
-Module14=PageNotesList
-Module15=PageOnboarding
-Module16=PagePasswordEdit
-Module17=PagePasswordList
-Module18=PagePasswords
-Module19=PageSettings
+Module13=PageImportCSV
+Module14=PageNoteEdit
+Module15=PageNotesList
+Module16=PageOnboarding
+Module17=PagePasswordEdit
+Module18=PagePasswordList
+Module19=PagePasswords
 Module2=clsNoteEntry
-Module20=Starter
+Module20=PageSettings
+Module21=Starter
 Module3=clsPasswordEntry
 Module4=clsPasswordGroup
 Module5=ModBackup
@@ -42,7 +43,7 @@ Module8=ModPasswords
 Module9=ModSecurity
 NumberOfFiles=5
 NumberOfLibraries=9
-NumberOfModules=20
+NumberOfModules=21
 Version=13.4
 @EndOfDesignText@
 #Region  Project Attributes
@@ -66,6 +67,7 @@ Sub Process_Globals
 	Public PendingBackupFile As String 'Arquivo .lockzero recebido externamente
 	Public PendingCSVFile As String 'Arquivo .csv recebido externamente
 	Public PendingCSVFolder As String
+	Private LastProcessedIntentUri As String 'Evita processar o mesmo intent duas vezes
 End Sub
 
 Sub Globals
@@ -128,9 +130,6 @@ End Sub
 
 'Processa intent de arquivo .lockzero ou .csv recebido
 Private Sub CheckIncomingIntent
-	'Evita processar mesmo intent duas vezes
-	If PendingBackupFile <> "" Or PendingCSVFile <> "" Then Return
-
 	Dim Intent As Intent = Activity.GetStartingIntent
 
 	If Intent.IsInitialized = False Then Return
@@ -141,7 +140,15 @@ Private Sub CheckIncomingIntent
 		If uri = Null Then Return
 
 		Dim uriStr As String = uri
-		Dim mimeType As String = Intent.GetType
+
+		'Evita processar o mesmo intent duas vezes (Activity_Resume pode ser chamado multiplas vezes)
+		If uriStr = LastProcessedIntentUri Then Return
+		LastProcessedIntentUri = uriStr
+
+		'Obtem MimeType via JavaObject (Intent.getType)
+		Dim jo As JavaObject = Intent
+		Dim mimeType As String = jo.RunMethod("getType", Null)
+		If mimeType = Null Then mimeType = ""
 
 		Log("=== Arquivo recebido via Intent ===")
 		Log("URI: " & uriStr)
