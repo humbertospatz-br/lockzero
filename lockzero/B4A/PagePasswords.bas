@@ -27,10 +27,14 @@ Sub Class_Globals
 	Private IsPassVisible As Boolean = False
 	Private CurrentDialogMode As String = "" 'add_group, unlock_group, edit_group
 	Private CurrentGroupId As String = ""
+
+	'Timer de sessao no header
+	Private lblSessionTimer As Label
+	Private tmrSession As Timer
 End Sub
 
 Public Sub Initialize
-
+	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -45,6 +49,14 @@ Private Sub B4XPage_Appear
 
 	ModSession.Touch
 	LoadGroups
+
+	'Inicia timer de sessao
+	UpdateSessionTimer
+	tmrSession.Enabled = True
+End Sub
+
+Private Sub B4XPage_Disappear
+	tmrSession.Enabled = False
 End Sub
 
 ' ============================================
@@ -78,7 +90,19 @@ Private Sub CreateUI
 	lblHeaderTitle.TextColor = Colors.White
 	lblHeaderTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblHeaderTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 110dip, headerH)
+	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 160dip, headerH)
+
+	'Timer de sessao no header
+	lblSessionTimer.Initialize("lblSessionTimer")
+	lblSessionTimer.Text = "00:00"
+	lblSessionTimer.TextSize = 12
+	lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
+	lblSessionTimer.Gravity = Gravity.CENTER
+	pnlHeader.AddView(lblSessionTimer, width - 110dip, 12dip, 55dip, 32dip)
+
+	'Fundo arredondado para o timer (indica que e clicavel)
+	Dim xvTimer As B4XView = lblSessionTimer
+	xvTimer.SetColorAndBorder(Colors.ARGB(60, 255, 255, 255), 0, Colors.Transparent, 8dip)
 
 	'Botao adicionar no header - usando Label para evitar tema do sistema
 	Dim lblAdd As Label
@@ -719,5 +743,47 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.HomeBg
+End Sub
+
+' ============================================
+'  TIMER DE SESSAO
+' ============================================
+
+Private Sub tmrSession_Tick
+	ModSession.Touch
+	UpdateSessionTimer
+
+	'Verifica se sessao expirou
+	If ModSession.IsSessionActive = False Then
+		tmrSession.Enabled = False
+		B4XPages.ClosePage(Me)
+	End If
+End Sub
+
+Private Sub UpdateSessionTimer
+	If ModSession.IsSessionActive Then
+		lblSessionTimer.Text = ModSession.GetRemainingFormatted
+
+		'Muda cor quando tempo baixo (< 60s)
+		Dim remaining As Int = ModSession.GetRemainingSeconds
+		If remaining < 60 Then
+			lblSessionTimer.TextColor = ModTheme.Warning
+		Else
+			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
+		End If
+	Else
+		lblSessionTimer.Text = "00:00"
+		lblSessionTimer.TextColor = ModTheme.Danger
+	End If
+End Sub
+
+Private Sub lblSessionTimer_Click
+	Wait For (xui.Msgbox2Async(ModLang.T("lock_confirm_msg"), ModLang.T("lock"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		tmrSession.Enabled = False
+		ModSession.EndSession
+		B4XPages.ClosePage(Me)
+	End If
 End Sub
 

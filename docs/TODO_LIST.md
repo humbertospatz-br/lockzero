@@ -11,27 +11,24 @@
 
 ---
 
-## URGENTE - PageBackup ClassCastException (2025-12-28)
+## CONCLUIDO - Backup e Import via Intent (2025-12-29)
 
-> **Origem:** Bug critico ao clicar em "Create Backup"
-> **Status:** PENDENTE - Continuar amanha
+> **Origem:** Implementacao completa do sistema de backup
+> **Status:** CONCLUIDO
 
-### Problema
-O erro `ClassCastException: BALayout cannot be cast to android.graphics.Bitmap` ainda ocorre em `ShowExportDialog`. O codigo antigo com `xui.Msgbox2Async` passando panel como ultimo parametro ainda existe.
+### Implementado
+- [x] [2025-12-29] **Extensao .lockzero** - Arquivos de backup com extensao propria
+- [x] [2025-12-29] **Intent-filter** - App registrado para abrir arquivos .lockzero
+- [x] [2025-12-29] **FileProvider** - Compartilhamento seguro de arquivos
+- [x] [2025-12-29] **Import via WhatsApp** - Receber backup via mensageiros
+- [x] [2025-12-29] **singleTask launchMode** - App abre em task separada
+- [x] [2025-12-29] **ContentResolver** - Leitura de arquivos de outros apps
+- [x] [2025-12-29] **Dialog de frase aumentado** - Mais espaco para nome do arquivo
+- [x] [2025-12-29] **Textos traduzidos** - ModLang.T() em todas as mensagens
+- [x] [2025-12-29] **Timer de sessao em PagePasswords** - Contador regressivo no header
 
-### Solucao Necessaria
-- [ ] [2025-12-28] **Remover todo codigo xui.Msgbox2Async com panel** em PageBackup.bas
-- [ ] [2025-12-28] **Implementar CreatePhraseDialog** - dialog customizado com overlay
-- [ ] [2025-12-28] **Verificar ShowPhraseDialog** - NullPointerException indica que dialog nao foi criado
-- [ ] [2025-12-28] **Chamar CreatePhraseDialog no B4XPage_Created** - antes de qualquer uso
-- [ ] [2025-12-28] **Testar Export/Import/Restore** - todos usam o dialog de frase
-
-### Arquivos a Modificar
-- `PageBackup.bas` - Substituir xui.Msgbox2Async por dialog customizado
-
-### Referencia
-- Dica #28 em DICAS_B4A.md - xui.Msgbox2Async parametros
-- Dica #29 em DICAS_B4A.md - Dialog customizado com campo de entrada
+### Documentacao
+- [x] [2025-12-29] **UI_PATTERNS.md** - Guia de padronizacao de telas
 
 ---
 
@@ -697,4 +694,4 @@ Facebook,https://facebook.com,usuario,senha456
 - [x] Concluido
 - [-] Cancelado
 
-**Ultima atualizacao:** 2025-12-28
+**Ultima atualizacao:** 2025-12-29

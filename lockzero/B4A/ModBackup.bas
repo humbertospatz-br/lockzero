@@ -5,7 +5,7 @@ Type=StaticCode
 Version=9.85
 @EndOfDesignText@
 'ModBackup.bas - Modulo de Backup
-'LockZero - Export/Import de arquivos .lockzero
+'LockZero - Export/Import de arquivos .loc
 'Backup criptografado com frase mestre
 
 Sub Process_Globals
@@ -15,6 +15,23 @@ Sub Process_Globals
 	'Ultimo backup
 	Private LastBackupPath As String
 	Private LastBackupTime As Long
+
+	'Pasta compartilhada (para FileProvider)
+	Private SharedFolder As String
+End Sub
+
+'Inicializa pasta shared (chamar antes de usar)
+Public Sub InitSharedFolder
+	SharedFolder = File.DirInternal & "/shared"
+	If File.Exists(SharedFolder, "") = False Then
+		File.MakeDir(SharedFolder, "")
+	End If
+End Sub
+
+'Retorna pasta shared
+Public Sub GetSharedFolder As String
+	If SharedFolder = "" Then InitSharedFolder
+	Return SharedFolder
 End Sub
 
 ' ============================================
@@ -154,7 +171,7 @@ Public Sub ImportBackup(backupPhrase As String, sourceFolder As String, fileName
 		Dim plainText As String = ModSecurity.Decrypt(backupPhrase, encrypted)
 
 		If plainText = "" Then
-			result.Put("message", "Frase incorreta ou arquivo corrompido")
+			result.Put("message", ModLang.T("backup_wrong_phrase"))
 			Return result
 		End If
 
@@ -408,4 +425,53 @@ Public Sub ListBackups(folder As String) As List
 	End Try
 
 	Return backups
+End Sub
+
+' ============================================
+'  COMPARTILHAR ARQUIVO (FileProvider)
+' ============================================
+
+'Obtem URI do arquivo para compartilhamento via FileProvider
+Public Sub GetFileUri(fileName As String) As Object
+	Dim folder As String = GetSharedFolder
+	Dim f As JavaObject
+	f.InitializeNewInstance("java.io.File", Array(folder, fileName))
+	Dim fp As JavaObject
+	Dim context As JavaObject
+	context.InitializeContext
+	'Usa androidx (versao moderna)
+	fp.InitializeStatic("androidx.core.content.FileProvider")
+	Return fp.RunMethod("getUriForFile", Array(context, Application.PackageName & ".provider", f))
+End Sub
+
+'Compartilha arquivo de backup
+Public Sub ShareBackupFile(fileName As String)
+	Log("ShareBackupFile: " & fileName)
+	Try
+		Dim uri As Object = GetFileUri(fileName)
+		Log("ShareBackupFile: URI obtido = " & uri)
+
+		Dim shareIntent As Intent
+		shareIntent.Initialize(shareIntent.ACTION_SEND, "")
+		shareIntent.SetType("application/octet-stream")
+		shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup")
+		shareIntent.PutExtra("android.intent.extra.STREAM", uri)
+		shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
+		Log("ShareBackupFile: iniciando share...")
+		StartActivity(shareIntent)
+	Catch
+		Log("ShareBackupFile ERRO: " & LastException)
+	End Try
+End Sub
+
+'Exporta backup para pasta shared e retorna nome do arquivo
+Public Sub ExportToShared(backupPhrase As String) As String
+	InitSharedFolder
+	Dim fullPath As String = ExportBackup(backupPhrase, SharedFolder)
+	If fullPath <> "" Then
+		'Extrai nome do arquivo do caminho
+		Dim fileName As String = fullPath.SubString(fullPath.LastIndexOf("/") + 1)
+		Return fileName
+	End If
+	Return ""
 End Sub

@@ -31,6 +31,8 @@ Sub Class_Globals
 	Private edtPhrase As EditText
 	Private btnPhraseOk As Button
 	Private btnPhraseCancel As Button
+	Private btnPhraseShow As Button
+	Private PhraseVisible As Boolean = False
 	Private CurrentDialogMode As String 'export, import, test
 	Private CurrentBackupFolder As String
 	Private CurrentBackupFileName As String
@@ -47,9 +49,11 @@ Public Sub Initialize
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
+	Log("PageBackup: B4XPage_Created inicio")
 	Root = Root1
 	CreateUI
 	ApplyTheme
+	Log("PageBackup: B4XPage_Created fim")
 End Sub
 
 Private Sub B4XPage_Appear
@@ -58,6 +62,17 @@ Private Sub B4XPage_Appear
 
 	ModSession.Touch
 	UpdateLastBackupInfo
+
+	'Verifica se há arquivo .loc recebido externamente
+	If Main.PendingBackupFile <> "" Then
+		Log("PageBackup: Arquivo pendente para importar: " & Main.PendingBackupFile)
+		CurrentBackupFolder = Starter.Provider.SharedFolder
+		CurrentBackupFileName = Main.PendingBackupFile
+		Main.PendingBackupFile = "" 'Limpa para nao processar novamente
+
+		'Pede a frase para importar
+		ShowPhraseDialog("import", CurrentBackupFileName & CRLF & ModLang.T("backup_enter_phrase"))
+	End If
 End Sub
 
 ' ============================================
@@ -236,21 +251,23 @@ Private Sub CreateUI
 End Sub
 
 Private Sub CreatePhraseDialog
+	Log("CreatePhraseDialog: inicio")
 	'Overlay escuro
 	pnlOverlay.Initialize("pnlOverlay")
 	pnlOverlay.Color = Colors.ARGB(180, 0, 0, 0)
 	Root.AddView(pnlOverlay, 0, 0, Root.Width, Root.Height)
 	pnlOverlay.Visible = False
+	Log("CreatePhraseDialog: overlay criado")
 
-	'Dialog box
+	'Dialog box (altura aumentada para acomodar nome de arquivo longo)
 	Dim dialogW As Int = Root.Width - 40dip
-	Dim dialogH As Int = 180dip
+	Dim dialogH As Int = 210dip
 
 	pnlPhraseDialog.Initialize("")
 	pnlPhraseDialog.Color = ModTheme.HomeHeaderBg
 	pnlOverlay.AddView(pnlPhraseDialog, 20dip, 100dip, dialogW, dialogH)
 
-	'Titulo (sera definido dinamicamente)
+	'Titulo (altura aumentada para nome de arquivo + instrucao)
 	Dim lblTitle As Label
 	lblTitle.Initialize("")
 	lblTitle.Text = ModLang.T("backup_phrase_hint")
@@ -258,9 +275,11 @@ Private Sub CreatePhraseDialog
 	lblTitle.TextColor = Colors.White
 	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
 	lblTitle.Tag = "lblPhraseTitle"
-	pnlPhraseDialog.AddView(lblTitle, 10dip, 15dip, dialogW - 20dip, 30dip)
+	pnlPhraseDialog.AddView(lblTitle, 10dip, 10dip, dialogW - 20dip, 60dip)
 
-	'Campo de frase
+	'Campo de frase (largura reduzida para caber botao)
+	Dim btnShowW As Int = 65dip
+	Dim edtW As Int = dialogW - 40dip - btnShowW - 5dip
 	edtPhrase.Initialize("edtPhrase")
 	edtPhrase.Hint = ModLang.T("backup_phrase_hint")
 	edtPhrase.SingleLine = True
@@ -272,7 +291,15 @@ Private Sub CreatePhraseDialog
 	cd.Initialize2(ModTheme.HomeBg, 8dip, 1dip, Colors.ARGB(80, 255, 255, 255))
 	edtPhrase.Background = cd
 
-	pnlPhraseDialog.AddView(edtPhrase, 20dip, 55dip, dialogW - 40dip, 50dip)
+	pnlPhraseDialog.AddView(edtPhrase, 15dip, 80dip, edtW, 50dip)
+
+	'Botao ver/ocultar
+	btnPhraseShow.Initialize("btnPhraseShow")
+	btnPhraseShow.Text = ModLang.T("show")
+	btnPhraseShow.TextSize = Starter.FONT_CAPTION
+	btnPhraseShow.Color = ModTheme.HomeIconBg
+	btnPhraseShow.TextColor = Colors.White
+	pnlPhraseDialog.AddView(btnPhraseShow, dialogW - btnShowW - 15dip, 80dip, btnShowW, 50dip)
 
 	'Botoes
 	btnPhraseCancel.Initialize("btnPhraseCancel")
@@ -280,32 +307,50 @@ Private Sub CreatePhraseDialog
 	btnPhraseCancel.TextSize = Starter.FONT_BUTTON
 	btnPhraseCancel.Color = Colors.Gray
 	btnPhraseCancel.TextColor = Colors.White
-	pnlPhraseDialog.AddView(btnPhraseCancel, 20dip, 120dip, 100dip, 45dip)
+	pnlPhraseDialog.AddView(btnPhraseCancel, 20dip, 145dip, 100dip, 45dip)
 
 	btnPhraseOk.Initialize("btnPhraseOk")
 	btnPhraseOk.Text = ModLang.T("confirm")
 	btnPhraseOk.TextSize = Starter.FONT_BUTTON
 	btnPhraseOk.Color = ModTheme.HomeIconBg
 	btnPhraseOk.TextColor = Colors.White
-	pnlPhraseDialog.AddView(btnPhraseOk, dialogW - 120dip, 120dip, 100dip, 45dip)
+	pnlPhraseDialog.AddView(btnPhraseOk, dialogW - 120dip, 145dip, 100dip, 45dip)
+	Log("CreatePhraseDialog: fim - dialog completo")
 End Sub
 
 Private Sub ShowPhraseDialog(mode As String, title As String)
+	Log("ShowPhraseDialog: mode=" & mode)
+	Log("ShowPhraseDialog: pnlOverlay.IsInitialized=" & pnlOverlay.IsInitialized)
+	Log("ShowPhraseDialog: pnlPhraseDialog.IsInitialized=" & pnlPhraseDialog.IsInitialized)
+
+	If pnlOverlay.IsInitialized = False Then
+		Log("ShowPhraseDialog: criando dialog pois nao existe")
+		CreatePhraseDialog
+	End If
+
 	CurrentDialogMode = mode
 	edtPhrase.Text = ""
+	PhraseVisible = False
+	edtPhrase.InputType = Bit.Or(1, 128) 'PASSWORD
+	btnPhraseShow.Text = ModLang.T("show")
 
+	Log("ShowPhraseDialog: atualizando titulo")
 	'Atualiza titulo
 	For i = 0 To pnlPhraseDialog.NumberOfViews - 1
 		Dim v As View = pnlPhraseDialog.GetView(i)
-		If v.Tag = "lblPhraseTitle" Then
-			Dim lbl As Label = v
-			lbl.Text = title
+		If v.Tag <> Null Then
+			If v.Tag = "lblPhraseTitle" Then
+				Dim lbl As Label = v
+				lbl.Text = title
+			End If
 		End If
 	Next
 
+	Log("ShowPhraseDialog: mostrando overlay")
 	pnlOverlay.Visible = True
 	pnlOverlay.BringToFront
 	edtPhrase.RequestFocus
+	Log("ShowPhraseDialog: fim")
 End Sub
 
 Private Sub HidePhraseDialog
@@ -321,6 +366,19 @@ End Sub
 
 Private Sub btnPhraseCancel_Click
 	HidePhraseDialog
+End Sub
+
+Private Sub btnPhraseShow_Click
+	PhraseVisible = Not(PhraseVisible)
+	If PhraseVisible Then
+		edtPhrase.InputType = 1 'TEXT
+		btnPhraseShow.Text = ModLang.T("hide")
+	Else
+		edtPhrase.InputType = Bit.Or(1, 128) 'PASSWORD
+		btnPhraseShow.Text = ModLang.T("show")
+	End If
+	'Manter cursor no final
+	edtPhrase.SelectionStart = edtPhrase.Text.Length
 End Sub
 
 Private Sub btnPhraseOk_Click
@@ -366,6 +424,7 @@ Private Sub btnBack_Click
 End Sub
 
 Private Sub btnExport_Click
+	Log("=== btnExport_Click ===")
 	ModSession.Touch
 	ShowExportDialog
 End Sub
@@ -385,53 +444,56 @@ End Sub
 ' ============================================
 
 Private Sub ShowExportDialog
+	Log("ShowExportDialog: inicio")
 	ShowPhraseDialog("export", ModLang.T("backup_phrase_hint"))
+	Log("ShowExportDialog: fim")
 End Sub
 
 Private Sub DoExport(phrase As String)
-	'Usa pasta interna do app (nao precisa permissao)
-	Dim folder As String = File.DirInternal
+	'Exporta para pasta shared do FileProvider
+	Dim folder As String = Starter.Provider.SharedFolder
+	Dim fullPath As String = ModBackup.ExportBackup(phrase, folder)
 
-	Dim path As String = ModBackup.ExportBackup(phrase, folder)
+	If fullPath <> "" Then
+		'Extrai nome do arquivo
+		Dim fileName As String = fullPath.SubString(fullPath.LastIndexOf("/") + 1)
+		Log("DoExport: arquivo = " & fileName)
 
-	If path <> "" Then
 		UpdateLastBackupInfo
 
 		'Pergunta se quer compartilhar
 		Wait For (xui.Msgbox2Async(ModLang.T("backup_success") & CRLF & CRLF & ModLang.T("backup_share_question"), ModLang.T("success"), ModLang.T("share"), "", ModLang.T("no"), Null)) Msgbox_Result(Result As Int)
 
 		If Result = xui.DialogResponse_Positive Then
-			ShareBackupContent(folder, path)
+			ShareBackupAsFile(fileName)
 		End If
 	Else
 		xui.MsgboxAsync(ModLang.T("backup_error"), ModLang.T("error"))
 	End If
 End Sub
 
-Private Sub ShareBackupContent(folder As String, fullPath As String)
+Private Sub ShareBackupAsFile(fileName As String)
 	Try
-		'Extrai nome do arquivo do caminho completo
-		Dim fileName As String = fullPath.SubString(fullPath.LastIndexOf("/") + 1)
+		Log("ShareBackupAsFile: " & fileName)
+		Dim uri As Object = Starter.Provider.GetFileUri(fileName)
+		Log("ShareBackupAsFile URI: " & uri)
 
-		'Le conteudo do arquivo
-		Dim backupContent As String = File.ReadString(folder, fileName)
-
-		'Compartilha como texto (igual LockSeed)
 		Dim shareIntent As Intent
 		shareIntent.Initialize(shareIntent.ACTION_SEND, "")
-		shareIntent.SetType("text/plain")
-		shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup - " & DateTime.Date(DateTime.Now))
-		shareIntent.PutExtra("android.intent.extra.TEXT", backupContent)
+		shareIntent.SetType("application/vnd.lockzero")  'MimeType customizado
+		shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup")
+		shareIntent.PutExtra("android.intent.extra.STREAM", uri)
+		shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
 		StartActivity(shareIntent)
 	Catch
-		Log("ShareBackupContent erro: " & LastException)
+		Log("ShareBackupAsFile erro: " & LastException)
 		ToastMessageShow(ModLang.T("share_error"), True)
 	End Try
 End Sub
 
 Private Sub ShowImportDialog
-	'Lista backups na pasta interna
-	CurrentBackupFolder = File.DirInternal
+	'Lista backups na pasta shared do FileProvider
+	CurrentBackupFolder = Starter.Provider.SharedFolder
 
 	Dim backups As List = ModBackup.ListBackups(CurrentBackupFolder)
 
@@ -472,8 +534,8 @@ Private Sub DoImport(phrase As String, folder As String, fileName As String)
 End Sub
 
 Private Sub ShowTestDialog
-	'Lista backups na pasta interna
-	CurrentBackupFolder = File.DirInternal
+	'Lista backups na pasta shared do FileProvider
+	CurrentBackupFolder = Starter.Provider.SharedFolder
 
 	Dim backups As List = ModBackup.ListBackups(CurrentBackupFolder)
 
@@ -647,8 +709,8 @@ Private Sub btnImportTextOk_Click
 
 	HideImportTextDialog
 
-	'Salva como arquivo temporario e pede a frase
-	CurrentBackupFolder = File.DirInternal
+	'Salva como arquivo temporario na pasta shared do FileProvider
+	CurrentBackupFolder = Starter.Provider.SharedFolder
 	CurrentBackupFileName = "pasted_backup_" & DateTime.Now & ".lockzero"
 	File.WriteString(CurrentBackupFolder, CurrentBackupFileName, backupText)
 
