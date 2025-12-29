@@ -5,6 +5,10 @@ Type=Class
 Version=9.5
 @EndOfDesignText@
 'version: 1.00
+'Requires: androidx.biometric library
+'Download from: https://www.b4x.com/android/forum/threads/biometric-fingerprint-face.99626/
+'#AdditionalJar: androidx.biometric
+
 #Event: Complete (Success As Boolean, ErrorMessage As String)
 
 Sub Class_Globals

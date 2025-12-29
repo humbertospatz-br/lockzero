@@ -10,6 +10,28 @@
 
 ## 2025-12-29
 
+### [2025-12-29 18:30] - Fix Biometria - Contexto da Activity
+
+**Descricao:** Correcao do bug que fazia biometria "entrar e sair" sem mostrar log
+
+**Problema identificado:**
+- `Biometric.Initialize(Me, "Biometric")` estava sendo chamado em `Public Sub Initialize`
+- Nesse ponto o contexto da Activity (ctxt.InitializeContext) ainda NAO existe
+- BiometricManager falhava silenciosamente sem mostrar nenhum log
+
+**Solucao aplicada (comparando com exemplo funcional BiometricExample):**
+- Mover `Biometric.Initialize` de `Initialize` para `B4XPage_Created`
+- Adicionar log de debug: `Log("Biometric initialized, CanAuthenticate: " & Biometric.CanAuthenticate)`
+
+**Arquivos modificados:**
+- B4XMainPage.bas - Linha 48 comentada, linha 54-55 adicionadas
+- docs/TODO_LIST.md - Nota adicionada na Fase 3
+- docs/HISTORICO.md - Este arquivo
+
+**Status:** TESTAR NA PROXIMA SESSAO
+
+---
+
 ### [2025-12-29 16:00] - PIN e Biometria - Fase 1 e 3
 
 **Descricao:** Implementacao de autenticacao por PIN e Biometria ao iniciar o app

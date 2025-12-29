@@ -45,13 +45,15 @@ End Sub
 
 Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
-	Biometric.Initialize(Me, "Biometric")
+	'Biometric.Initialize(Me, "Biometric")
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	Root.Color = ModTheme.Background
-
+	Biometric.Initialize(Me, "Biometric")
+	Log("Biometric initialized, CanAuthenticate: " & Biometric.CanAuthenticate)
+	
 	CreateMainPanel
 	CreateSideMenu
 	CreateLockScreen		'Overlay de PIN/Biometria

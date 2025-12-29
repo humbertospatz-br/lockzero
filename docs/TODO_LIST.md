@@ -71,6 +71,10 @@ OPERACAO SENSIVEL (deletar grupo/senha):
 - [x] [2025-12-29] B4XMainPage - Verificar PIN ao iniciar (se configurado)
 - [x] [2025-12-29] Dialog de autenticacao: biometria primeiro, PIN fallback
 - [x] [2025-12-29] Bloquear app ate autenticar (pnlLock overlay)
+- [x] [2025-12-29] **FIX BIOMETRIA**: Mover `Biometric.Initialize` de `Initialize` para `B4XPage_Created`
+  - **Problema:** BiometricManager precisa do contexto da Activity que so existe apos B4XPage_Created
+  - **Solucao:** Inicializar biometria em B4XPage_Created, nao em Initialize
+  - **STATUS: TESTAR NA PROXIMA SESSAO** - Log adicionado para debug
 
 ### TAREFAS - FASE 4: Operacoes Sensiveis
 
