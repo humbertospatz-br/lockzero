@@ -671,20 +671,6 @@ Public Sub RemovePIN
 End Sub
 
 ' ============================================
-'  BIOMETRIA
-' ============================================
-
-'Habilita/desabilita uso de biometria
-Public Sub SetUseBiometric(use As Boolean)
-	SetSetting("useBiometric", use)
-End Sub
-
-'Retorna se biometria esta habilitada nas configuracoes
-Public Sub GetUseBiometric As Boolean
-	Return GetSetting("useBiometric", False)
-End Sub
-
-' ============================================
 '  UTILITARIOS
 ' ============================================
 
