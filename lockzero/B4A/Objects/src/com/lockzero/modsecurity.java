@@ -74,7 +74,7 @@ _normalizedphrase = _normalizepassphrase(_ba,_passphrase);
  //BA.debugLineNum = 195;BA.debugLine="If normalizedPhrase.Length < 10 Then";
 if (_normalizedphrase.length()<10) { 
  //BA.debugLineNum = 196;BA.debugLine="Log(\"Decrypt: Frase muito fraca!\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("543515910","Decrypt: Frase muito fraca!",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743515910","Decrypt: Frase muito fraca!",0);
  //BA.debugLineNum = 197;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -113,7 +113,7 @@ if (true) return anywheresoftware.b4a.keywords.Common.BytesToString(_decrypted,(
  } 
        catch (Exception e24) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e24); //BA.debugLineNum = 226;BA.debugLine="Log(\"ModSecurity.Decrypt erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("543515940","ModSecurity.Decrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743515940","ModSecurity.Decrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 227;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -169,7 +169,7 @@ if (true) return anywheresoftware.b4a.keywords.Common.BytesToString(_decrypted,(
  } 
        catch (Exception e19) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e19); //BA.debugLineNum = 336;BA.debugLine="Log(\"ModSecurity.DecryptWithSalt erro: \" & LastE";
-anywheresoftware.b4a.keywords.Common.LogImpl("543778078","ModSecurity.DecryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743778078","ModSecurity.DecryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 337;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -231,7 +231,7 @@ _normalizedphrase = _normalizepassphrase(_ba,_passphrase);
  //BA.debugLineNum = 158;BA.debugLine="If normalizedPhrase.Length < 10 Then";
 if (_normalizedphrase.length()<10) { 
  //BA.debugLineNum = 159;BA.debugLine="Log(\"Encrypt: Frase muito fraca!\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("543450374","Encrypt: Frase muito fraca!",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743450374","Encrypt: Frase muito fraca!",0);
  //BA.debugLineNum = 160;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -265,7 +265,7 @@ if (true) return "AES:"+_su.EncodeBase64(_encrypted);
  } 
        catch (Exception e22) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e22); //BA.debugLineNum = 183;BA.debugLine="Log(\"ModSecurity.Encrypt erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("543450398","ModSecurity.Encrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743450398","ModSecurity.Encrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 184;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -315,7 +315,7 @@ if (true) return "AES:"+_su.EncodeBase64(_encrypted);
  } 
        catch (Exception e17) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e17); //BA.debugLineNum = 300;BA.debugLine="Log(\"ModSecurity.EncryptWithSalt erro: \" & LastE";
-anywheresoftware.b4a.keywords.Common.LogImpl("543712538","ModSecurity.EncryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743712538","ModSecurity.EncryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 301;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -609,7 +609,7 @@ _attempts = _parser.NextObject();
  } 
        catch (Exception e10) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e10); //BA.debugLineNum = 474;BA.debugLine="Log(\"ModSecurity.LoadAttempts erro: \" & LastExc";
-anywheresoftware.b4a.keywords.Common.LogImpl("544498955","ModSecurity.LoadAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("744498955","ModSecurity.LoadAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  };
  //BA.debugLineNum = 478;BA.debugLine="Return attempts";
@@ -640,7 +640,7 @@ _settings = _parser.NextObject();
  } 
        catch (Exception e10) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e10); //BA.debugLineNum = 541;BA.debugLine="Log(\"ModSecurity.LoadSettings erro: \" & LastExc";
-anywheresoftware.b4a.keywords.Common.LogImpl("544892171","ModSecurity.LoadSettings erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("744892171","ModSecurity.LoadSettings erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  };
  //BA.debugLineNum = 545;BA.debugLine="Return settings";
@@ -660,7 +660,7 @@ _cleaned = _removeaccents(_ba,_phrase.replace(" ","").toLowerCase());
  //BA.debugLineNum = 58;BA.debugLine="Dim unique As String = GetUniqueChars(cleaned, 10";
 _unique = _getuniquechars(_ba,_cleaned,(int) (10));
  //BA.debugLineNum = 60;BA.debugLine="Log(\"NormalizePassphrase: '\" & phrase & \"' → '\" &";
-anywheresoftware.b4a.keywords.Common.LogImpl("543122697","NormalizePassphrase: '"+_phrase+"' → '"+_unique+"'",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("743122697","NormalizePassphrase: '"+_phrase+"' → '"+_unique+"'",0);
  //BA.debugLineNum = 61;BA.debugLine="Return unique";
 if (true) return _unique;
  //BA.debugLineNum = 62;BA.debugLine="End Sub";
@@ -896,7 +896,7 @@ anywheresoftware.b4a.keywords.Common.File.WriteString(anywheresoftware.b4a.keywo
  } 
        catch (Exception e6) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e6); //BA.debugLineNum = 487;BA.debugLine="Log(\"ModSecurity.SaveAttempts erro: \" & LastExce";
-anywheresoftware.b4a.keywords.Common.LogImpl("544564486","ModSecurity.SaveAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("744564486","ModSecurity.SaveAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 489;BA.debugLine="End Sub";
 return "";

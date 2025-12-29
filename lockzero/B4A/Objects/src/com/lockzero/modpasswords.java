@@ -116,7 +116,7 @@ _loadfromdisk(_ba);
  //BA.debugLineNum = 24;BA.debugLine="IsLoaded = True";
 _isloaded = anywheresoftware.b4a.keywords.Common.True;
  //BA.debugLineNum = 26;BA.debugLine="Log(\"ModPasswords: \" & Groups.Size & \" grupos, \"";
-anywheresoftware.b4a.keywords.Common.LogImpl("541680902","ModPasswords: "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741680902","ModPasswords: "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
  //BA.debugLineNum = 27;BA.debugLine="End Sub";
 return "";
 }
@@ -366,7 +366,7 @@ com.lockzero.clspasswordentry _e = null;
  //BA.debugLineNum = 34;BA.debugLine="If File.Exists(File.DirInternal, FILE_NAME) = Fal";
 if (anywheresoftware.b4a.keywords.Common.File.Exists(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_file_name)==anywheresoftware.b4a.keywords.Common.False) { 
  //BA.debugLineNum = 35;BA.debugLine="Log(\"ModPasswords: arquivo nao existe, iniciando";
-anywheresoftware.b4a.keywords.Common.LogImpl("541746434","ModPasswords: arquivo nao existe, iniciando vazio",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741746434","ModPasswords: arquivo nao existe, iniciando vazio",0);
  //BA.debugLineNum = 36;BA.debugLine="Return";
 if (true) return "";
  };
@@ -374,11 +374,11 @@ if (true) return "";
 try { //BA.debugLineNum = 40;BA.debugLine="Dim json As String = File.ReadString(File.DirInt";
 _json = anywheresoftware.b4a.keywords.Common.File.ReadString(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_file_name);
  //BA.debugLineNum = 41;BA.debugLine="Log(\"=== DEBUG JSON ===\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("541746440","=== DEBUG JSON ===",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741746440","=== DEBUG JSON ===",0);
  //BA.debugLineNum = 42;BA.debugLine="Log(json)";
-anywheresoftware.b4a.keywords.Common.LogImpl("541746441",_json,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741746441",_json,0);
  //BA.debugLineNum = 43;BA.debugLine="Log(\"=== FIM DEBUG ===\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("541746442","=== FIM DEBUG ===",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741746442","=== FIM DEBUG ===",0);
  //BA.debugLineNum = 44;BA.debugLine="If json.Length = 0 Then Return";
 if (_json.length()==0) { 
 if (true) return "";};
@@ -442,7 +442,7 @@ _entries.Put((Object)(_e._id /*String*/ ),(Object)(_e));
  } 
        catch (Exception e33) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e33); //BA.debugLineNum = 73;BA.debugLine="Log(\"ModPasswords.LoadFromDisk erro: \" & LastExc";
-anywheresoftware.b4a.keywords.Common.LogImpl("541746472","ModPasswords.LoadFromDisk erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741746472","ModPasswords.LoadFromDisk erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 75;BA.debugLine="End Sub";
 return "";
@@ -562,7 +562,7 @@ _gen.Initialize(_root);
  //BA.debugLineNum = 106;BA.debugLine="File.WriteString(File.DirInternal, FILE_NAME, gen";
 anywheresoftware.b4a.keywords.Common.File.WriteString(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_file_name,_gen.ToString());
  //BA.debugLineNum = 108;BA.debugLine="Log(\"ModPasswords: salvo \" & Groups.Size & \" grup";
-anywheresoftware.b4a.keywords.Common.LogImpl("541811995","ModPasswords: salvo "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("741811995","ModPasswords: salvo "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
  //BA.debugLineNum = 109;BA.debugLine="End Sub";
 return "";
 }

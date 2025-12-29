@@ -479,7 +479,7 @@ _ivlogo.setBitmap((android.graphics.Bitmap)(__c.LoadBitmap(__c.File.getDirAssets
  } 
        catch (Exception e9) {
 			ba.setLastException(e9); //BA.debugLineNum = 231;BA.debugLine="Log(\"Erro ao carregar ic_lockzero.png: \" & LastE";
-__c.LogImpl("51703947","Erro ao carregar ic_lockzero.png: "+__c.LastException(ba).getMessage(),0);
+__c.LogImpl("71703947","Erro ao carregar ic_lockzero.png: "+__c.LastException(ba).getMessage(),0);
  };
  //BA.debugLineNum = 235;BA.debugLine="Dim lblTitle As Label";
 _lbltitle = new anywheresoftware.b4a.objects.LabelWrapper();
@@ -558,7 +558,7 @@ _ivicon.setBitmap((android.graphics.Bitmap)(__c.LoadBitmap(__c.File.getDirAssets
  } 
        catch (Exception e16) {
 			ba.setLastException(e16); //BA.debugLineNum = 353;BA.debugLine="Log(\"Erro ao carregar \" & iconFile & \": \" & Last";
-__c.LogImpl("51966105","Erro ao carregar "+_iconfile+": "+__c.LastException(ba).getMessage(),0);
+__c.LogImpl("71966105","Erro ao carregar "+_iconfile+": "+__c.LastException(ba).getMessage(),0);
  //BA.debugLineNum = 355;BA.debugLine="Dim lblFallback As Label";
 _lblfallback = new anywheresoftware.b4a.objects.LabelWrapper();
  //BA.debugLineNum = 356;BA.debugLine="lblFallback.Initialize(\"\")";

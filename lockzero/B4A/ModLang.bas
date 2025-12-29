@@ -308,6 +308,24 @@ Private Sub LoadPortuguese
 	Texts.Put("backup_share_question", "Deseja compartilhar o arquivo de backup?")
 	Texts.Put("share", "Compartilhar")
 	Texts.Put("share_error", "Erro ao compartilhar")
+
+	'=== IMPORT CSV ===
+	Texts.Put("import_csv", "Importar CSV")
+	Texts.Put("csv_entries_found", "entradas encontradas")
+	Texts.Put("csv_selected", "Selecionadas")
+	Texts.Put("csv_select_all", "Selecionar Todos")
+	Texts.Put("csv_deselect_all", "Desmarcar Todos")
+	Texts.Put("csv_select_group", "Selecionar Grupo")
+	Texts.Put("csv_new_group", "Novo Grupo")
+	Texts.Put("csv_import_btn", "Importar")
+	Texts.Put("csv_imported", "entradas importadas")
+	Texts.Put("csv_updated", "atualizadas")
+	Texts.Put("csv_skipped", "ignoradas (incompletas)")
+	Texts.Put("csv_no_entries", "Nenhuma entrada válida no CSV")
+	Texts.Put("csv_no_groups", "Nenhum grupo existente")
+	Texts.Put("csv_select_at_least_one", "Selecione pelo menos uma entrada")
+	Texts.Put("csv_select_group_first", "Selecione ou crie um grupo primeiro")
+	Texts.Put("csv_error_parse", "Erro ao ler arquivo CSV")
 End Sub
 
 Private Sub LoadEnglish
@@ -557,4 +575,22 @@ Private Sub LoadEnglish
 	Texts.Put("backup_share_question", "Share the backup file?")
 	Texts.Put("share", "Share")
 	Texts.Put("share_error", "Error sharing")
+
+	'=== IMPORT CSV ===
+	Texts.Put("import_csv", "Import CSV")
+	Texts.Put("csv_entries_found", "entries found")
+	Texts.Put("csv_selected", "Selected")
+	Texts.Put("csv_select_all", "Select All")
+	Texts.Put("csv_deselect_all", "Deselect All")
+	Texts.Put("csv_select_group", "Select Group")
+	Texts.Put("csv_new_group", "New Group")
+	Texts.Put("csv_import_btn", "Import")
+	Texts.Put("csv_imported", "entries imported")
+	Texts.Put("csv_updated", "updated")
+	Texts.Put("csv_skipped", "skipped (incomplete)")
+	Texts.Put("csv_no_entries", "No valid entries in CSV")
+	Texts.Put("csv_no_groups", "No existing groups")
+	Texts.Put("csv_select_at_least_one", "Select at least one entry")
+	Texts.Put("csv_select_group_first", "Select or create a group first")
+	Texts.Put("csv_error_parse", "Error reading CSV file")
 End Sub

@@ -530,7 +530,7 @@ return;
 case 0:
 //C
 this.state = 1;
- //BA.debugLineNum = 775;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"lock_confir";
+ //BA.debugLineNum = 773;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"lock_confir";
 parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"lock_confirm_msg")),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"lock")),parent._modlang._t /*String*/ (ba,"yes"),"",parent._modlang._t /*String*/ (ba,"cancel"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
 this.state = 5;
 return;
@@ -539,7 +539,7 @@ case 5:
 this.state = 1;
 _result = (Integer) result[0];
 ;
- //BA.debugLineNum = 777;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+ //BA.debugLineNum = 775;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
 if (true) break;
 
 case 1:
@@ -552,11 +552,11 @@ this.state = 3;
 case 3:
 //C
 this.state = 4;
- //BA.debugLineNum = 778;BA.debugLine="tmrSession.Enabled = False";
+ //BA.debugLineNum = 776;BA.debugLine="tmrSession.Enabled = False";
 parent._tmrsession.setEnabled(parent.__c.False);
- //BA.debugLineNum = 779;BA.debugLine="ModSession.EndSession";
+ //BA.debugLineNum = 777;BA.debugLine="ModSession.EndSession";
 parent._modsession._endsession /*String*/ (ba);
- //BA.debugLineNum = 780;BA.debugLine="B4XPages.ClosePage(Me)";
+ //BA.debugLineNum = 778;BA.debugLine="B4XPages.ClosePage(Me)";
 parent._b4xpages._closepage /*String*/ (ba,parent);
  if (true) break;
 
@@ -564,7 +564,7 @@ case 4:
 //C
 this.state = -1;
 ;
- //BA.debugLineNum = 782;BA.debugLine="End Sub";
+ //BA.debugLineNum = 780;BA.debugLine="End Sub";
 if (true) break;
 
             }
@@ -718,30 +718,30 @@ _pnl = (anywheresoftware.b4a.objects.PanelWrapper) anywheresoftware.b4a.AbsObjec
  //BA.debugLineNum = 252;BA.debugLine="Dim groupId As String = pnl.Tag";
 _groupid = BA.ObjectToString(_pnl.getTag());
  //BA.debugLineNum = 254;BA.debugLine="Log(\"=== pnlGroup_Click ===\")";
-__c.LogImpl("559768836","=== pnlGroup_Click ===",0);
+__c.LogImpl("759768836","=== pnlGroup_Click ===",0);
  //BA.debugLineNum = 255;BA.debugLine="Log(\"GroupId: \" & groupId)";
-__c.LogImpl("559768837","GroupId: "+_groupid,0);
+__c.LogImpl("759768837","GroupId: "+_groupid,0);
  //BA.debugLineNum = 257;BA.debugLine="Dim g As clsPasswordGroup = ModPasswords.GetGroup";
 _g = _modpasswords._getgroupbyid /*com.lockzero.clspasswordgroup*/ (ba,_groupid);
  //BA.debugLineNum = 258;BA.debugLine="If g.IsInitialized = False Then";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
  //BA.debugLineNum = 259;BA.debugLine="Log(\"ERRO: Grupo nao inicializado!\")";
-__c.LogImpl("559768841","ERRO: Grupo nao inicializado!",0);
+__c.LogImpl("759768841","ERRO: Grupo nao inicializado!",0);
  //BA.debugLineNum = 260;BA.debugLine="Return";
 if (true) return "";
  };
  //BA.debugLineNum = 263;BA.debugLine="Log(\"Grupo: \" & g.Name)";
-__c.LogImpl("559768845","Grupo: "+_g._name /*String*/ ,0);
+__c.LogImpl("759768845","Grupo: "+_g._name /*String*/ ,0);
  //BA.debugLineNum = 264;BA.debugLine="Log(\"Salt: \" & g.Salt)";
-__c.LogImpl("559768846","Salt: "+_g._salt /*String*/ ,0);
+__c.LogImpl("759768846","Salt: "+_g._salt /*String*/ ,0);
  //BA.debugLineNum = 265;BA.debugLine="Log(\"TestValue: \" & g.TestValue)";
-__c.LogImpl("559768847","TestValue: "+_g._testvalue /*String*/ ,0);
+__c.LogImpl("759768847","TestValue: "+_g._testvalue /*String*/ ,0);
  //BA.debugLineNum = 266;BA.debugLine="Log(\"Sessao ativa: \" & ModSession.IsSessionActive";
-__c.LogImpl("559768848","Sessao ativa: "+BA.ObjectToString(_modsession._issessionactive /*boolean*/ (ba)),0);
+__c.LogImpl("759768848","Sessao ativa: "+BA.ObjectToString(_modsession._issessionactive /*boolean*/ (ba)),0);
  //BA.debugLineNum = 269;BA.debugLine="If ModSession.IsSessionActive Then";
 if (_modsession._issessionactive /*boolean*/ (ba)) { 
  //BA.debugLineNum = 270;BA.debugLine="Log(\"Sessao ativa - navegando direto\")";
-__c.LogImpl("559768852","Sessao ativa - navegando direto",0);
+__c.LogImpl("759768852","Sessao ativa - navegando direto",0);
  //BA.debugLineNum = 271;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
  //BA.debugLineNum = 272;BA.debugLine="NavigateToGroup(groupId)";
@@ -750,7 +750,7 @@ _navigatetogroup(_groupid);
 if (true) return "";
  };
  //BA.debugLineNum = 277;BA.debugLine="Log(\"Sessao inativa - mostrando dialog\")";
-__c.LogImpl("559768859","Sessao inativa - mostrando dialog",0);
+__c.LogImpl("759768859","Sessao inativa - mostrando dialog",0);
  //BA.debugLineNum = 278;BA.debugLine="ShowUnlockGroupDialog(groupId)";
 _showunlockgroupdialog(_groupid);
  //BA.debugLineNum = 279;BA.debugLine="End Sub";
@@ -1448,44 +1448,40 @@ return "";
 }
 public String  _tmrsession_tick() throws Exception{
  //BA.debugLineNum = 746;BA.debugLine="Private Sub tmrSession_Tick";
- //BA.debugLineNum = 747;BA.debugLine="ModSession.Touch";
+ //BA.debugLineNum = 749;BA.debugLine="If ModSession.IsSessionActive Then";
+if (_modsession._issessionactive /*boolean*/ (ba)) { 
+ //BA.debugLineNum = 750;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
- //BA.debugLineNum = 748;BA.debugLine="UpdateSessionTimer";
-_updatesessiontimer();
- //BA.debugLineNum = 751;BA.debugLine="If ModSession.IsSessionActive = False Then";
-if (_modsession._issessionactive /*boolean*/ (ba)==__c.False) { 
- //BA.debugLineNum = 752;BA.debugLine="tmrSession.Enabled = False";
-_tmrsession.setEnabled(__c.False);
- //BA.debugLineNum = 753;BA.debugLine="B4XPages.ClosePage(Me)";
-_b4xpages._closepage /*String*/ (ba,this);
  };
- //BA.debugLineNum = 755;BA.debugLine="End Sub";
+ //BA.debugLineNum = 752;BA.debugLine="UpdateSessionTimer";
+_updatesessiontimer();
+ //BA.debugLineNum = 753;BA.debugLine="End Sub";
 return "";
 }
 public String  _updatesessiontimer() throws Exception{
 int _remaining = 0;
- //BA.debugLineNum = 757;BA.debugLine="Private Sub UpdateSessionTimer";
- //BA.debugLineNum = 758;BA.debugLine="If ModSession.IsSessionActive Then";
+ //BA.debugLineNum = 755;BA.debugLine="Private Sub UpdateSessionTimer";
+ //BA.debugLineNum = 756;BA.debugLine="If ModSession.IsSessionActive Then";
 if (_modsession._issessionactive /*boolean*/ (ba)) { 
- //BA.debugLineNum = 759;BA.debugLine="lblSessionTimer.Text = ModSession.GetRemainingFo";
+ //BA.debugLineNum = 757;BA.debugLine="lblSessionTimer.Text = ModSession.GetRemainingFo";
 _lblsessiontimer.setText(BA.ObjectToCharSequence(_modsession._getremainingformatted /*String*/ (ba)));
- //BA.debugLineNum = 762;BA.debugLine="Dim remaining As Int = ModSession.GetRemainingSe";
+ //BA.debugLineNum = 760;BA.debugLine="Dim remaining As Int = ModSession.GetRemainingSe";
 _remaining = _modsession._getremainingseconds /*int*/ (ba);
- //BA.debugLineNum = 763;BA.debugLine="If remaining < 60 Then";
+ //BA.debugLineNum = 761;BA.debugLine="If remaining < 60 Then";
 if (_remaining<60) { 
- //BA.debugLineNum = 764;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Warning";
+ //BA.debugLineNum = 762;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Warning";
 _lblsessiontimer.setTextColor(_modtheme._warning /*int*/ (ba));
  }else {
- //BA.debugLineNum = 766;BA.debugLine="lblSessionTimer.TextColor = Colors.ARGB(200, 25";
+ //BA.debugLineNum = 764;BA.debugLine="lblSessionTimer.TextColor = Colors.ARGB(200, 25";
 _lblsessiontimer.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
  };
  }else {
- //BA.debugLineNum = 769;BA.debugLine="lblSessionTimer.Text = \"00:00\"";
+ //BA.debugLineNum = 767;BA.debugLine="lblSessionTimer.Text = \"00:00\"";
 _lblsessiontimer.setText(BA.ObjectToCharSequence("00:00"));
- //BA.debugLineNum = 770;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Danger";
+ //BA.debugLineNum = 768;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Danger";
 _lblsessiontimer.setTextColor(_modtheme._danger /*int*/ (ba));
  };
- //BA.debugLineNum = 772;BA.debugLine="End Sub";
+ //BA.debugLineNum = 770;BA.debugLine="End Sub";
 return "";
 }
 public Object callSub(String sub, Object sender, Object[] args) throws Exception {

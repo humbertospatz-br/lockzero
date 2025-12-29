@@ -67,7 +67,7 @@ com.lockzero.clspasswordgroup _g = null;
  //BA.debugLineNum = 48;BA.debugLine="If ModSession.IsSessionActive = False Then";
 if (_modsession._issessionactive /*boolean*/ (ba)==__c.False) { 
  //BA.debugLineNum = 49;BA.debugLine="Log(\"PagePasswordList: Sessao inativa - redireci";
-__c.LogImpl("557016323","PagePasswordList: Sessao inativa - redirecionando",0);
+__c.LogImpl("757016323","PagePasswordList: Sessao inativa - redirecionando",0);
  //BA.debugLineNum = 50;BA.debugLine="B4XPages.ClosePage(Me)";
 _b4xpages._closepage /*String*/ (ba,this);
  //BA.debugLineNum = 51;BA.debugLine="Return";
@@ -924,7 +924,7 @@ _cm.RunMethod("setPrimaryClip",new Object[]{(Object)(_clip.getObject())});
  } 
        catch (Exception e10) {
 			ba.setLastException(e10); //BA.debugLineNum = 640;BA.debugLine="Log(\"SetClipboardText error: \" & LastException)";
-__c.LogImpl("558982410","SetClipboardText error: "+BA.ObjectToString(__c.LastException(ba)),0);
+__c.LogImpl("758982410","SetClipboardText error: "+BA.ObjectToString(__c.LastException(ba)),0);
  };
  //BA.debugLineNum = 642;BA.debugLine="End Sub";
 return "";

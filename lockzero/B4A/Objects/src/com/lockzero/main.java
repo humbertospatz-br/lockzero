@@ -497,9 +497,9 @@ _uri = (Object)(_intent.GetData());
 if (_uri== null) { 
 if (true) return "";};
  //BA.debugLineNum = 91;BA.debugLine="Log(\"=== Arquivo .lockzero recebido ===\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094221","=== Arquivo .lockzero recebido ===",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094221","=== Arquivo .lockzero recebido ===",0);
  //BA.debugLineNum = 92;BA.debugLine="Log(\"URI: \" & uri)";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094222","URI: "+BA.ObjectToString(_uri),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094222","URI: "+BA.ObjectToString(_uri),0);
  //BA.debugLineNum = 95;BA.debugLine="Dim fileName As String = \"imported_\" & DateTime.";
 _filename = "imported_"+BA.NumberToString(anywheresoftware.b4a.keywords.Common.DateTime.getNow())+".lockzero";
  //BA.debugLineNum = 96;BA.debugLine="Dim destFolder As String = Starter.Provider.Shar";
@@ -517,17 +517,17 @@ _in.Close();
  //BA.debugLineNum = 103;BA.debugLine="Out.Close";
 _out.Close();
  //BA.debugLineNum = 105;BA.debugLine="Log(\"Arquivo copiado para: \" & destFolder & \"/\"";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094235","Arquivo copiado para: "+_destfolder+"/"+_filename,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094235","Arquivo copiado para: "+_destfolder+"/"+_filename,0);
  //BA.debugLineNum = 108;BA.debugLine="Dim fileSize As Long = File.Size(destFolder, fil";
 _filesize = anywheresoftware.b4a.keywords.Common.File.Size(_destfolder,_filename);
  //BA.debugLineNum = 109;BA.debugLine="Log(\"Tamanho do arquivo: \" & fileSize & \" bytes\"";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094239","Tamanho do arquivo: "+BA.NumberToString(_filesize)+" bytes",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094239","Tamanho do arquivo: "+BA.NumberToString(_filesize)+" bytes",0);
  //BA.debugLineNum = 110;BA.debugLine="If fileSize > 0 Then";
 if (_filesize>0) { 
  //BA.debugLineNum = 111;BA.debugLine="Dim content As String = File.ReadString(destFol";
 _content = anywheresoftware.b4a.keywords.Common.File.ReadString(_destfolder,_filename);
  //BA.debugLineNum = 112;BA.debugLine="Log(\"Primeiros 100 chars: \" & content.SubString";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094242","Primeiros 100 chars: "+_content.substring((int) (0),(int) (anywheresoftware.b4a.keywords.Common.Min(100,_content.length()))),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094242","Primeiros 100 chars: "+_content.substring((int) (0),(int) (anywheresoftware.b4a.keywords.Common.Min(100,_content.length()))),0);
  };
  //BA.debugLineNum = 116;BA.debugLine="PendingBackupFile = fileName";
 _pendingbackupfile = _filename;
@@ -536,7 +536,7 @@ mostCurrent._b4xpages._showpage /*String*/ (mostCurrent.activityBA,"PageBackup")
  } 
        catch (Exception e27) {
 			processBA.setLastException(e27); //BA.debugLineNum = 122;BA.debugLine="Log(\"CheckIncomingIntent erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("564094252","CheckIncomingIntent erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(mostCurrent.activityBA)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("764094252","CheckIncomingIntent erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(mostCurrent.activityBA)),0);
  };
  //BA.debugLineNum = 124;BA.debugLine="End Sub";
 return "";

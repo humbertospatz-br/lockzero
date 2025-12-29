@@ -503,7 +503,7 @@ _modnotes._forcereload /*String*/ (ba);
  //BA.debugLineNum = 640;BA.debugLine="ModSession.EndSession";
 _modsession._endsession /*String*/ (ba);
  //BA.debugLineNum = 642;BA.debugLine="Log(\"=== DADOS LIMPOS ===\")";
-__c.LogImpl("563111184","=== DADOS LIMPOS ===",0);
+__c.LogImpl("763111184","=== DADOS LIMPOS ===",0);
  //BA.debugLineNum = 643;BA.debugLine="End Sub";
 return "";
 }

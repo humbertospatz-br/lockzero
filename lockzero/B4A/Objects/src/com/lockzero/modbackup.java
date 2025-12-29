@@ -80,7 +80,7 @@ if (anywheresoftware.b4a.keywords.Common.File.Exists(anywheresoftware.b4a.keywor
 anywheresoftware.b4a.keywords.Common.File.Delete(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),"lockzero_passwords.json");
  };
  //BA.debugLineNum = 392;BA.debugLine="Log(\"ModBackup: todos os dados foram limpos\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("56225928","ModBackup: todos os dados foram limpos",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("76225928","ModBackup: todos os dados foram limpos",0);
  //BA.debugLineNum = 393;BA.debugLine="End Sub";
 return "";
 }
@@ -107,7 +107,7 @@ String _fullpath = "";
  //BA.debugLineNum = 40;BA.debugLine="If backupPhrase.Length < 6 Then";
 if (_backupphrase.length()<6) { 
  //BA.debugLineNum = 41;BA.debugLine="Log(\"ModBackup: frase muito curta\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("55373954","ModBackup: frase muito curta",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75373954","ModBackup: frase muito curta",0);
  //BA.debugLineNum = 42;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -210,7 +210,7 @@ _encrypted = mostCurrent._modsecurity._encrypt /*String*/ (_ba,_backupphrase,_pl
  //BA.debugLineNum = 107;BA.debugLine="If encrypted = \"\" Then";
 if ((_encrypted).equals("")) { 
  //BA.debugLineNum = 108;BA.debugLine="Log(\"ModBackup: erro ao criptografar\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("55374021","ModBackup: erro ao criptografar",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75374021","ModBackup: erro ao criptografar",0);
  //BA.debugLineNum = 109;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -227,13 +227,13 @@ _lastbackuptime = anywheresoftware.b4a.keywords.Common.DateTime.getNow();
  //BA.debugLineNum = 123;BA.debugLine="SaveBackupInfo";
 _savebackupinfo(_ba);
  //BA.debugLineNum = 125;BA.debugLine="Log(\"ModBackup: backup criado em \" & fullPath)";
-anywheresoftware.b4a.keywords.Common.LogImpl("55374038","ModBackup: backup criado em "+_fullpath,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75374038","ModBackup: backup criado em "+_fullpath,0);
  //BA.debugLineNum = 126;BA.debugLine="Return fullPath";
 if (true) return _fullpath;
  } 
        catch (Exception e59) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e59); //BA.debugLineNum = 129;BA.debugLine="Log(\"ModBackup.ExportBackup erro: \" & LastExcept";
-anywheresoftware.b4a.keywords.Common.LogImpl("55374042","ModBackup.ExportBackup erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75374042","ModBackup.ExportBackup erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 130;BA.debugLine="Return \"\"";
 if (true) return "";
  };
@@ -285,7 +285,7 @@ if (true) return BA.ObjectToString(_jo.GetField("MODEL"));
  } 
        catch (Exception e6) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e6); //BA.debugLineNum = 373;BA.debugLine="Log(\"ModBackup.GetDeviceInfo erro: \" & LastExcep";
-anywheresoftware.b4a.keywords.Common.LogImpl("56160390","ModBackup.GetDeviceInfo erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("76160390","ModBackup.GetDeviceInfo erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 374;BA.debugLine="Return \"Unknown\"";
 if (true) return "Unknown";
  };
@@ -550,13 +550,13 @@ _result.Put((Object)("message"),(Object)("Backup restaurado com sucesso"));
  //BA.debugLineNum = 242;BA.debugLine="result.Put(\"stats\", stats)";
 _result.Put((Object)("stats"),(Object)(_stats.getObject()));
  //BA.debugLineNum = 244;BA.debugLine="Log(\"ModBackup: importado \" & groupsImported & \"";
-anywheresoftware.b4a.keywords.Common.LogImpl("55439590","ModBackup: importado "+BA.NumberToString(_groupsimported)+" grupos, "+BA.NumberToString(_entriesimported)+" senhas, "+BA.NumberToString(_notesimported)+" notas",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75439590","ModBackup: importado "+BA.NumberToString(_groupsimported)+" grupos, "+BA.NumberToString(_entriesimported)+" senhas, "+BA.NumberToString(_notesimported)+" notas",0);
  //BA.debugLineNum = 245;BA.debugLine="Return result";
 if (true) return _result;
  } 
        catch (Exception e78) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e78); //BA.debugLineNum = 248;BA.debugLine="Log(\"ModBackup.ImportBackup erro: \" & LastExcept";
-anywheresoftware.b4a.keywords.Common.LogImpl("55439594","ModBackup.ImportBackup erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("75439594","ModBackup.ImportBackup erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 249;BA.debugLine="result.Put(\"message\", \"Erro ao importar: \" & Las";
 _result.Put((Object)("message"),(Object)("Erro ao importar: "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage()));
  //BA.debugLineNum = 250;BA.debugLine="Return result";
@@ -621,7 +621,7 @@ _backups.Add((Object)(_info.getObject()));
  } 
        catch (Exception e17) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e17); //BA.debugLineNum = 418;BA.debugLine="Log(\"ModBackup.ListBackups erro: \" & LastExcepti";
-anywheresoftware.b4a.keywords.Common.LogImpl("56291474","ModBackup.ListBackups erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("76291474","ModBackup.ListBackups erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 421;BA.debugLine="Return backups";
 if (true) return _backups;
@@ -676,12 +676,12 @@ Object _uri = null;
 anywheresoftware.b4a.objects.IntentWrapper _shareintent = null;
  //BA.debugLineNum = 442;BA.debugLine="Public Sub ShareBackupFile(fileName As String)";
  //BA.debugLineNum = 443;BA.debugLine="Log(\"ShareBackupFile: \" & fileName)";
-anywheresoftware.b4a.keywords.Common.LogImpl("563569921","ShareBackupFile: "+_filename,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("763569921","ShareBackupFile: "+_filename,0);
  //BA.debugLineNum = 444;BA.debugLine="Try";
 try { //BA.debugLineNum = 445;BA.debugLine="Dim uri As Object = GetFileUri(fileName)";
 _uri = _getfileuri(_ba,_filename);
  //BA.debugLineNum = 446;BA.debugLine="Log(\"ShareBackupFile: URI obtido = \" & uri)";
-anywheresoftware.b4a.keywords.Common.LogImpl("563569924","ShareBackupFile: URI obtido = "+BA.ObjectToString(_uri),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("763569924","ShareBackupFile: URI obtido = "+BA.ObjectToString(_uri),0);
  //BA.debugLineNum = 448;BA.debugLine="Dim shareIntent As Intent";
 _shareintent = new anywheresoftware.b4a.objects.IntentWrapper();
  //BA.debugLineNum = 449;BA.debugLine="shareIntent.Initialize(shareIntent.ACTION_SEND,";
@@ -695,13 +695,13 @@ _shareintent.PutExtra("android.intent.extra.STREAM",_uri);
  //BA.debugLineNum = 453;BA.debugLine="shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMI";
 _shareintent.setFlags((int) (1));
  //BA.debugLineNum = 454;BA.debugLine="Log(\"ShareBackupFile: iniciando share...\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("563569932","ShareBackupFile: iniciando share...",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("763569932","ShareBackupFile: iniciando share...",0);
  //BA.debugLineNum = 455;BA.debugLine="StartActivity(shareIntent)";
 anywheresoftware.b4a.keywords.Common.StartActivity((_ba.processBA == null ? _ba : _ba.processBA),(Object)(_shareintent.getObject()));
  } 
        catch (Exception e14) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e14); //BA.debugLineNum = 457;BA.debugLine="Log(\"ShareBackupFile ERRO: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("563569935","ShareBackupFile ERRO: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("763569935","ShareBackupFile ERRO: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 459;BA.debugLine="End Sub";
 return "";

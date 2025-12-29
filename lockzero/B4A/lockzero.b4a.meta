@@ -61,6 +61,6 @@ ModuleClosedNodes6=
 ModuleClosedNodes7=
 ModuleClosedNodes8=
 ModuleClosedNodes9=
-NavigationStack=B4XMainPage,Class_Globals,21,0,ModSecurity,RemoveAccents,75,0,ModSecurity,ValidatePassphraseStrength,63,0,PageSettings,Class_Globals,9,0,ModSecurity,NormalizePassphrase,63,0,ModLang,Process_Globals,7,0,ModBackup,InitSharedFolder,24,0,ModBackup,GetSharedFolder,37,0,ModBackup,ExportBackup,39,0,ModLang,LoadPortuguese,89,0,Main,Activity_Create,38,0
+NavigationStack=ModSecurity,RemoveAccents,75,0,ModSecurity,ValidatePassphraseStrength,63,0,PageSettings,Class_Globals,9,0,ModSecurity,NormalizePassphrase,63,0,ModLang,Process_Globals,7,0,ModBackup,InitSharedFolder,24,0,ModBackup,GetSharedFolder,37,0,ModBackup,ExportBackup,39,0,ModLang,LoadPortuguese,89,0,Main,Activity_Create,38,0,Main,Globals,34,0
 SelectedBuild=0
 VisibleModules=20,1,2,3,4,5,6,7,8,9

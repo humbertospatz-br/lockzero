@@ -338,7 +338,7 @@ _notes.Add((Object)(_note));
  } 
        catch (Exception e16) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e16); //BA.debugLineNum = 204;BA.debugLine="Log(\"ModNotes.LoadNotes erro: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("57864339","ModNotes.LoadNotes erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("77864339","ModNotes.LoadNotes erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 206;BA.debugLine="End Sub";
 return "";
@@ -433,7 +433,7 @@ anywheresoftware.b4a.keywords.Common.File.WriteString(anywheresoftware.b4a.keywo
  } 
        catch (Exception e12) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e12); //BA.debugLineNum = 222;BA.debugLine="Log(\"ModNotes.SaveNotes erro: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("57929870","ModNotes.SaveNotes erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("77929870","ModNotes.SaveNotes erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 224;BA.debugLine="End Sub";
 return "";

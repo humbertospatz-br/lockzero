@@ -19,7 +19,7 @@ Library6=reflection
 Library7=stringutils
 Library8=xui views
 Library9=fileprovider
-ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~SetActivityAttribute(Main, android:launchMode, "singleTask")~\n~'FileProvider~\n~  AddApplicationText(~\n~  <provider~\n~  android:name="androidx.core.content.FileProvider"~\n~  android:authorities="$PACKAGE$.provider"~\n~  android:exported="false"~\n~  android:grantUriPermissions="true">~\n~  <meta-data~\n~  android:name="android.support.FILE_PROVIDER_PATHS"~\n~  android:resource="@xml/provider_paths"/>~\n~  </provider>~\n~  )~\n~~\n~  CreateResource(xml, provider_paths,~\n~  <files-path name="name" path="shared" />~\n~  )~\n~'Intent-filter para arquivos .lockzero~\n~ AddActivityText(Main,~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content" android:mimeType="application/vnd.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="file" android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content"~\n~          android:mimeType="application/octet-stream"~\n~          android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  )~\n~
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~SetActivityAttribute(Main, android:launchMode, "singleTask")~\n~'FileProvider~\n~  AddApplicationText(~\n~  <provider~\n~  android:name="androidx.core.content.FileProvider"~\n~  android:authorities="$PACKAGE$.provider"~\n~  android:exported="false"~\n~  android:grantUriPermissions="true">~\n~  <meta-data~\n~  android:name="android.support.FILE_PROVIDER_PATHS"~\n~  android:resource="@xml/provider_paths"/>~\n~  </provider>~\n~  )~\n~~\n~  CreateResource(xml, provider_paths,~\n~  <files-path name="name" path="shared" />~\n~  )~\n~'Intent-filter para arquivos .lockzero~\n~ AddActivityText(Main,~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content" android:mimeType="application/vnd.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="file" android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content"~\n~          android:mimeType="application/octet-stream"~\n~          android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  )~\n~  'Intent-filter para arquivos .csv~\n~ AddActivityText(Main,~\n~ <intent-filter>~\n~   <action android:name="android.intent.action.VIEW"/>~\n~   <category android:name="android.intent.category.DEFAULT"/>~\n~   <data android:scheme="content" android:mimeType="text/csv"/>~\n~ </intent-filter>~\n~ <intent-filter>~\n~   <action android:name="android.intent.action.VIEW"/>~\n~   <category android:name="android.intent.category.DEFAULT"/>~\n~   <data android:scheme="content" android:mimeType="text/comma-separated-values"/>~\n~ </intent-filter>~\n~ )~\n~~\n~
 Module1=B4XMainPage
 Module10=ModSession
 Module11=ModTheme
@@ -64,6 +64,8 @@ Version=13.4
 Sub Process_Globals
 	Public ActionBarHomeClicked As Boolean
 	Public PendingBackupFile As String 'Arquivo .lockzero recebido externamente
+	Public PendingCSVFile As String 'Arquivo .csv recebido externamente
+	Public PendingCSVFolder As String
 End Sub
 
 Sub Globals
@@ -76,6 +78,7 @@ Sub Globals
 	Private pgNotesList As PageNotesList
 	Private pgNoteEdit As PageNoteEdit
 	Private pgSettings As PageSettings
+	Private pgImportCSV As PageImportCSV
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
@@ -97,6 +100,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	pgNotesList.Initialize
 	pgNoteEdit.Initialize
 	pgSettings.Initialize
+	pgImportCSV.Initialize
 
 	B4XPages.AddPageAndCreate("PagePasswords", pgPasswords)
 	B4XPages.AddPageAndCreate("PagePasswordList", pgPasswordList)
@@ -106,6 +110,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	B4XPages.AddPageAndCreate("PageNotesList", pgNotesList)
 	B4XPages.AddPageAndCreate("PageNoteEdit", pgNoteEdit)
 	B4XPages.AddPageAndCreate("PageSettings", pgSettings)
+	B4XPages.AddPageAndCreate("PageImportCSV", pgImportCSV)
 
 	B4XPages.GetManager.LogEvents = True
 
@@ -121,10 +126,10 @@ Sub Activity_Create(FirstTime As Boolean)
 	CheckIncomingIntent
 End Sub
 
-'Processa intent de arquivo .lockzero recebido
+'Processa intent de arquivo .lockzero ou .csv recebido
 Private Sub CheckIncomingIntent
 	'Evita processar mesmo intent duas vezes
-	If PendingBackupFile <> "" Then Return
+	If PendingBackupFile <> "" Or PendingCSVFile <> "" Then Return
 
 	Dim Intent As Intent = Activity.GetStartingIntent
 
@@ -135,35 +140,69 @@ Private Sub CheckIncomingIntent
 		Dim uri As Object = Intent.GetData
 		If uri = Null Then Return
 
-		Log("=== Arquivo .lockzero recebido ===")
-		Log("URI: " & uri)
+		Dim uriStr As String = uri
+		Dim mimeType As String = Intent.GetType
 
-		'Copia arquivo para pasta shared
-		Dim fileName As String = "imported_" & DateTime.Now & ".lockzero"
-		Dim destFolder As String = Starter.Provider.SharedFolder
+		Log("=== Arquivo recebido via Intent ===")
+		Log("URI: " & uriStr)
+		Log("MimeType: " & mimeType)
 
-		'Usa ContentResolver para ler o arquivo
-		Dim In As InputStream = ContentResolver_OpenInputStream(uri)
-		Dim Out As OutputStream = File.OpenOutput(destFolder, fileName, False)
-		File.Copy2(In, Out)
-		In.Close
-		Out.Close
-
-		Log("Arquivo copiado para: " & destFolder & "/" & fileName)
-
-		'Debug: verificar conteudo do arquivo copiado
-		Dim fileSize As Long = File.Size(destFolder, fileName)
-		Log("Tamanho do arquivo: " & fileSize & " bytes")
-		If fileSize > 0 Then
-			Dim content As String = File.ReadString(destFolder, fileName)
-			Log("Primeiros 100 chars: " & content.SubString2(0, Min(100, content.Length)))
+		'Detecta tipo de arquivo
+		Dim isCSV As Boolean = False
+		If mimeType <> "" Then
+			If mimeType.ToLowerCase.Contains("csv") Or mimeType.ToLowerCase.Contains("comma-separated") Then
+				isCSV = True
+			End If
+		End If
+		If uriStr.ToLowerCase.EndsWith(".csv") Then
+			isCSV = True
 		End If
 
-		'Marca para importar
-		PendingBackupFile = fileName
+		Dim destFolder As String = Starter.Provider.SharedFolder
 
-		'Abre tela de backup
-		B4XPages.ShowPage("PageBackup")
+		If isCSV Then
+			'=== CSV - Importar senhas ===
+			Log("Detectado arquivo CSV")
+			Dim fileName As String = "import_" & DateTime.Now & ".csv"
+
+			Dim In As InputStream = ContentResolver_OpenInputStream(uri)
+			Dim Out As OutputStream = File.OpenOutput(destFolder, fileName, False)
+			File.Copy2(In, Out)
+			In.Close
+			Out.Close
+
+			Log("CSV copiado para: " & destFolder & "/" & fileName)
+
+			'Marca para importar
+			PendingCSVFile = fileName
+			PendingCSVFolder = destFolder
+
+			'Configura e abre PageImportCSV
+			pgImportCSV.SetCSVFile(destFolder, fileName)
+			B4XPages.ShowPage("PageImportCSV")
+		Else
+			'=== LOCKZERO - Backup ===
+			Log("Detectado arquivo .lockzero")
+			Dim fileName As String = "imported_" & DateTime.Now & ".lockzero"
+
+			Dim In As InputStream = ContentResolver_OpenInputStream(uri)
+			Dim Out As OutputStream = File.OpenOutput(destFolder, fileName, False)
+			File.Copy2(In, Out)
+			In.Close
+			Out.Close
+
+			Log("Arquivo copiado para: " & destFolder & "/" & fileName)
+
+			'Debug: verificar conteudo
+			Dim fileSize As Long = File.Size(destFolder, fileName)
+			Log("Tamanho do arquivo: " & fileSize & " bytes")
+
+			'Marca para importar
+			PendingBackupFile = fileName
+
+			'Abre tela de backup
+			B4XPages.ShowPage("PageBackup")
+		End If
 
 	Catch
 		Log("CheckIncomingIntent erro: " & LastException)
