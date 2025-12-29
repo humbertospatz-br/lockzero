@@ -10,6 +10,46 @@
 
 ## 2025-12-29
 
+### [2025-12-29 16:00] - PIN e Biometria - Fase 1 e 3
+
+**Descricao:** Implementacao de autenticacao por PIN e Biometria ao iniciar o app
+
+**ModSecurity.bas - Funcoes de PIN:**
+- HasPIN() - Verifica se PIN esta configurado
+- SavePIN(pin) - Salva PIN (4-8 digitos) com Base64
+- ValidatePIN(inputPin) - Valida PIN digitado
+- RemovePIN() - Remove PIN configurado
+- GetUseBiometric/SetUseBiometric - Config biometria
+
+**ModLang.bas - Textos PT/EN:**
+- pin_title, pin_enter, pin_create, pin_confirm
+- pin_wrong, pin_saved, pin_removed, pin_mismatch, pin_too_short
+- biometric_title, biometric_prompt, biometric_or_pin, biometric_failed
+
+**B4XMainPage.bas - Fluxo de Autenticacao:**
+- pnlLock overlay escuro com campo PIN
+- Biometria acionada automaticamente se habilitada
+- Callback Biometric_Complete para sucesso/falha
+- Fallback para PIN se biometria falhar
+- IsAuthenticated flag controla acesso
+
+**lockzero.b4a:**
+- BiometricManager registrado como Module22 (NumberOfModules=22)
+
+**Arquivos modificados:**
+- ModSecurity.bas - Funcoes PIN e biometria
+- ModLang.bas - Textos PT/EN
+- B4XMainPage.bas - Lock screen e fluxo autenticacao
+- lockzero.b4a - Registro BiometricManager
+- docs/TODO_LIST.md - Atualizado
+- docs/HISTORICO.md - Este arquivo
+
+**Pendente (Fase 2 e 4):**
+- PageSettings - Fluxo criar/remover PIN
+- Biometria em operacoes sensiveis (delete)
+
+---
+
 ### [2025-12-29 14:00] - Importacao CSV + Performance + Bug Fixes
 
 **Descricao:** Implementacao de importacao CSV do Chrome/Edge/Safari + otimizacoes de performance

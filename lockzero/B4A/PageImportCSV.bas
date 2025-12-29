@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=Class
@@ -18,6 +18,7 @@ Sub Class_Globals
 	'UI - Info
 	Private lblInfo As Label
 	Private lblSelected As Label
+	Private btnToggleAll As Button
 
 	'UI - Lista
 	Private svEntries As ScrollView
@@ -37,6 +38,7 @@ Sub Class_Globals
 	'Arquivo CSV
 	Private CSVFolder As String
 	Private CSVFileName As String
+	Private LastParsedFile As String 'Para detectar se arquivo mudou
 
 	'Dialog Overlay
 	Private pnlOverlay As Panel
@@ -55,6 +57,7 @@ Public Sub Initialize
 	SelectedIndexes.Initialize
 	SelectedGroupId = ""
 	SelectedGroupName = ""
+	LastParsedFile = ""
 End Sub
 
 'Recebe o caminho do arquivo CSV
@@ -72,13 +75,31 @@ End Sub
 Private Sub B4XPage_Appear
 	CallSub2(Main, "SetPageTitle", ModLang.T("import_csv"))
 
-	'Carrega CSV se ainda nao carregou
-	If CSVEntries.Size = 0 And CSVFileName <> "" Then
-		ParseCSV
-		LoadEntries
+	'Carrega CSV se ainda nao carregou OU se arquivo mudou
+	If CSVFileName <> "" Then
+		Dim fullPath As String = CSVFolder & "/" & CSVFileName
+		If CSVEntries.Size = 0 Or fullPath <> LastParsedFile Then
+			Log("Parseando CSV: " & CSVFileName)
+			'Limpa estado anterior
+			CSVEntries.Initialize
+			SelectedIndexes.Initialize
+			SelectedGroupId = ""
+			SelectedGroupName = ""
+			'Parseia novo arquivo
+			ParseCSV
+			LastParsedFile = fullPath
+			LoadEntries
+		End If
 	End If
 
 	UpdateInfo
+End Sub
+
+Private Sub B4XPage_Disappear
+	'Limpa apenas os pendentes do Main para permitir novas importacoes
+	'NAO limpa CSVEntries/SelectedIndexes aqui pois o app pode ir para background temporariamente
+	Main.PendingCSVFile = ""
+	Main.PendingCSVFolder = ""
 End Sub
 
 ' ============================================
@@ -142,13 +163,12 @@ Private Sub CreateUI
 	pnlInfo.AddView(lblSelected, 16dip, 35dip, width - 150dip, 25dip)
 
 	'Botao Selecionar/Desmarcar Todos
-	Dim btnToggle As Button
-	btnToggle.Initialize("btnToggleAll")
-	btnToggle.Text = ModLang.T("csv_select_all")
-	btnToggle.TextSize = Starter.FONT_CAPTION
-	btnToggle.Color = ModTheme.HomeIconBg
-	btnToggle.TextColor = Colors.White
-	pnlInfo.AddView(btnToggle, width - 140dip, 30dip, 125dip, 35dip)
+	btnToggleAll.Initialize("btnToggleAll")
+	btnToggleAll.Text = ModLang.T("csv_select_all")
+	btnToggleAll.TextSize = Starter.FONT_CAPTION
+	btnToggleAll.Color = ModTheme.HomeIconBg
+	btnToggleAll.TextColor = Colors.White
+	pnlInfo.AddView(btnToggleAll, width - 140dip, 30dip, 125dip, 35dip)
 
 	'===========================================
 	' LISTA DE ENTRADAS
@@ -282,7 +302,7 @@ Private Sub ParseCSV
 			End If
 
 			CSVEntries.Add(entry)
-			SelectedIndexes.Add(CSVEntries.Size - 1) 'Seleciona por padrao
+			'NAO seleciona por padrao - usuario deve escolher
 		Next
 
 		Log("CSV: " & CSVEntries.Size & " entradas validas")
@@ -359,14 +379,19 @@ Private Sub LoadEntries
 		xvItem.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
 		pnlEntries.AddView(pnlItem, 12dip, y, width - 24dip, itemHeight)
 
-		'Checkbox (simulado com Label)
+		'Checkbox (simulado com Label) - melhor contraste
 		Dim isSelected As Boolean = SelectedIndexes.IndexOf(i) >= 0
 		Dim lblCheck As Label
 		lblCheck.Initialize("lblCheck")
 		lblCheck.Tag = i
-		lblCheck.Text = IIf(isSelected, Chr(9745), Chr(9744)) 'Checkbox unicode
-		lblCheck.TextSize = 24
-		lblCheck.TextColor = IIf(isSelected, ModTheme.Success, Colors.ARGB(150, 255, 255, 255))
+		If isSelected Then
+			lblCheck.Text = Chr(9745) 'Checked
+			lblCheck.TextColor = Colors.RGB(100, 255, 100) 'Verde claro
+		Else
+			lblCheck.Text = Chr(9744) 'Unchecked
+			lblCheck.TextColor = Colors.White 'Branco para melhor contraste
+		End If
+		lblCheck.TextSize = 26
 		lblCheck.Gravity = Gravity.CENTER
 		pnlItem.AddView(lblCheck, 5dip, 0, 40dip, itemHeight)
 
@@ -411,6 +436,13 @@ Private Sub UpdateInfo
 	lblInfo.Text = CSVEntries.Size & " " & ModLang.T("csv_entries_found")
 	lblSelected.Text = ModLang.T("csv_selected") & ": " & SelectedIndexes.Size
 	btnImport.Text = ModLang.T("csv_import_btn") & " (" & SelectedIndexes.Size & ")"
+
+	'Alterna texto do botao toggle
+	If SelectedIndexes.Size = CSVEntries.Size And CSVEntries.Size > 0 Then
+		btnToggleAll.Text = ModLang.T("csv_deselect_all")
+	Else
+		btnToggleAll.Text = ModLang.T("csv_select_all")
+	End If
 
 	If SelectedGroupName <> "" Then
 		btnSelectGroup.Text = SelectedGroupName
@@ -480,8 +512,14 @@ Private Sub btnImport_Click
 		Return
 	End If
 
-	'Pede a frase-senha
-	ShowPassphraseDialog
+	'Se sessao ja esta ativa, importa direto sem pedir frase
+	If ModSession.IsSessionActive Then
+		Log("Sessao ativa - importando direto")
+		DoImport(ModSession.GetPassphrase)
+	Else
+		'Pede a frase-senha
+		ShowPassphraseDialog
+	End If
 End Sub
 
 Private Sub pnlOverlay_Click
@@ -569,10 +607,20 @@ End Sub
 Private Sub btnGroupItem_Click
 	Dim btn As Button = Sender
 	Dim tag As String = btn.Tag
-	Dim parts() As String = Regex.Split("\\|", tag)
 
-	SelectedGroupId = parts(0)
-	SelectedGroupName = parts(1)
+	Log("=== btnGroupItem_Click ===")
+	Log("Tag: " & tag)
+
+	'Usa IndexOf em vez de Regex.Split (mais confiavel)
+	Dim pipePos As Int = tag.IndexOf("|")
+	If pipePos > 0 Then
+		SelectedGroupId = tag.SubString2(0, pipePos)
+		SelectedGroupName = tag.SubString(pipePos + 1)
+		Log("SelectedGroupId: " & SelectedGroupId)
+		Log("SelectedGroupName: " & SelectedGroupName)
+	Else
+		Log("ERRO: Tag invalida - pipe nao encontrado: " & tag)
+	End If
 
 	HideDialog
 	UpdateInfo
@@ -803,13 +851,20 @@ Private Sub btnUnlockGroup_Click
 		Return
 	End If
 
+	Log("=== btnUnlockGroup_Click ===")
+	Log("SelectedGroupId: " & SelectedGroupId)
+	Log("SelectedGroupName: " & SelectedGroupName)
+
 	'Valida frase com o grupo
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(SelectedGroupId)
 	If g.IsInitialized = False Then
-		ToastMessageShow(ModLang.T("error"), True)
+		Log("ERRO: Grupo nao encontrado com ID: " & SelectedGroupId)
+		ToastMessageShow(ModLang.T("error") & " - Grupo não encontrado", True)
 		HideDialog
 		Return
 	End If
+
+	Log("Grupo encontrado: " & g.Name)
 
 	If g.ValidatePhrase(phrase) = False Then
 		ToastMessageShow(ModLang.T("wrong_passphrase"), True)
@@ -856,13 +911,6 @@ Private Sub DoImport(phrase As String)
 	Dim imported As Int = 0
 	Dim updated As Int = 0
 
-	'Pega grupo para usar o salt
-	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(SelectedGroupId)
-	If g.IsInitialized = False Then
-		ToastMessageShow(ModLang.T("error"), True)
-		Return
-	End If
-
 	For Each idx As Int In SelectedIndexes
 		Dim csvEntry As Map = CSVEntries.Get(idx)
 
@@ -874,14 +922,34 @@ Private Sub DoImport(phrase As String)
 
 		If name = "" Then name = url
 
+		Log("=== Importando: " & name & " ===")
+		Log("Username plain: " & username)
+		Log("Password plain: " & password.SubString2(0, Min(3, password.Length)) & "***")
+		Log("Session active: " & ModSession.IsSessionActive)
+
+		'Criptografa os campos
+		Dim encUsername As String = ModSession.Encrypt(username)
+		Dim encPassword As String = ModSession.Encrypt(password)
+		Dim encNote As String = ""
+		If note <> "" Then encNote = ModSession.Encrypt(note)
+
+		Log("Username enc: " & encUsername.SubString2(0, Min(20, encUsername.Length)) & "...")
+		Log("Password enc: " & encPassword.SubString2(0, Min(20, encPassword.Length)) & "...")
+
+		'Verifica se criptografia funcionou
+		If encUsername = "" Or encPassword = "" Then
+			Log("ERRO: Criptografia falhou!")
+			Continue
+		End If
+
 		'Verifica duplicata (mesmo URL + username no grupo)
 		Dim existingId As String = FindExistingEntry(url, username)
 
 		If existingId <> "" Then
 			'Atualiza existente
 			Dim existing As clsPasswordEntry = ModPasswords.GetEntryById(existingId)
-			existing.PasswordEnc = ModSecurity.EncryptAES(password, phrase, g.Salt)
-			If note <> "" Then existing.Notes = ModSecurity.EncryptAES(note, phrase, g.Salt)
+			existing.PasswordEnc = encPassword
+			If encNote <> "" Then existing.Notes = encNote
 			existing.UpdatedAt = DateTime.Now
 			ModPasswords.SaveEntry(existing)
 			updated = updated + 1
@@ -892,40 +960,44 @@ Private Sub DoImport(phrase As String)
 			e.GroupId = SelectedGroupId
 			e.Name = name
 			e.Url = url
-			e.Username = ModSecurity.EncryptAES(username, phrase, g.Salt)
-			e.PasswordEnc = ModSecurity.EncryptAES(password, phrase, g.Salt)
-			If note <> "" Then e.Notes = ModSecurity.EncryptAES(note, phrase, g.Salt)
+			e.Username = encUsername
+			e.PasswordEnc = encPassword
+			If encNote <> "" Then e.Notes = encNote
 			ModPasswords.SaveEntry(e)
 			imported = imported + 1
 		End If
 	Next
 
-	'Mostra resultado
-	Dim msg As String = imported & " " & ModLang.T("csv_imported")
-	If updated > 0 Then
-		msg = msg & CRLF & updated & " " & ModLang.T("csv_updated")
-	End If
-
-	xui.MsgboxAsync(msg, ModLang.T("success"))
-
-	'Limpa e volta
+	'Limpa tudo ANTES de fechar para evitar que tela reapareça com dados antigos
+	Main.PendingCSVFile = ""
+	Main.PendingCSVFolder = ""
 	CSVEntries.Initialize
 	SelectedIndexes.Initialize
+	CSVFileName = ""
+	CSVFolder = ""
+	LastParsedFile = ""
+	SelectedGroupId = ""
+	SelectedGroupName = ""
+
+	'Fecha a pagina primeiro
 	B4XPages.ClosePage(Me)
+
+	'Mostra resultado via Toast (nao bloqueia)
+	Dim msg As String = imported & " " & ModLang.T("csv_imported")
+	If updated > 0 Then
+		msg = msg & ", " & updated & " " & ModLang.T("csv_updated")
+	End If
+	ToastMessageShow(msg, True)
 End Sub
 
 'Busca entrada existente pelo URL + username
 Private Sub FindExistingEntry(url As String, username As String) As String
 	Dim entries As List = ModPasswords.GetEntriesByGroup(SelectedGroupId)
 
-	'Pega grupo para decriptar
-	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(SelectedGroupId)
-	Dim phrase As String = ModSession.GetPassphrase
-
 	For Each e As clsPasswordEntry In entries
 		If e.Url.ToLowerCase = url.ToLowerCase Then
 			'Decripta username para comparar
-			Dim decryptedUser As String = ModSecurity.DecryptAES(e.Username, phrase, g.Salt)
+			Dim decryptedUser As String = ModSession.Decrypt(e.Username)
 			If decryptedUser.ToLowerCase = username.ToLowerCase Then
 				Return e.Id
 			End If

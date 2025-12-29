@@ -22,6 +22,12 @@ Sub Class_Globals
 	Private svEntries As ScrollView
 	Private pnlEntries As B4XView
 
+	'Busca
+	Private edtSearch As EditText
+	Private lblClearSearch As Label
+	Private AllEntries As List 'Lista completa de entradas
+	Private FilteredEntries As List 'Lista filtrada pela busca
+
 	'Timer para limpar clipboard
 	Private tmrClipboard As Timer
 	Private ClipboardCountdown As Int
@@ -41,6 +47,8 @@ End Sub
 Public Sub Initialize
 	tmrClipboard.Initialize("tmrClipboard", 1000)
 	tmrSession.Initialize("tmrSession", 1000)
+	AllEntries.Initialize
+	FilteredEntries.Initialize
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -124,6 +132,7 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 	Dim headerH As Int = 56dip
+	Dim searchH As Int = 54dip
 
 	'Header com seta voltar, titulo e botao +
 	Dim pnlHeader As Panel
@@ -175,10 +184,44 @@ Private Sub CreateUI
 	Dim xvAdd As B4XView = lblAdd
 	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 20dip)
 
+	'Barra de busca
+	Dim pnlSearch As Panel
+	pnlSearch.Initialize("")
+	pnlSearch.Color = ModTheme.HomeBg
+	Root.AddView(pnlSearch, 0, headerH, width, searchH)
+
+	edtSearch.Initialize("edtSearch")
+	edtSearch.Hint = ModLang.T("search_hint")
+	edtSearch.SingleLine = True
+	edtSearch.Text = ""
+	edtSearch.TextSize = Starter.FONT_BODY
+	edtSearch.TextColor = Colors.White
+	edtSearch.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	Dim pnlSearchInput As Panel
+	pnlSearchInput.Initialize("")
+	pnlSearchInput.Color = ModTheme.HomeIconBg
+	pnlSearch.AddView(pnlSearchInput, 16dip, 5dip, width - 32dip, 44dip)
+
+	'Arredondar cantos do input
+	Dim xvSearchInput As B4XView = pnlSearchInput
+	xvSearchInput.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+
+	pnlSearchInput.AddView(edtSearch, 12dip, 0, width - 100dip, 44dip)
+
+	'Botao X para limpar busca
+	lblClearSearch.Initialize("lblClearSearch")
+	lblClearSearch.Text = "X"
+	lblClearSearch.TextSize = 16
+	lblClearSearch.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblClearSearch.Gravity = Gravity.CENTER
+	lblClearSearch.Visible = False
+	pnlSearchInput.AddView(lblClearSearch, width - 80dip, 2dip, 40dip, 40dip)
+
 	'Lista de senhas
 	svEntries.Initialize(0)
 	svEntries.Color = ModTheme.HomeBg
-	Root.AddView(svEntries, 0, headerH, width, height - headerH)
+	Root.AddView(svEntries, 0, headerH + searchH, width, height - headerH - searchH)
 
 	pnlEntries = svEntries.Panel
 	pnlEntries.Color = ModTheme.HomeBg
@@ -222,14 +265,52 @@ End Sub
 ' ============================================
 
 Private Sub LoadEntries
+	'Carrega todas as entradas do grupo
+	AllEntries = ModPasswords.GetEntriesByGroup(CurrentGroupId)
+
+	'Limpa busca e exibe todas
+	edtSearch.Text = ""
+	FilteredEntries.Initialize
+	For Each e As clsPasswordEntry In AllEntries
+		FilteredEntries.Add(e)
+	Next
+
+	DisplayEntries
+End Sub
+
+'Filtra entradas com base no texto de busca
+Private Sub FilterEntries(query As String)
+	FilteredEntries.Initialize
+	Dim q As String = query.ToLowerCase.Trim
+
+	If q.Length = 0 Then
+		'Sem filtro - mostra todas
+		For Each e As clsPasswordEntry In AllEntries
+			FilteredEntries.Add(e)
+		Next
+	Else
+		'Filtra por nome ou URL
+		For Each e As clsPasswordEntry In AllEntries
+			Dim name As String = e.GetDisplayName.ToLowerCase
+			Dim url As String = e.Url.ToLowerCase
+			If name.Contains(q) Or url.Contains(q) Then
+				FilteredEntries.Add(e)
+			End If
+		Next
+	End If
+
+	DisplayEntries
+End Sub
+
+'Exibe as entradas filtradas na lista
+Private Sub DisplayEntries
 	pnlEntries.RemoveAllViews
 
-	Dim entries As List = ModPasswords.GetEntriesByGroup(CurrentGroupId)
 	Dim width As Int = Root.Width
 	Dim itemHeight As Int = 80dip
 	Dim y As Int = 16dip
 
-	If entries.Size = 0 Then
+	If FilteredEntries.Size = 0 Then
 		Dim lblEmpty As B4XView = CreateLabel(ModLang.T("empty"), 14, False)
 		lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
 		pnlEntries.AddView(lblEmpty, 0, 100dip, width, 40dip)
@@ -237,7 +318,7 @@ Private Sub LoadEntries
 		Return
 	End If
 
-	For Each e As clsPasswordEntry In entries
+	For Each e As clsPasswordEntry In FilteredEntries
 		Dim pnlItem As Panel
 		pnlItem.Initialize("pnlEntry")
 		pnlItem.Tag = e.Id
@@ -316,6 +397,21 @@ Private Sub btnAdd_Click
 	Else
 		NavigateToAddPassword
 	End If
+End Sub
+
+'Evento de busca - filtra conforme digita
+Private Sub edtSearch_TextChanged(Old As String, New As String)
+	ModSession.Touch
+	FilterEntries(New)
+	'Mostra/esconde botao X
+	lblClearSearch.Visible = (New.Length > 0)
+End Sub
+
+'Limpa o campo de busca
+Private Sub lblClearSearch_Click
+	edtSearch.Text = ""
+	lblClearSearch.Visible = False
+	FilterEntries("")
 End Sub
 
 Private Sub pnlOverlay_Click
@@ -565,15 +661,14 @@ Private Sub ShowEntryDetails(entryId As String)
 	Dim password As String = ModPasswords.DecryptValue(e.PasswordEnc)
 	Dim notes As String = ModPasswords.DecryptValue(e.Notes)
 
-	Dim details As String = e.GetDisplayName & CRLF & CRLF
+	Dim details As String = ""
 	If e.Url <> "" Then
-		details = details & ModLang.T("url") & ": " & e.Url & CRLF
+		details = e.Url & CRLF & CRLF
 	End If
-	details = details & ModLang.T("username") & ": " & username & CRLF
-	details = details & ModLang.T("password") & ": " & password & CRLF
-
+	details = details & ModLang.T("username") & ": " & username & CRLF & CRLF
+	details = details & ModLang.T("password") & ": " & password
 	If notes <> "" Then
-		details = details & CRLF & ModLang.T("note") & ": " & notes
+		details = details & CRLF & CRLF & ModLang.T("note") & ": " & notes
 	End If
 
 	Wait For (xui.Msgbox2Async(details, e.GetDisplayName, ModLang.T("copy"), ModLang.T("close"), ModLang.T("edit"), Null)) Msgbox_Result(Result As Int)
@@ -589,7 +684,9 @@ Private Sub ShowEntryOptions(entryId As String)
 	Dim e As clsPasswordEntry = ModPasswords.GetEntryById(entryId)
 	If e.IsInitialized = False Then Return
 
-	Wait For (xui.Msgbox2Async(e.GetDisplayName, "", ModLang.T("edit"), ModLang.T("delete"), ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+	'Msgbox2Async params: Message, Title, Positive, Cancel, Negative, Icon
+	'Positive=Edit, Cancel=Cancel, Negative=Delete
+	Wait For (xui.Msgbox2Async(e.GetDisplayName, "", ModLang.T("edit"), ModLang.T("cancel"), ModLang.T("delete"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
 		EditEntry(entryId)
@@ -610,14 +707,22 @@ Private Sub EditEntry(entryId As String)
 End Sub
 
 Private Sub ConfirmDeleteEntry(entryId As String)
+	'SEGURANCA: Verifica se sessao esta ativa antes de permitir exclusao
+	If ModSession.IsSessionActive = False Then
+		ToastMessageShow(ModLang.T("session_expired"), True)
+		Return
+	End If
+
 	Dim e As clsPasswordEntry = ModPasswords.GetEntryById(entryId)
 	If e.IsInitialized = False Then Return
 
 	Wait For (xui.Msgbox2Async(ModLang.T("confirm_delete_msg"), ModLang.T("confirm_delete"), ModLang.T("delete"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
+		ModSession.Touch 'Renova sessao
 		ModPasswords.DeleteEntry(entryId)
 		LoadEntries
+		ToastMessageShow(ModLang.T("success"), False)
 	End If
 End Sub
 

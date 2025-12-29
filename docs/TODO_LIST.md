@@ -11,6 +11,120 @@
 
 ---
 
+## EM ANDAMENTO - PIN e Biometria (2025-12-29)
+
+> **Origem:** Seguranca adicional para operacoes sensiveis
+> **Status:** EM IMPLEMENTACAO
+> **Referencia:** LockSeed (BiometricManager.bas, ModSecurity.bas)
+
+### DEFINICOES
+
+- **Biometria tem PREFERENCIA sobre PIN** (PIN e fallback)
+- **PIN obrigatorio se configurado** (senao, nao pede nada)
+- **PIN:** 4 a 8 digitos
+- **BiometricManager.bas:** JA EXISTE no projeto
+
+### FLUXO DE AUTENTICACAO
+
+```
+INICIAR APP:
+├─ Tem PIN configurado?
+│  ├─ NAO → Entrar direto (sem PIN)
+│  └─ SIM → Autenticar:
+│           ├─ Biometria habilitada + disponivel? → Pedir biometria
+│           │   └─ Falhou? → Fallback para PIN
+│           └─ Sem biometria → Pedir PIN
+│               └─ PIN correto? → Entrar no app
+
+OPERACAO SENSIVEL (deletar grupo/senha):
+├─ Sessao ativa?
+│  ├─ SIM + Biometria habilitada → Pedir biometria (ou PIN fallback)
+│  ├─ SIM + Sem biometria → Confirmar com dialog simples
+│  └─ NAO → Pedir frase-senha completa
+```
+
+### TAREFAS - FASE 1: Estrutura Base
+
+- [x] [2025-12-29] `BiometricManager.bas` - JA EXISTE no projeto
+- [x] [2025-12-29] Registrar BiometricManager em lockzero.b4a (Module22)
+- [x] [2025-12-29] Adicionar em ModSecurity.bas:
+  - `PIN_FILE = "lockzero_pin.dat"`
+  - `HasPIN() As Boolean`
+  - `SavePIN(pin As String)`
+  - `ValidatePIN(inputPin As String) As Boolean`
+  - `RemovePIN()`
+  - `GetUseBiometric() As Boolean`
+  - `SetUseBiometric(use As Boolean)`
+- [x] [2025-12-29] Adicionar textos em ModLang.bas:
+  - `pin_title`, `pin_enter`, `pin_create`, `pin_confirm`
+  - `pin_wrong`, `pin_removed`, `pin_saved`
+  - `biometric_title`, `biometric_prompt`, `biometric_or_pin`
+
+### TAREFAS - FASE 2: Tela de Configuracoes
+
+- [ ] [2025-12-29] PageSettings - Implementar fluxo criar PIN (digitar 2x, 4-8 digitos)
+- [ ] [2025-12-29] PageSettings - Implementar fluxo remover PIN (pedir PIN atual)
+- [ ] [2025-12-29] PageSettings - Toggle biometria (so aparece se PIN configurado)
+
+### TAREFAS - FASE 3: Inicializacao do App
+
+- [x] [2025-12-29] B4XMainPage - Verificar PIN ao iniciar (se configurado)
+- [x] [2025-12-29] Dialog de autenticacao: biometria primeiro, PIN fallback
+- [x] [2025-12-29] Bloquear app ate autenticar (pnlLock overlay)
+
+### TAREFAS - FASE 4: Operacoes Sensiveis
+
+- [ ] [2025-12-29] PagePasswords - Ao deletar grupo:
+  - Se sessao ATIVA + biometria → pedir biometria
+  - Se sessao INATIVA → pedir frase
+- [ ] [2025-12-29] PagePasswordList - Ao deletar senha:
+  - Se sessao ATIVA + biometria → pedir biometria
+  - Se sessao INATIVA → pedir frase
+
+---
+
+## FUTURO - Troca de Frase-Senha (2025-12-29)
+
+> **Origem:** Seguranca - permitir trocar frase comprometida
+> **Status:** PLANEJAMENTO INICIAL
+> **Prioridade:** MEDIA (apos PIN/Biometria)
+
+### COMPLEXIDADE
+
+A troca de frase envolve:
+1. Verificar modo atual (frase unica vs por categoria)
+2. Descriptografar TODOS os dados com frase antiga
+3. Recriptografar TODOS os dados com frase nova
+4. Atualizar TestValue de todos os grupos
+5. Invalidar backups antigos (avisar usuario)
+6. Forcar novo backup
+
+### FLUXO PROPOSTO
+
+```
+TROCAR FRASE:
+1. Pedir frase ATUAL (validar)
+2. Pedir frase NOVA (2x para confirmar)
+3. Validar forca da nova frase
+4. AVISO: "Backups antigos serao invalidados. Deseja continuar?"
+5. Processo de migracao:
+   - Descriptografar todos os dados
+   - Recriptografar com nova frase
+   - Atualizar TestValue dos grupos
+6. Forcar criacao de novo backup
+7. Sucesso: "Frase alterada. Faca backup agora!"
+```
+
+### TAREFAS (a detalhar depois)
+
+- [ ] PageSettings - Botao "Trocar frase-senha"
+- [ ] ModPasswords - Funcao MigratePassphrase(oldPhrase, newPhrase)
+- [ ] ModNotes - Funcao MigratePassphrase(oldPhrase, newPhrase)
+- [ ] Fluxo completo com dialogs
+- [ ] Teste extensivo (dados nao podem ser perdidos!)
+
+---
+
 ## CONCLUIDO - Importacao CSV e Performance (2025-12-29)
 
 > **Origem:** Importacao de senhas do Chrome/Edge/Safari + otimizacoes

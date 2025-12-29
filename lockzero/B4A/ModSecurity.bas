@@ -660,6 +660,68 @@ Public Sub GetUseSinglePassphrase As Boolean
 End Sub
 
 ' ============================================
+'  PIN DE ACESSO (4-8 digitos)
+' ============================================
+
+Private Const PIN_FILE As String = "lockzero_pin.dat"
+
+'Verifica se PIN esta configurado
+Public Sub HasPIN As Boolean
+	Return File.Exists(File.DirInternal, PIN_FILE)
+End Sub
+
+'Salva PIN (ofuscado em Base64)
+Public Sub SavePIN(pin As String)
+	If pin.Length < 4 Or pin.Length > 8 Then
+		Log("SavePIN: PIN deve ter 4-8 digitos")
+		Return
+	End If
+	Dim su As StringUtils
+	Dim data() As Byte = pin.GetBytes("UTF8")
+	Dim encoded As String = su.EncodeBase64(data)
+	File.WriteString(File.DirInternal, PIN_FILE, encoded)
+	Log("ModSecurity: PIN salvo")
+End Sub
+
+'Valida PIN informado
+Public Sub ValidatePIN(inputPin As String) As Boolean
+	If HasPIN = False Then Return False
+
+	Try
+		Dim encoded As String = File.ReadString(File.DirInternal, PIN_FILE)
+		Dim su As StringUtils
+		Dim data() As Byte = su.DecodeBase64(encoded)
+		Dim savedPin As String = BytesToString(data, 0, data.Length, "UTF8")
+		Return inputPin = savedPin
+	Catch
+		Log("ValidatePIN erro: " & LastException)
+		Return False
+	End Try
+End Sub
+
+'Remove PIN
+Public Sub RemovePIN
+	If File.Exists(File.DirInternal, PIN_FILE) Then
+		File.Delete(File.DirInternal, PIN_FILE)
+		Log("ModSecurity: PIN removido")
+	End If
+End Sub
+
+' ============================================
+'  BIOMETRIA
+' ============================================
+
+'Habilita/desabilita uso de biometria
+Public Sub SetUseBiometric(use As Boolean)
+	SetSetting("useBiometric", use)
+End Sub
+
+'Retorna se biometria esta habilitada nas configuracoes
+Public Sub GetUseBiometric As Boolean
+	Return GetSetting("useBiometric", False)
+End Sub
+
+' ============================================
 '  UTILITARIOS
 ' ============================================
 

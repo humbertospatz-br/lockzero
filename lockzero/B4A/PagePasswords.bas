@@ -513,7 +513,9 @@ Private Sub ShowGroupOptions(groupId As String)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(groupId)
 	If g.IsInitialized = False Then Return
 
-	Wait For (xui.Msgbox2Async(g.Name, "", ModLang.T("edit"), ModLang.T("delete"), ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+	'Msgbox2Async params: Message, Title, Positive, Cancel, Negative, Icon
+	'Positive=Edit, Cancel=Cancel, Negative=Delete
+	Wait For (xui.Msgbox2Async(g.Name, "", ModLang.T("edit"), ModLang.T("cancel"), ModLang.T("delete"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
 		'Editar
@@ -606,8 +608,111 @@ Private Sub ConfirmDeleteGroup(groupId As String)
 	Wait For (xui.Msgbox2Async(msg, ModLang.T("confirm_delete"), ModLang.T("delete"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
-		ModPasswords.DeleteGroup(groupId)
+		'Pede a frase-senha para confirmar exclusao
+		ShowDeleteGroupDialog(groupId)
+	End If
+End Sub
+
+'Dialog para pedir frase antes de apagar grupo
+Private Sub ShowDeleteGroupDialog(groupId As String)
+	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(groupId)
+	If g.IsInitialized = False Then Return
+
+	CurrentDialogMode = "delete_group"
+	CurrentGroupId = groupId
+	IsPassVisible = False
+
+	Dim dialogW As Int = Root.Width - 40dip
+	pnlDialog.RemoveAllViews
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("confirm_delete")
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24dip)
+
+	'Subtitulo
+	Dim lblSub As Label
+	lblSub.Initialize("")
+	lblSub.Text = g.Name & CRLF & ModLang.T("enter_passphrase")
+	lblSub.TextSize = 12
+	lblSub.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblSub.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblSub, 0, 36dip, dialogW, 40dip)
+
+	'Campo de frase com botao olho
+	Dim pnlInput As Panel
+	pnlInput.Initialize("")
+	pnlInput.Color = ModTheme.HomeBg
+	pnlDialog.AddView(pnlInput, 16dip, 85dip, dialogW - 32dip, 50dip)
+
+	edtPassphrase.Initialize("edtPassphrase")
+	edtPassphrase.Hint = ModLang.T("passphrase_hint")
+	edtPassphrase.SingleLine = True
+	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.Text = ""
+	edtPassphrase.TextColor = Colors.White
+	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 50dip)
+
+	'Botao Ver/Ocultar
+	btnShowPass.Initialize("btnShowPass")
+	btnShowPass.Text = ModLang.T("view")
+	btnShowPass.TextSize = Starter.FONT_CAPTION
+	btnShowPass.Color = Colors.Transparent
+	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+	btnShowPass.Gravity = Gravity.CENTER
+	pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 5dip, 60dip, 40dip)
+
+	'Botoes
+	Dim btnCancel As Button
+	btnCancel.Initialize("btnDialogCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 13
+	btnCancel.Color = Colors.Transparent
+	btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
+	pnlDialog.AddView(btnCancel, 16dip, 150dip, 100dip, 40dip)
+
+	Dim btnOk As Button
+	btnOk.Initialize("btnDialogOk")
+	btnOk.Text = ModLang.T("delete")
+	btnOk.TextSize = 12
+	btnOk.Color = ModTheme.Danger
+	btnOk.TextColor = Colors.White
+	pnlDialog.AddView(btnOk, dialogW - 130dip, 150dip, 114dip, 40dip)
+
+	pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dialogW, 200dip)
+
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+	edtPassphrase.RequestFocus
+End Sub
+
+'Processa exclusao de grupo apos validar frase
+Private Sub ProcessDeleteGroup
+	Dim phrase As String = edtPassphrase.Text.Trim
+	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
+
+	If g.IsInitialized = False Then
+		HideDialog
+		Return
+	End If
+
+	'Valida frase com TestValue do grupo
+	If g.ValidatePhrase(phrase) Then
+		'Frase correta - apaga grupo
+		ModPasswords.DeleteGroup(CurrentGroupId)
+		HideDialog
 		LoadGroups
+		ToastMessageShow(ModLang.T("success"), False)
+	Else
+		'Frase incorreta
+		ToastMessageShow(ModLang.T("wrong_passphrase"), True)
+		edtPassphrase.Text = ""
 	End If
 End Sub
 
@@ -642,6 +747,8 @@ Private Sub btnDialogOk_Click
 			ProcessUnlockGroup
 		Case "edit_group"
 			ProcessEditGroup
+		Case "delete_group"
+			ProcessDeleteGroup
 	End Select
 End Sub
 
@@ -751,10 +858,7 @@ End Sub
 
 Private Sub tmrSession_Tick
 	'Apenas atualiza o display do timer
-	'Nao fecha a pagina - usuario pode iniciar sessao clicando em um grupo
-	If ModSession.IsSessionActive Then
-		ModSession.Touch
-	End If
+	'NAO chama Touch aqui - isso resetaria o timer!
 	UpdateSessionTimer
 End Sub
 

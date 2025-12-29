@@ -34,6 +34,7 @@ Module19=PagePasswords
 Module2=clsNoteEntry
 Module20=PageSettings
 Module21=Starter
+Module22=BiometricManager
 Module3=clsPasswordEntry
 Module4=clsPasswordGroup
 Module5=ModBackup
@@ -43,7 +44,7 @@ Module8=ModPasswords
 Module9=ModSecurity
 NumberOfFiles=5
 NumberOfLibraries=9
-NumberOfModules=21
+NumberOfModules=22
 Version=13.4
 @EndOfDesignText@
 #Region  Project Attributes

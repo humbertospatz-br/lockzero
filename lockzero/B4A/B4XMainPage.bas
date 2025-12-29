@@ -33,10 +33,19 @@ Sub Class_Globals
 	'=== TIMER SESSAO ===
 	Private tmrSession As Timer
 	Private lblSessionTimer As Label
+
+	'=== AUTENTICACAO PIN/BIOMETRIA ===
+	Private Biometric As BiometricManager
+	Private pnlLock As Panel			'Overlay de bloqueio
+	Private edtPinInput As EditText		'Campo para digitar PIN
+	Private btnPinSubmit As Button		'Botao confirmar PIN
+	Private lblPinError As Label		'Mensagem de erro
+	Private IsAuthenticated As Boolean = False  'Flag de autenticacao
 End Sub
 
 Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
+	Biometric.Initialize(Me, "Biometric")
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -45,6 +54,7 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 
 	CreateMainPanel
 	CreateSideMenu
+	CreateLockScreen		'Overlay de PIN/Biometria
 	ShowHome
 	ApplyTheme
 End Sub
@@ -52,6 +62,12 @@ End Sub
 Private Sub B4XPage_Appear
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", "LockZero")
+
+	'Verifica se precisa autenticar (PIN configurado e nao autenticado ainda)
+	If ModSecurity.HasPIN And IsAuthenticated = False Then
+		ShowLockScreen
+		Return  'Nao continua ate autenticar
+	End If
 
 	'Atualiza menu, cards e footer (caso idioma tenha mudado)
 	RebuildMenuItems
@@ -547,6 +563,145 @@ Private Sub lblSessionTimer_Click
 		lblSessionTimer.Text = ""
 		ToastMessageShow(ModLang.T("locked"), False)
 	End If
+End Sub
+
+' ============================================
+'  AUTENTICACAO PIN/BIOMETRIA
+' ============================================
+
+'Cria overlay de bloqueio com campo PIN
+Private Sub CreateLockScreen
+	Dim width As Int = Root.Width
+	Dim height As Int = Root.Height
+
+	'Overlay escuro
+	pnlLock.Initialize("")
+	pnlLock.Color = ModTheme.HomeBg
+	pnlLock.Visible = False
+	Root.AddView(pnlLock, 0, 0, width, height)
+
+	'Logo/titulo
+	Dim lblLogo As Label
+	lblLogo.Initialize("")
+	lblLogo.Text = "LockZero"
+	lblLogo.TextSize = 28
+	lblLogo.TextColor = Colors.White
+	lblLogo.Gravity = Gravity.CENTER_HORIZONTAL
+	lblLogo.Typeface = Typeface.DEFAULT_BOLD
+	pnlLock.AddView(lblLogo, 0, 120dip, width, 40dip)
+
+	'Subtitulo
+	Dim lblSubtitle As Label
+	lblSubtitle.Initialize("")
+	lblSubtitle.Text = ModLang.T("pin_enter")
+	lblSubtitle.TextSize = 14
+	lblSubtitle.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblSubtitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlLock.AddView(lblSubtitle, 0, 170dip, width, 30dip)
+
+	'Campo PIN
+	edtPinInput.Initialize("edtPinInput")
+	edtPinInput.Hint = "PIN"
+	edtPinInput.InputType = Bit.Or(2, 8192) 'NUMBER + PASSWORD
+	edtPinInput.TextSize = 24
+	edtPinInput.TextColor = Colors.White
+	edtPinInput.HintColor = Colors.ARGB(100, 255, 255, 255)
+	edtPinInput.Gravity = Gravity.CENTER
+	Dim xvPin As B4XView = edtPinInput
+	xvPin.SetColorAndBorder(Colors.ARGB(40, 255, 255, 255), 1dip, Colors.ARGB(80, 255, 255, 255), 8dip)
+	pnlLock.AddView(edtPinInput, width/2 - 100dip, 220dip, 200dip, 50dip)
+
+	'Label de erro
+	lblPinError.Initialize("")
+	lblPinError.Text = ""
+	lblPinError.TextSize = 12
+	lblPinError.TextColor = ModTheme.Danger
+	lblPinError.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlLock.AddView(lblPinError, 0, 280dip, width, 25dip)
+
+	'Botao confirmar
+	btnPinSubmit.Initialize("btnPinSubmit")
+	btnPinSubmit.Text = ModLang.T("ok")
+	btnPinSubmit.TextSize = 16
+	btnPinSubmit.TextColor = Colors.White
+	Dim xvBtn As B4XView = btnPinSubmit
+	xvBtn.SetColorAndBorder(ModTheme.Primary, 0, ModTheme.Primary, 8dip)
+	pnlLock.AddView(btnPinSubmit, width/2 - 80dip, 320dip, 160dip, 48dip)
+
+	'Texto biometria
+	Dim lblBioHint As Label
+	lblBioHint.Initialize("")
+	lblBioHint.Text = ModLang.T("biometric_or_pin")
+	lblBioHint.TextSize = 12
+	lblBioHint.TextColor = Colors.ARGB(120, 255, 255, 255)
+	lblBioHint.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlLock.AddView(lblBioHint, 0, 390dip, width, 25dip)
+End Sub
+
+'Mostra tela de bloqueio e tenta biometria primeiro
+Private Sub ShowLockScreen
+	pnlLock.Visible = True
+	pnlLock.BringToFront
+	edtPinInput.Text = ""
+	lblPinError.Text = ""
+
+	'Tenta biometria se habilitada e disponivel
+	If ModSecurity.GetUseBiometric Then
+		Dim canAuth As String = Biometric.CanAuthenticate
+		If canAuth = "SUCCESS" Then
+			'Delay pequeno para UI carregar, depois mostra biometria
+			Sleep(300)
+			Biometric.Show(ModLang.T("biometric_prompt"))
+		End If
+	End If
+End Sub
+
+'Esconde tela de bloqueio apos autenticar
+Private Sub HideLockScreen
+	IsAuthenticated = True
+	pnlLock.Visible = False
+
+	'Continua o fluxo normal do B4XPage_Appear
+	RebuildMenuItems
+	ShowHome
+	RefreshFooter
+	UpdateSessionDisplay
+	If ModSession.IsSessionActive Then
+		tmrSession.Enabled = True
+	End If
+End Sub
+
+'Callback da biometria
+Private Sub Biometric_Complete(Success As Boolean, ErrorMessage As String)
+	If Success Then
+		Log("Biometria: Sucesso")
+		HideLockScreen
+	Else
+		Log("Biometria: Falha - " & ErrorMessage)
+		'Nao mostra erro, usuario pode digitar PIN
+	End If
+End Sub
+
+'Botao confirmar PIN
+Private Sub btnPinSubmit_Click
+	Dim pin As String = edtPinInput.Text.Trim
+
+	If pin.Length < 4 Then
+		lblPinError.Text = ModLang.T("pin_too_short")
+		Return
+	End If
+
+	If ModSecurity.ValidatePIN(pin) Then
+		HideLockScreen
+	Else
+		lblPinError.Text = ModLang.T("pin_wrong")
+		edtPinInput.Text = ""
+	End If
+End Sub
+
+'Enter no campo PIN
+Private Sub edtPinInput_EnterPressed
+	btnPinSubmit_Click
 End Sub
 
 ' ============================================
