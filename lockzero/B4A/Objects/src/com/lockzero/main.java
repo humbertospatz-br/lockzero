@@ -25,7 +25,7 @@ public class main extends Activity implements B4AActivity{
     ActivityWrapper _activity;
     java.util.ArrayList<B4AMenuItem> menuItems;
 	public static final boolean fullScreen = false;
-	public static final boolean includeTitle = true;
+	public static final boolean includeTitle = false;
     public static WeakReference<Activity> previousOne;
     public static boolean dontPause;
 
@@ -336,80 +336,265 @@ public class main extends Activity implements B4AActivity{
     }
 
 public anywheresoftware.b4a.keywords.Common __c = null;
-public static boolean _vvvvvvvvvvvvvvvv7 = false;
-public b4a.example.dateutils _vvvvvvvvvvvvvvvvvvvv2 = null;
-public com.lockzero.modlang _vvvvvvvvvvvvvvvvvvvv4 = null;
-public com.lockzero.modsecurity _vvvvvvvvvvvvvvvvvvvv5 = null;
-public com.lockzero.modsession _vvvvvvvvvvvvvvvvvvvv6 = null;
-public com.lockzero.modtheme _vvvvvvvvvvvvvvvvvvvv7 = null;
-public com.lockzero.starter _vvvvvvvvvvvvvvvvvvvv0 = null;
-public com.lockzero.b4xpages _vvvvvvvvvvvvvvvvvvvvv1 = null;
-public com.lockzero.b4xcollections _vvvvvvvvvvvvvvvvvvvvv2 = null;
-public com.lockzero.xuiviewsutils _vvvvvvvvvvvvvvvvvvvvv3 = null;
+public static boolean _actionbarhomeclicked = false;
+public static String _pendingbackupfile = "";
+public com.lockzero.pagepasswords _pgpasswords = null;
+public com.lockzero.pagepasswordlist _pgpasswordlist = null;
+public com.lockzero.pagepasswordedit _pgpasswordedit = null;
+public com.lockzero.pagebackup _pgbackup = null;
+public com.lockzero.pageonboarding _pgonboarding = null;
+public com.lockzero.pagenoteslist _pgnoteslist = null;
+public com.lockzero.pagenoteedit _pgnoteedit = null;
+public com.lockzero.pagesettings _pgsettings = null;
+public b4a.example.dateutils _dateutils = null;
+public com.lockzero.starter _starter = null;
+public com.lockzero.modbackup _modbackup = null;
+public com.lockzero.modlang _modlang = null;
+public com.lockzero.modnotes _modnotes = null;
+public com.lockzero.modpasswords _modpasswords = null;
+public com.lockzero.modsecurity _modsecurity = null;
+public com.lockzero.modsession _modsession = null;
+public com.lockzero.modtheme _modtheme = null;
+public com.lockzero.b4xpages _b4xpages = null;
+public com.lockzero.b4xcollections _b4xcollections = null;
+public com.lockzero.xuiviewsutils _xuiviewsutils = null;
 
 public static boolean isAnyActivityVisible() {
     boolean vis = false;
 vis = vis | (main.mostCurrent != null);
 return vis;}
 public static String  _activity_actionbarhomeclick() throws Exception{
- //BA.debugLineNum = 33;BA.debugLine="Sub Activity_ActionBarHomeClick";
- //BA.debugLineNum = 34;BA.debugLine="ActionBarHomeClicked = True";
-_vvvvvvvvvvvvvvvv7 = anywheresoftware.b4a.keywords.Common.True;
- //BA.debugLineNum = 35;BA.debugLine="B4XPages.Delegate.Activity_ActionBarHomeClick";
-mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._activity_actionbarhomeclick /*String*/ ();
- //BA.debugLineNum = 36;BA.debugLine="ActionBarHomeClicked = False";
-_vvvvvvvvvvvvvvvv7 = anywheresoftware.b4a.keywords.Common.False;
- //BA.debugLineNum = 37;BA.debugLine="End Sub";
+ //BA.debugLineNum = 148;BA.debugLine="Sub Activity_ActionBarHomeClick";
+ //BA.debugLineNum = 149;BA.debugLine="ActionBarHomeClicked = True";
+_actionbarhomeclicked = anywheresoftware.b4a.keywords.Common.True;
+ //BA.debugLineNum = 150;BA.debugLine="B4XPages.Delegate.Activity_ActionBarHomeClick";
+mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._activity_actionbarhomeclick /*String*/ ();
+ //BA.debugLineNum = 151;BA.debugLine="ActionBarHomeClicked = False";
+_actionbarhomeclicked = anywheresoftware.b4a.keywords.Common.False;
+ //BA.debugLineNum = 152;BA.debugLine="End Sub";
 return "";
 }
 public static String  _activity_create(boolean _firsttime) throws Exception{
 com.lockzero.b4xpagesmanager _pm = null;
- //BA.debugLineNum = 25;BA.debugLine="Sub Activity_Create(FirstTime As Boolean)";
- //BA.debugLineNum = 26;BA.debugLine="Dim pm As B4XPagesManager";
+String _onboardingcomplete = "";
+ //BA.debugLineNum = 34;BA.debugLine="Sub Activity_Create(FirstTime As Boolean)";
+ //BA.debugLineNum = 35;BA.debugLine="Dim pm As B4XPagesManager";
 _pm = new com.lockzero.b4xpagesmanager();
- //BA.debugLineNum = 27;BA.debugLine="pm.Initialize(Activity)";
+ //BA.debugLineNum = 36;BA.debugLine="pm.Initialize(Activity)";
 _pm._initialize /*String*/ (mostCurrent.activityBA,mostCurrent._activity);
- //BA.debugLineNum = 28;BA.debugLine="End Sub";
+ //BA.debugLineNum = 38;BA.debugLine="If FirstTime Then";
+if (_firsttime) { 
+ //BA.debugLineNum = 40;BA.debugLine="ModPasswords.Init";
+mostCurrent._modpasswords._init /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 41;BA.debugLine="ModNotes.Init";
+mostCurrent._modnotes._init /*String*/ (mostCurrent.activityBA);
+ };
+ //BA.debugLineNum = 45;BA.debugLine="pgPasswords.Initialize";
+mostCurrent._pgpasswords._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 46;BA.debugLine="pgPasswordList.Initialize";
+mostCurrent._pgpasswordlist._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 47;BA.debugLine="pgPasswordEdit.Initialize";
+mostCurrent._pgpasswordedit._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 48;BA.debugLine="pgBackup.Initialize";
+mostCurrent._pgbackup._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 49;BA.debugLine="pgOnboarding.Initialize";
+mostCurrent._pgonboarding._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 50;BA.debugLine="pgNotesList.Initialize";
+mostCurrent._pgnoteslist._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 51;BA.debugLine="pgNoteEdit.Initialize";
+mostCurrent._pgnoteedit._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 52;BA.debugLine="pgSettings.Initialize";
+mostCurrent._pgsettings._initialize /*String*/ (mostCurrent.activityBA);
+ //BA.debugLineNum = 54;BA.debugLine="B4XPages.AddPageAndCreate(\"PagePasswords\", pgPass";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PagePasswords",(Object)(mostCurrent._pgpasswords));
+ //BA.debugLineNum = 55;BA.debugLine="B4XPages.AddPageAndCreate(\"PagePasswordList\", pgP";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PagePasswordList",(Object)(mostCurrent._pgpasswordlist));
+ //BA.debugLineNum = 56;BA.debugLine="B4XPages.AddPageAndCreate(\"PagePasswordEdit\", pgP";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PagePasswordEdit",(Object)(mostCurrent._pgpasswordedit));
+ //BA.debugLineNum = 57;BA.debugLine="B4XPages.AddPageAndCreate(\"PageBackup\", pgBackup)";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PageBackup",(Object)(mostCurrent._pgbackup));
+ //BA.debugLineNum = 58;BA.debugLine="B4XPages.AddPageAndCreate(\"PageOnboarding\", pgOnb";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PageOnboarding",(Object)(mostCurrent._pgonboarding));
+ //BA.debugLineNum = 59;BA.debugLine="B4XPages.AddPageAndCreate(\"PageNotesList\", pgNote";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PageNotesList",(Object)(mostCurrent._pgnoteslist));
+ //BA.debugLineNum = 60;BA.debugLine="B4XPages.AddPageAndCreate(\"PageNoteEdit\", pgNoteE";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PageNoteEdit",(Object)(mostCurrent._pgnoteedit));
+ //BA.debugLineNum = 61;BA.debugLine="B4XPages.AddPageAndCreate(\"PageSettings\", pgSetti";
+mostCurrent._b4xpages._addpageandcreate /*String*/ (mostCurrent.activityBA,"PageSettings",(Object)(mostCurrent._pgsettings));
+ //BA.debugLineNum = 63;BA.debugLine="B4XPages.GetManager.LogEvents = True";
+mostCurrent._b4xpages._getmanager /*com.lockzero.b4xpagesmanager*/ (mostCurrent.activityBA)._logevents /*boolean*/  = anywheresoftware.b4a.keywords.Common.True;
+ //BA.debugLineNum = 65;BA.debugLine="If FirstTime Then";
+if (_firsttime) { 
+ //BA.debugLineNum = 67;BA.debugLine="Dim onboardingComplete As String = ModSecurity.G";
+_onboardingcomplete = BA.ObjectToString(mostCurrent._modsecurity._getsetting /*Object*/ (mostCurrent.activityBA,"onboarding_complete",(Object)("false")));
+ //BA.debugLineNum = 68;BA.debugLine="If onboardingComplete <> \"true\" Then";
+if ((_onboardingcomplete).equals("true") == false) { 
+ //BA.debugLineNum = 69;BA.debugLine="B4XPages.ShowPageAndRemovePreviousPages(\"PageOn";
+mostCurrent._b4xpages._showpageandremovepreviouspages /*String*/ (mostCurrent.activityBA,"PageOnboarding");
+ };
+ };
+ //BA.debugLineNum = 74;BA.debugLine="CheckIncomingIntent";
+_checkincomingintent();
+ //BA.debugLineNum = 75;BA.debugLine="End Sub";
 return "";
 }
 public static boolean  _activity_keypress(int _keycode) throws Exception{
- //BA.debugLineNum = 39;BA.debugLine="Sub Activity_KeyPress (KeyCode As Int) As Boolean";
- //BA.debugLineNum = 40;BA.debugLine="Return B4XPages.Delegate.Activity_KeyPress(KeyCod";
-if (true) return mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._activity_keypress /*boolean*/ (_keycode);
- //BA.debugLineNum = 41;BA.debugLine="End Sub";
+ //BA.debugLineNum = 154;BA.debugLine="Sub Activity_KeyPress (KeyCode As Int) As Boolean";
+ //BA.debugLineNum = 155;BA.debugLine="Return B4XPages.Delegate.Activity_KeyPress(KeyCod";
+if (true) return mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._activity_keypress /*boolean*/ (_keycode);
+ //BA.debugLineNum = 156;BA.debugLine="End Sub";
 return false;
 }
 public static String  _activity_pause(boolean _userclosed) throws Exception{
- //BA.debugLineNum = 47;BA.debugLine="Sub Activity_Pause (UserClosed As Boolean)";
- //BA.debugLineNum = 48;BA.debugLine="B4XPages.Delegate.Activity_Pause";
-mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._activity_pause /*String*/ ();
- //BA.debugLineNum = 49;BA.debugLine="End Sub";
+ //BA.debugLineNum = 164;BA.debugLine="Sub Activity_Pause (UserClosed As Boolean)";
+ //BA.debugLineNum = 165;BA.debugLine="B4XPages.Delegate.Activity_Pause";
+mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._activity_pause /*String*/ ();
+ //BA.debugLineNum = 166;BA.debugLine="End Sub";
 return "";
 }
 public static String  _activity_permissionresult(String _permission,boolean _result) throws Exception{
- //BA.debugLineNum = 51;BA.debugLine="Sub Activity_PermissionResult (Permission As Strin";
- //BA.debugLineNum = 52;BA.debugLine="B4XPages.Delegate.Activity_PermissionResult(Permi";
-mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._activity_permissionresult /*String*/ (_permission,_result);
- //BA.debugLineNum = 53;BA.debugLine="End Sub";
+ //BA.debugLineNum = 168;BA.debugLine="Sub Activity_PermissionResult (Permission As Strin";
+ //BA.debugLineNum = 169;BA.debugLine="B4XPages.Delegate.Activity_PermissionResult(Permi";
+mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._activity_permissionresult /*String*/ (_permission,_result);
+ //BA.debugLineNum = 170;BA.debugLine="End Sub";
 return "";
 }
 public static String  _activity_resume() throws Exception{
- //BA.debugLineNum = 43;BA.debugLine="Sub Activity_Resume";
- //BA.debugLineNum = 44;BA.debugLine="B4XPages.Delegate.Activity_Resume";
-mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._activity_resume /*String*/ ();
- //BA.debugLineNum = 45;BA.debugLine="End Sub";
+ //BA.debugLineNum = 158;BA.debugLine="Sub Activity_Resume";
+ //BA.debugLineNum = 160;BA.debugLine="CheckIncomingIntent";
+_checkincomingintent();
+ //BA.debugLineNum = 161;BA.debugLine="B4XPages.Delegate.Activity_Resume";
+mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._activity_resume /*String*/ ();
+ //BA.debugLineNum = 162;BA.debugLine="End Sub";
 return "";
 }
+public static String  _checkincomingintent() throws Exception{
+anywheresoftware.b4a.objects.IntentWrapper _intent = null;
+Object _uri = null;
+String _filename = "";
+String _destfolder = "";
+anywheresoftware.b4a.objects.streams.File.InputStreamWrapper _in = null;
+anywheresoftware.b4a.objects.streams.File.OutputStreamWrapper _out = null;
+long _filesize = 0L;
+String _content = "";
+ //BA.debugLineNum = 78;BA.debugLine="Private Sub CheckIncomingIntent";
+ //BA.debugLineNum = 80;BA.debugLine="If PendingBackupFile <> \"\" Then Return";
+if ((_pendingbackupfile).equals("") == false) { 
+if (true) return "";};
+ //BA.debugLineNum = 82;BA.debugLine="Dim Intent As Intent = Activity.GetStartingIntent";
+_intent = new anywheresoftware.b4a.objects.IntentWrapper();
+_intent = mostCurrent._activity.GetStartingIntent();
+ //BA.debugLineNum = 84;BA.debugLine="If Intent.IsInitialized = False Then Return";
+if (_intent.IsInitialized()==anywheresoftware.b4a.keywords.Common.False) { 
+if (true) return "";};
+ //BA.debugLineNum = 85;BA.debugLine="If Intent.Action <> Intent.ACTION_VIEW Then Retur";
+if ((_intent.getAction()).equals(_intent.ACTION_VIEW) == false) { 
+if (true) return "";};
+ //BA.debugLineNum = 87;BA.debugLine="Try";
+try { //BA.debugLineNum = 88;BA.debugLine="Dim uri As Object = Intent.GetData";
+_uri = (Object)(_intent.GetData());
+ //BA.debugLineNum = 89;BA.debugLine="If uri = Null Then Return";
+if (_uri== null) { 
+if (true) return "";};
+ //BA.debugLineNum = 91;BA.debugLine="Log(\"=== Arquivo .lockzero recebido ===\")";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094221","=== Arquivo .lockzero recebido ===",0);
+ //BA.debugLineNum = 92;BA.debugLine="Log(\"URI: \" & uri)";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094222","URI: "+BA.ObjectToString(_uri),0);
+ //BA.debugLineNum = 95;BA.debugLine="Dim fileName As String = \"imported_\" & DateTime.";
+_filename = "imported_"+BA.NumberToString(anywheresoftware.b4a.keywords.Common.DateTime.getNow())+".lockzero";
+ //BA.debugLineNum = 96;BA.debugLine="Dim destFolder As String = Starter.Provider.Shar";
+_destfolder = mostCurrent._starter._provider /*com.lockzero.fileprovider*/ ._sharedfolder /*String*/ ;
+ //BA.debugLineNum = 99;BA.debugLine="Dim In As InputStream = ContentResolver_OpenInpu";
+_in = new anywheresoftware.b4a.objects.streams.File.InputStreamWrapper();
+_in = _contentresolver_openinputstream(_uri);
+ //BA.debugLineNum = 100;BA.debugLine="Dim Out As OutputStream = File.OpenOutput(destFo";
+_out = new anywheresoftware.b4a.objects.streams.File.OutputStreamWrapper();
+_out = anywheresoftware.b4a.keywords.Common.File.OpenOutput(_destfolder,_filename,anywheresoftware.b4a.keywords.Common.False);
+ //BA.debugLineNum = 101;BA.debugLine="File.Copy2(In, Out)";
+anywheresoftware.b4a.keywords.Common.File.Copy2((java.io.InputStream)(_in.getObject()),(java.io.OutputStream)(_out.getObject()));
+ //BA.debugLineNum = 102;BA.debugLine="In.Close";
+_in.Close();
+ //BA.debugLineNum = 103;BA.debugLine="Out.Close";
+_out.Close();
+ //BA.debugLineNum = 105;BA.debugLine="Log(\"Arquivo copiado para: \" & destFolder & \"/\"";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094235","Arquivo copiado para: "+_destfolder+"/"+_filename,0);
+ //BA.debugLineNum = 108;BA.debugLine="Dim fileSize As Long = File.Size(destFolder, fil";
+_filesize = anywheresoftware.b4a.keywords.Common.File.Size(_destfolder,_filename);
+ //BA.debugLineNum = 109;BA.debugLine="Log(\"Tamanho do arquivo: \" & fileSize & \" bytes\"";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094239","Tamanho do arquivo: "+BA.NumberToString(_filesize)+" bytes",0);
+ //BA.debugLineNum = 110;BA.debugLine="If fileSize > 0 Then";
+if (_filesize>0) { 
+ //BA.debugLineNum = 111;BA.debugLine="Dim content As String = File.ReadString(destFol";
+_content = anywheresoftware.b4a.keywords.Common.File.ReadString(_destfolder,_filename);
+ //BA.debugLineNum = 112;BA.debugLine="Log(\"Primeiros 100 chars: \" & content.SubString";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094242","Primeiros 100 chars: "+_content.substring((int) (0),(int) (anywheresoftware.b4a.keywords.Common.Min(100,_content.length()))),0);
+ };
+ //BA.debugLineNum = 116;BA.debugLine="PendingBackupFile = fileName";
+_pendingbackupfile = _filename;
+ //BA.debugLineNum = 119;BA.debugLine="B4XPages.ShowPage(\"PageBackup\")";
+mostCurrent._b4xpages._showpage /*String*/ (mostCurrent.activityBA,"PageBackup");
+ } 
+       catch (Exception e27) {
+			processBA.setLastException(e27); //BA.debugLineNum = 122;BA.debugLine="Log(\"CheckIncomingIntent erro: \" & LastException";
+anywheresoftware.b4a.keywords.Common.LogImpl("564094252","CheckIncomingIntent erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(mostCurrent.activityBA)),0);
+ };
+ //BA.debugLineNum = 124;BA.debugLine="End Sub";
+return "";
+}
+public static anywheresoftware.b4a.objects.streams.File.InputStreamWrapper  _contentresolver_openinputstream(Object _uri) throws Exception{
+String _uristring = "";
+anywheresoftware.b4j.object.JavaObject _androiduri = null;
+anywheresoftware.b4j.object.JavaObject _parseduri = null;
+anywheresoftware.b4j.object.JavaObject _ctxt = null;
+anywheresoftware.b4j.object.JavaObject _cr = null;
+ //BA.debugLineNum = 127;BA.debugLine="Private Sub ContentResolver_OpenInputStream(uri As";
+ //BA.debugLineNum = 129;BA.debugLine="Dim uriString As String = uri";
+_uristring = BA.ObjectToString(_uri);
+ //BA.debugLineNum = 132;BA.debugLine="Dim androidUri As JavaObject";
+_androiduri = new anywheresoftware.b4j.object.JavaObject();
+ //BA.debugLineNum = 133;BA.debugLine="androidUri.InitializeStatic(\"android.net.Uri\")";
+_androiduri.InitializeStatic("android.net.Uri");
+ //BA.debugLineNum = 134;BA.debugLine="Dim parsedUri As JavaObject = androidUri.RunMetho";
+_parseduri = new anywheresoftware.b4j.object.JavaObject();
+_parseduri = (anywheresoftware.b4j.object.JavaObject) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4j.object.JavaObject(), (java.lang.Object)(_androiduri.RunMethod("parse",new Object[]{(Object)(_uristring)})));
+ //BA.debugLineNum = 137;BA.debugLine="Dim ctxt As JavaObject";
+_ctxt = new anywheresoftware.b4j.object.JavaObject();
+ //BA.debugLineNum = 138;BA.debugLine="ctxt.InitializeContext";
+_ctxt.InitializeContext(processBA);
+ //BA.debugLineNum = 139;BA.debugLine="Dim cr As JavaObject = ctxt.RunMethod(\"getContent";
+_cr = new anywheresoftware.b4j.object.JavaObject();
+_cr = (anywheresoftware.b4j.object.JavaObject) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4j.object.JavaObject(), (java.lang.Object)(_ctxt.RunMethod("getContentResolver",(Object[])(anywheresoftware.b4a.keywords.Common.Null))));
+ //BA.debugLineNum = 142;BA.debugLine="Return cr.RunMethod(\"openInputStream\", Array(pars";
+if (true) return (anywheresoftware.b4a.objects.streams.File.InputStreamWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.streams.File.InputStreamWrapper(), (java.io.InputStream)(_cr.RunMethod("openInputStream",new Object[]{(Object)(_parseduri.getObject())})));
+ //BA.debugLineNum = 143;BA.debugLine="End Sub";
+return null;
+}
 public static String  _create_menu(Object _menu) throws Exception{
- //BA.debugLineNum = 55;BA.debugLine="Sub Create_Menu (Menu As Object)";
- //BA.debugLineNum = 56;BA.debugLine="B4XPages.Delegate.Create_Menu(Menu)";
-mostCurrent._vvvvvvvvvvvvvvvvvvvvv1._vvvvvvvvvvvv4 /*com.lockzero.b4xpagesdelegator*/ ._create_menu /*String*/ (_menu);
- //BA.debugLineNum = 57;BA.debugLine="End Sub";
+ //BA.debugLineNum = 172;BA.debugLine="Sub Create_Menu (Menu As Object)";
+ //BA.debugLineNum = 173;BA.debugLine="B4XPages.Delegate.Create_Menu(Menu)";
+mostCurrent._b4xpages._delegate /*com.lockzero.b4xpagesdelegator*/ ._create_menu /*String*/ (_menu);
+ //BA.debugLineNum = 174;BA.debugLine="End Sub";
 return "";
 }
 public static String  _globals() throws Exception{
- //BA.debugLineNum = 21;BA.debugLine="Sub Globals";
- //BA.debugLineNum = 23;BA.debugLine="End Sub";
+ //BA.debugLineNum = 22;BA.debugLine="Sub Globals";
+ //BA.debugLineNum = 24;BA.debugLine="Private pgPasswords As PagePasswords";
+mostCurrent._pgpasswords = new com.lockzero.pagepasswords();
+ //BA.debugLineNum = 25;BA.debugLine="Private pgPasswordList As PagePasswordList";
+mostCurrent._pgpasswordlist = new com.lockzero.pagepasswordlist();
+ //BA.debugLineNum = 26;BA.debugLine="Private pgPasswordEdit As PagePasswordEdit";
+mostCurrent._pgpasswordedit = new com.lockzero.pagepasswordedit();
+ //BA.debugLineNum = 27;BA.debugLine="Private pgBackup As PageBackup";
+mostCurrent._pgbackup = new com.lockzero.pagebackup();
+ //BA.debugLineNum = 28;BA.debugLine="Private pgOnboarding As PageOnboarding";
+mostCurrent._pgonboarding = new com.lockzero.pageonboarding();
+ //BA.debugLineNum = 29;BA.debugLine="Private pgNotesList As PageNotesList";
+mostCurrent._pgnoteslist = new com.lockzero.pagenoteslist();
+ //BA.debugLineNum = 30;BA.debugLine="Private pgNoteEdit As PageNoteEdit";
+mostCurrent._pgnoteedit = new com.lockzero.pagenoteedit();
+ //BA.debugLineNum = 31;BA.debugLine="Private pgSettings As PageSettings";
+mostCurrent._pgsettings = new com.lockzero.pagesettings();
+ //BA.debugLineNum = 32;BA.debugLine="End Sub";
 return "";
 }
 
@@ -420,11 +605,14 @@ public static void initializeProcessGlobals() {
 		try {
 		        b4a.example.dateutils._process_globals();
 main._process_globals();
+starter._process_globals();
+modbackup._process_globals();
 modlang._process_globals();
+modnotes._process_globals();
+modpasswords._process_globals();
 modsecurity._process_globals();
 modsession._process_globals();
 modtheme._process_globals();
-starter._process_globals();
 b4xpages._process_globals();
 b4xcollections._process_globals();
 xuiviewsutils._process_globals();
@@ -433,53 +621,20 @@ xuiviewsutils._process_globals();
 			throw new RuntimeException(e);
 		}
     }
-}
-
-private static byte[][] bb;
-
-public static String vvv13(final byte[] _b, final int i) throws Exception {
-Runnable r = new Runnable() {
-{
-
-int value = i / 7 + 487714;
-if (bb == null) {
-		
-                bb = new byte[4][];
-				bb[0] = BA.packageName.getBytes("UTF8");
-                bb[1] = BA.applicationContext.getPackageManager().getPackageInfo(BA.packageName, 0).versionName.getBytes("UTF8");
-                if (bb[1].length == 0)
-                    bb[1] = "jsdkfh".getBytes("UTF8");
-                bb[2] = new byte[] { (byte)BA.applicationContext.getPackageManager().getPackageInfo(BA.packageName, 0).versionCode };			
-        }
-        bb[3] = new byte[] {
-                    (byte) (value >>> 24),
-						(byte) (value >>> 16),
-						(byte) (value >>> 8),
-						(byte) value};
-				try {
-					for (int __b = 0;__b < (3 + 1);__b ++) {
-						for (int b = 0;b<_b.length;b++) {
-							_b[b] ^= bb[__b][b % bb[__b].length];
-						}
-					}
-
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-                
-
-            
-}
-public void run() {
-}
-};
-return new String(_b, "UTF8");
-}
-public static String  _process_globals() throws Exception{
+}public static String  _process_globals() throws Exception{
  //BA.debugLineNum = 17;BA.debugLine="Sub Process_Globals";
  //BA.debugLineNum = 18;BA.debugLine="Public ActionBarHomeClicked As Boolean";
-_vvvvvvvvvvvvvvvv7 = false;
- //BA.debugLineNum = 19;BA.debugLine="End Sub";
+_actionbarhomeclicked = false;
+ //BA.debugLineNum = 19;BA.debugLine="Public PendingBackupFile As String 'Arquivo .lock";
+_pendingbackupfile = "";
+ //BA.debugLineNum = 20;BA.debugLine="End Sub";
+return "";
+}
+public static String  _setpagetitle(String _title) throws Exception{
+ //BA.debugLineNum = 188;BA.debugLine="Public Sub SetPageTitle(title As String)";
+ //BA.debugLineNum = 189;BA.debugLine="Activity.Title = title";
+mostCurrent._activity.setTitle(BA.ObjectToCharSequence(_title));
+ //BA.debugLineNum = 190;BA.debugLine="End Sub";
 return "";
 }
 public boolean _onCreateOptionsMenu(android.view.Menu menu) {

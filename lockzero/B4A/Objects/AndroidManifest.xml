@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.lockzero"
 	android:versionCode="1"
-	android:versionName=""
+	android:versionName="0.1.0"
 	android:installLocation="internalOnly">
 	
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>
@@ -11,17 +11,28 @@
 	    android:normalScreens="true" 
 	    android:smallScreens="true" 
 	    android:anyDensity="true"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 	<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 	<application
 		android:name="androidx.multidex.MultiDexApplication"
 		android:icon="@drawable/icon"
-		android:label="B4A Example"
+		android:label="LockZero"
 		android:theme="@style/LightTheme">
+		
+		<provider
+		  android:name="androidx.core.content.FileProvider"
+		  android:authorities="com.lockzero.provider"
+		  android:exported="false"
+		  android:grantUriPermissions="true">
+		  <meta-data
+		  android:name="android.support.FILE_PROVIDER_PATHS"
+		  android:resource="@xml/provider_paths"/>
+		  </provider>
 		<activity
 			android:windowSoftInputMode="stateHidden"
-			android:launchMode="singleTop"
+			android:launchMode="singleTask"
 			android:name=".main"
-			android:label="B4A Example"
+			android:label="LockZero"
 			android:screenOrientation="portrait"
 			android:exported="true">
 			<intent-filter>
@@ -29,6 +40,23 @@
 			   <category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 			
+			<intent-filter>
+			    <action android:name="android.intent.action.VIEW"/>
+			    <category android:name="android.intent.category.DEFAULT"/>
+			    <data android:scheme="content" android:mimeType="application/vnd.lockzero"/>
+			  </intent-filter>
+			  <intent-filter>
+			    <action android:name="android.intent.action.VIEW"/>
+			    <category android:name="android.intent.category.DEFAULT"/>
+			    <data android:scheme="file" android:pathPattern=".*\.lockzero"/>
+			  </intent-filter>
+			  <intent-filter>
+			    <action android:name="android.intent.action.VIEW"/>
+			    <category android:name="android.intent.category.DEFAULT"/>
+			    <data android:scheme="content"
+			          android:mimeType="application/octet-stream"
+			          android:pathPattern=".*\.lockzero"/>
+			  </intent-filter>
 		</activity>
 		<service
 			android:name=".starter"

@@ -62,9 +62,10 @@ Cofre digital **100% offline** para armazenamento seguro de:
 |         (Basic4Android - Cross-platform)         |
 +--------------------------------------------------+
 |                    CRIPTOGRAFIA                   |
-|  - AES-256 para dados                            |
-|  - SHA-256 para derivacao de chave               |
-|  - Salt unico por grupo                          |
+|  - AES-256-CBC para dados                        |
+|  - PBKDF2-SHA256 para derivacao de chave         |
+|    (100.000 iteracoes - ~100ms por tentativa)    |
+|  - Salt unico por grupo (32 bytes hex)           |
 |  - XOR para ofuscacao em memoria                 |
 +--------------------------------------------------+
 |                    STORAGE LOCAL                  |
@@ -73,6 +74,7 @@ Cofre digital **100% offline** para armazenamento seguro de:
 +--------------------------------------------------+
 |                    SISTEMA                        |
 |  - Android 5.0+ (API 21+)                        |
+|  - Auto-lock em background (Activity_Pause)      |
 |  - FLAG_SECURE (anti-screenshot) - futuro        |
 +--------------------------------------------------+
 ```
@@ -166,18 +168,28 @@ Gerencia sessao em memoria com frase ofuscada.
 ```basic
 'Funcoes principais:
 Public Sub StartSession(passphrase As String)
+Public Sub StartSessionWithCategory(passphrase, category As String)
 Public Sub EndSession()
 Public Sub IsSessionActive() As Boolean
 Public Sub GetPassphrase() As String  'Retorna frase desofuscada
 Public Sub Touch()  'Renova timeout
+Public Sub Lock()  'Bloqueia sessao
 
-'Configuracao:
-Private SESSION_TIMEOUT As Int = 300000  '5 minutos em ms
+'Funcoes de categoria:
+Public Sub GetSessionCategory() As String
+Public Sub GetSessionCategoryName() As String  'Nome traduzido
+Public Sub IsSessionValidForCategory(category) As Boolean
+Public Sub NeedsPassphraseForCategory(category) As Boolean
+
+'Funcoes de tempo:
+Public Sub GetRemainingSeconds() As Int
+Public Sub GetRemainingFormatted() As String  'MM:SS
 
 'Seguranca:
 ' - Frase armazenada com XOR usando salt aleatorio
 ' - Timeout automatico por inatividade
 ' - Limpeza de memoria ao encerrar
+' - Suporte a frase unica ou por categoria
 ```
 
 ### ModPasswords.bas
@@ -353,8 +365,13 @@ Public Sub GetDecryptedContent(passphrase) As String
 
 ### PagePasswordList.bas - Senhas
 
-- Titulo breadcrumb: "Senhas > NomeGrupo"
-- Header com titulo "SENHAS" e botao +
+- Titulo breadcrumb: "Senhas → NomeGrupo"
+- Header com titulo, timer de sessao e botao +
+- **Timer de sessao no header:**
+  - Exibe tempo restante (MM:SS)
+  - Cor amarela quando < 60s
+  - Toque no timer: dialog para bloquear sessao manualmente
+  - Sessao expirada: volta automaticamente para tela anterior
 - Lista de senhas com favorito, nome, username
 - Botao copiar senha (limpa clipboard em 30s)
 - Click: detalhes / Long click: opcoes
@@ -394,21 +411,73 @@ Public Sub GetDecryptedContent(passphrase) As String
 
 ### Criptografia
 
-| Dado | Algoritmo | Chave |
-|------|-----------|-------|
-| Senhas | AES-256 | SHA256(frase + salt) |
-| Usernames | AES-256 | SHA256(frase + salt) |
-| Notas | AES-256 | SHA256(frase + salt) |
-| TestValue | AES-256 | SHA256(frase + salt) |
-| Backup | AES-256 | SHA256(frase backup) |
+| Dado | Algoritmo | Derivacao de Chave |
+|------|-----------|-------------------|
+| Senhas | AES-256-CBC | PBKDF2(frase, salt, 100k iter) |
+| Usernames | AES-256-CBC | PBKDF2(frase, salt, 100k iter) |
+| Notas | AES-256-CBC | PBKDF2(frase, salt, 100k iter) |
+| TestValue | AES-256-CBC | PBKDF2(frase, salt, 100k iter) |
+| Backup | AES-256-CBC | PBKDF2(frase backup, salt fixo, 100k iter) |
 
-### Validacao de Frase
+**Por que PBKDF2?**
+- SHA-256 simples: ~1.000.000 tentativas/segundo (vulneravel)
+- PBKDF2 100k iter: ~10 tentativas/segundo (seguro)
+- Atacante precisa 100.000x mais tempo para cada tentativa
 
-1. Grupo tem `TestValue` = "LOCKZERO" criptografado com a frase
-2. Ao abrir grupo, usuario digita frase
-3. Sistema tenta descriptografar TestValue
-4. Se resultado = "LOCKZERO", frase correta
-5. Se nao, incrementa contador de falhas
+### Normalizacao de Frase-Senha
+
+> **DOCUMENTACAO INTERNA - NAO DIVULGAR AO USUARIO**
+
+A frase-senha do usuario passa por normalizacao antes de ser usada na criptografia.
+Isso segue a mesma logica do LockSeed.
+
+**Regras de Normalizacao:**
+
+| Etapa | Regra | Exemplo |
+|-------|-------|---------|
+| 1 | Remove espacos | "Minha avo" → "Minhaavo" |
+| 2 | Converte para minusculas | "Minhaavo" → "minhaavo" |
+| 3 | Remove acentos (ASCII) | "minhaavo" → "minhaavo" (a→a, c→c) |
+| 4 | Extrai 10 chars unicos | "minhaavo" → "minhavo" (7 unicos) |
+
+**Exemplos Completos:**
+
+| Frase Original | Resultado | Status |
+|----------------|-----------|--------|
+| "Minha avo nasceu em 1950" | "minhavonsce" (11 unicos) | OK |
+| "AAAaaa123" | "a123" (4 unicos) | REJEITADO |
+| "Hello World 123" | "helowrd123" (10 unicos) | OK |
+| "12345678" | "12345678" (8 unicos) | REJEITADO |
+
+**Validacao:**
+- Frase deve ter minimo 8 caracteres (antes de normalizar)
+- Apos normalizar, deve resultar em pelo menos 10 chars unicos
+- Se nao atingir, mostra mensagem generica: **"Frase muito curta"**
+
+**Seguranca:**
+- Mensagem de erro SEMPRE generica
+- Usuario NUNCA sabe que precisa de 10 chars diferentes
+- Logica interna nao e revelada
+
+### Validacao de Frase (TestValue Dinamico)
+
+**Problema do TestValue fixo:**
+Se TestValue sempre descriptografa para "LOCKZERO", atacante tem known-plaintext.
+
+**Solucao - TestValue dinamico:**
+```
+Ao criar grupo:
+  salt = GenerateRandomSalt()
+  expectedValue = SHA256(salt)  // Valor esperado unico por grupo
+  TestValue = Encrypt(frase, expectedValue)
+
+Ao validar frase:
+  expectedValue = SHA256(salt)
+  decrypted = Decrypt(frase_digitada, TestValue)
+  if decrypted == expectedValue -> frase correta
+```
+
+Cada grupo tem TestValue diferente, impossibilitando known-plaintext attack.
 
 ### Protecao Brute Force
 
@@ -419,18 +488,56 @@ Public Sub GetDecryptedContent(passphrase) As String
 | 9-10 | 300 segundos (5 min) |
 | 11+ | +300s cada |
 
+Combinado com PBKDF2: ataque de forca bruta se torna impraticavel.
+
 ### Sessao em Memoria
 
 - Frase armazenada com XOR (ofuscada)
 - Salt aleatorio gerado por sessao
-- Timeout de 5 minutos de inatividade
+- Timeout de 2-5 minutos de inatividade (configuravel)
 - Touch() renova timeout a cada interacao
 - Limpeza completa ao encerrar
+- **Bloqueio manual:** usuario pode encerrar sessao tocando no timer
+
+**Sessao unica global:**
+- Apenas UMA frase ativa por vez
+- Ao trocar de grupo com frase diferente, sessao anterior encerra
+- Comportamento intencional de seguranca (nao e bug)
+
+**Timer de sessao visivel:**
+- Exibido no header da lista de senhas E no footer da Home
+- Formato MM:SS decrescente
+- Cor de alerta quando < 60 segundos
+- Clicavel para bloqueio imediato (com confirmacao)
+
+**Modo de frase-senha (configuravel):**
+- **Frase unica:** Mesma frase para todas as categorias (padrao)
+  - Sessao continua ao navegar entre categorias
+  - Mais conveniente para uso diario
+- **Frase por categoria:** Cada categoria pode ter sua propria frase
+  - Ao trocar de categoria, sessao anterior encerra
+  - Exibe nome da categoria no timer (ex: "Senhas • 2:30")
+  - Maior seguranca (compartimentalizacao)
+
+### Auto-lock em Background
+
+Quando app vai para segundo plano (Activity_Pause):
+- Sessao e encerrada imediatamente
+- Usuario precisa re-digitar frase ao voltar
+- Protege contra acesso fisico ao dispositivo desbloqueado
+
+### Confirmacao de Exclusao
+
+Operacoes destrutivas (deletar grupo/senha) exigem:
+- Re-digitacao da frase do grupo
+- Previne exclusao acidental
+- Protege contra acesso nao autorizado temporario
 
 ### Clipboard
 
 - Senha copiada limpa automaticamente em 30s
 - Timer visivel para usuario
+- Complementa limpeza automatica do Android 13+ (1h)
 
 ---
 
@@ -506,7 +613,7 @@ Border radius:    8-12dip
 
 ## Roadmap
 
-### v0.1.0 - MVP (atual)
+### v0.1.0 - MVP (concluido)
 
 - [x] Cofre de senhas com grupos
 - [x] Notas seguras
@@ -516,6 +623,17 @@ Border radius:    8-12dip
 - [x] Backup .lockzero
 - [x] Multi-idioma PT/EN
 - [x] Tema dark
+
+### v0.1.1 - Hardening de Seguranca (atual)
+
+- [x] PBKDF2 para derivacao de chave (100k iteracoes)
+- [x] TestValue dinamico (hash do salt)
+- [x] Timer de sessao visivel no header e Home com bloqueio manual
+- [x] Modo frase unica/por categoria (configuravel)
+- [ ] Tela de configuracoes (PageSettings)
+- [ ] Auto-lock em background (Activity_Pause)
+- [ ] Confirmacao de exclusao com re-digitacao de frase
+- [ ] Contador de itens nos cards da Home
 
 ### v0.2.0 - Cartoes
 
@@ -574,4 +692,4 @@ Border radius:    8-12dip
 
 ---
 
-**Ultima atualizacao:** 2025-12-26
+**Ultima atualizacao:** 2025-12-28

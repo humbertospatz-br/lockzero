@@ -54,6 +54,9 @@ Sub Process_Globals
 
 	'=== FLAGS ===
 	Private IsInitialized As Boolean = False
+
+	'=== FILE PROVIDER (para compartilhar arquivos) ===
+	Public Provider As FileProvider
 End Sub
 
 Sub Service_Create
@@ -101,7 +104,11 @@ Private Sub InitializeApp
 	ModTheme.Init
 	Log("ModTheme OK - Dark: " & ModTheme.IsDarkTheme)
 
-	'3. Sessao limpa (usuario precisa desbloquear)
+	'3. FileProvider para compartilhar arquivos
+	Provider.Initialize
+	Log("FileProvider OK - SharedFolder: " & Provider.SharedFolder)
+
+	'4. Sessao limpa (usuario precisa desbloquear)
 	ModSession.EndSession
 	Log("ModSession OK - Bloqueado")
 

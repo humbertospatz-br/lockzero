@@ -1,0 +1,98 @@
+┌──────────────────────────────────────────┐
+│ ⬡  LockZero                        ☰     │  ← HEADER
+├──────────────────────────────────────────┤
+│                                          │
+│   ┌──────────────┐   ┌──────────────┐   │
+│   │      ⬡◇      │   │      ⬡▭      │   │
+│   │              │   │              │   │
+│   │   Passwords  │   │    Cards     │   │
+│   └──────────────┘   └──────────────┘   │
+│                                          │
+│   ┌──────────────┐   ┌──────────────┐   │
+│   │      ⬡▱      │   │      ⬡≡      │   │
+│   │              │   │              │   │
+│   │  Documents   │   │    Notes     │   │
+│   └──────────────┘   └──────────────┘   │
+│                                          │
+│                                          │
+│            Lock and Zero Worries          │
+│               Free Version                │
+│                  v0.1.0                  │
+└──────────────────────────────────────────┘
+
+🔍 Leitura do layout (importante)
+HEADER
+
+Ícone do LockZero (⬡)
+
+Texto LockZero
+
+Menu ☰
+
+Altura discreta
+
+Sem sombra pesada
+
+GRID
+
+2×2
+
+Cards iguais
+
+Sem scroll
+
+Ícones centralizados
+
+Label abaixo do ícone
+
+CARD
+
+Cada card contém:
+
+-Ícone derivado do ícone principal
+
+-Label curto
+
+-Nada mais
+
+Estados:
+
+-Normal
+
+-Pressed
+
+-Disabled (delay)
+
+FOOTER
+
+-Slogan (opcional visualmente, mas aprovado)
+
+-Versão Free/Premium
+
+-Version number
+
+-Texto muted, quase invisível.
+
+🧠 Regras de implementação (anotar)
+
+Home não muda visualmente se sessão ativa/inativa
+
+-Não exibir contadores
+
+-Não exibir cadeados
+
+-Não exibir “+”
+
+Toque decide o fluxo
+
+🛠️ Pronto para B4A
+
+-Esse ASCII pode ser traduzido diretamente para:
+
+-Panels
+
+-GridLayout manual
+
+-B4XPages
+
+-Sem decisão em aberto.

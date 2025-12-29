@@ -750,14 +750,12 @@ End Sub
 ' ============================================
 
 Private Sub tmrSession_Tick
-	ModSession.Touch
-	UpdateSessionTimer
-
-	'Verifica se sessao expirou
-	If ModSession.IsSessionActive = False Then
-		tmrSession.Enabled = False
-		B4XPages.ClosePage(Me)
+	'Apenas atualiza o display do timer
+	'Nao fecha a pagina - usuario pode iniciar sessao clicando em um grupo
+	If ModSession.IsSessionActive Then
+		ModSession.Touch
 	End If
+	UpdateSessionTimer
 End Sub
 
 Private Sub UpdateSessionTimer
