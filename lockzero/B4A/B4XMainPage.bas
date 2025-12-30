@@ -41,6 +41,7 @@ Sub Class_Globals
 	Private btnPinSubmit As Button		'Botao confirmar PIN
 	Private lblPinError As Label		'Mensagem de erro
 	Private IsAuthenticated As Boolean = False  'Flag de autenticacao
+
 End Sub
 
 Public Sub Initialize

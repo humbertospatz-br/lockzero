@@ -398,16 +398,27 @@ End Sub
 
 Private Sub btnLangPT_Click
 	ModLang.SetLanguage("pt")
+	ModSecurity.SaveLanguage("pt")
 	HideDialog
-	UpdateDisplayValues
+	RefreshUI
 	ToastMessageShow(ModLang.T("success"), False)
 End Sub
 
 Private Sub btnLangEN_Click
 	ModLang.SetLanguage("en")
+	ModSecurity.SaveLanguage("en")
 	HideDialog
-	UpdateDisplayValues
+	RefreshUI
 	ToastMessageShow(ModLang.T("success"), False)
+End Sub
+
+'Atualiza toda a UI com novo idioma
+Private Sub RefreshUI
+	Root.RemoveAllViews
+	CreateUI
+	ApplyTheme
+	UpdateDisplayValues
+	CallSub2(Main, "SetPageTitle", ModLang.T("settings"))
 End Sub
 
 '=== TIMER ===

@@ -10,6 +10,32 @@
 
 ## 2025-12-30
 
+### [2025-12-30 14:00] - Fix Selecao de Idioma na Primeira Instalacao
+
+**Descricao:** Correcao do painel de selecao de idioma que nao desaparecia ao clicar OK
+
+**Problema identificado:**
+- B4XMainPage.B4XPage_Appear tentava mostrar painel de idioma
+- PageOnboarding era mostrado antes (por lockzero.b4a Activity_Create)
+- Dois contextos conflitantes tentavam controlar selecao de idioma
+- Botao OK disparava mas painel nao desaparecia
+
+**Solucao aplicada:**
+- Mover selecao de idioma para PageOnboarding (Step 0)
+- Remover codigo de selecao de idioma de B4XMainPage
+- PageOnboarding agora tem 4 steps: Language → Welcome → Warning → Complete
+- Se idioma ja foi escolhido, pula direto para Welcome (Step 1)
+
+**Arquivos modificados:**
+- PageOnboarding.bas - Adicionado Step 0 (Language Select)
+- B4XMainPage.bas - Removido ShowLanguageSelectPanel e variaveis relacionadas
+- docs/HISTORICO.md - Este arquivo
+
+**Licao aprendida:**
+> Evitar duplicacao de logica em multiplas paginas - cada funcionalidade deve ter um unico ponto de controle
+
+---
+
 ### [2025-12-30 12:30] - Fix Biometria + Implementacao PIN
 
 **Descricao:** Correcao completa do sistema de biometria e implementacao do dialog de PIN

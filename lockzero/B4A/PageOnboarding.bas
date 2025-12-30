@@ -13,9 +13,16 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI - Telas
-	Private pnlWelcome As B4XView
-	Private pnlWarning As B4XView
-	Private pnlComplete As B4XView
+	Private pnlLanguage As B4XView  'Step 0: Selecao de idioma
+	Private pnlWelcome As B4XView   'Step 1: Welcome
+	Private pnlWarning As B4XView   'Step 2: Warning
+	Private pnlComplete As B4XView  'Step 3: Complete
+
+	'UI - Language
+	Private optLangPT As RadioButton
+	Private optLangEN As RadioButton
+	Private btnLangNext As Button
+	Private SelectedLangIndex As Int = 0
 
 	'UI - Welcome
 	Private lblWelcomeTitle As Label
@@ -45,7 +52,13 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	CreateUI
 	ApplyTheme
-	ShowStep(0)
+
+	'Se idioma ja foi escolhido, pula para Welcome (step 1)
+	If ModSecurity.IsLanguageChosen Then
+		ShowStep(1)
+	Else
+		ShowStep(0)
+	End If
 End Sub
 
 Private Sub B4XPage_Appear
@@ -63,8 +76,45 @@ Private Sub CreateUI
 	Dim margin As Int = 24dip
 	Dim contentWidth As Int = width - (margin * 2)
 
-	'=== STEP 0: WELCOME ===
+	'=== STEP 0: LANGUAGE SELECT ===
+	pnlLanguage = xui.CreatePanel("")
+	Root.AddView(pnlLanguage, 0, 0, width, height)
+
+	'Titulo (duas linhas - bilíngue)
+	Dim lblLangTitle As Label
+	lblLangTitle.Initialize("")
+	lblLangTitle.Text = "Select Language" & CRLF & "Selecione o Idioma"
+	lblLangTitle.TextSize = Starter.FONT_TITLE
+	lblLangTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	lblLangTitle.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
+	pnlLanguage.AddView(lblLangTitle, margin, 100dip, contentWidth, 70dip)
+
+	'RadioButtons para idiomas
+	Dim rbTop As Int = 200dip
+	Dim rbH As Int = 50dip
+
+	optLangPT.Initialize("optLangPT")
+	optLangPT.Text = "Português (Brasil)"
+	optLangPT.TextSize = Starter.FONT_BODY
+	optLangPT.Checked = True
+	SelectedLangIndex = 0
+	pnlLanguage.AddView(optLangPT, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
+	rbTop = rbTop + rbH
+
+	optLangEN.Initialize("optLangEN")
+	optLangEN.Text = "English"
+	optLangEN.TextSize = Starter.FONT_BODY
+	pnlLanguage.AddView(optLangEN, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
+
+	'Botao continuar
+	btnLangNext.Initialize("btnLangNext")
+	btnLangNext.Text = "OK"
+	btnLangNext.TextSize = Starter.FONT_BUTTON
+	pnlLanguage.AddView(btnLangNext, margin, height - 100dip, contentWidth, 50dip)
+
+	'=== STEP 1: WELCOME ===
 	pnlWelcome = xui.CreatePanel("")
+	pnlWelcome.Visible = False
 	Root.AddView(pnlWelcome, 0, 0, width, height)
 
 	lblWelcomeTitle.Initialize("")
@@ -85,7 +135,7 @@ Private Sub CreateUI
 	btnWelcomeNext.TextSize = Starter.FONT_BUTTON
 	pnlWelcome.AddView(btnWelcomeNext, margin, height - 100dip, contentWidth, 50dip)
 
-	'=== STEP 1: WARNING (ZERO RECOVERY) ===
+	'=== STEP 2: WARNING (ZERO RECOVERY) ===
 	pnlWarning = xui.CreatePanel("")
 	pnlWarning.Visible = False
 	Root.AddView(pnlWarning, 0, 0, width, height)
@@ -116,7 +166,7 @@ Private Sub CreateUI
 	btnWarningNext.Enabled = False
 	pnlWarning.AddView(btnWarningNext, margin, height - 90dip, contentWidth, 50dip)
 
-	'=== STEP 2: COMPLETE ===
+	'=== STEP 3: COMPLETE ===
 	pnlComplete = xui.CreatePanel("")
 	pnlComplete.Visible = False
 	Root.AddView(pnlComplete, 0, 0, width, height)
@@ -147,13 +197,64 @@ End Sub
 Private Sub ShowStep(stepNum As Int)
 	CurrentStep = stepNum
 
-	pnlWelcome.Visible = (stepNum = 0)
-	pnlWarning.Visible = (stepNum = 1)
-	pnlComplete.Visible = (stepNum = 2)
+	pnlLanguage.Visible = (stepNum = 0)
+	pnlWelcome.Visible = (stepNum = 1)
+	pnlWarning.Visible = (stepNum = 2)
+	pnlComplete.Visible = (stepNum = 3)
+End Sub
+
+'Botao continuar na tela de idioma
+Private Sub btnLangNext_Click
+	'Aplica idioma selecionado
+	If SelectedLangIndex = 0 Then
+		ModLang.SetLanguage("pt")
+		ModSecurity.SaveLanguage("pt")
+	Else
+		ModLang.SetLanguage("en")
+		ModSecurity.SaveLanguage("en")
+	End If
+
+	'Marca que idioma foi escolhido
+	ModSecurity.SetLanguageChosen
+
+	'Atualiza textos do Welcome antes de mostrar
+	RefreshWelcomeTexts
+
+	'Vai para Welcome
+	ShowStep(1)
+End Sub
+
+'Eventos dos RadioButtons
+Private Sub optLangPT_CheckedChange(Checked As Boolean)
+	If Checked Then
+		SelectedLangIndex = 0
+		optLangEN.Checked = False
+	End If
+End Sub
+
+Private Sub optLangEN_CheckedChange(Checked As Boolean)
+	If Checked Then
+		SelectedLangIndex = 1
+		optLangPT.Checked = False
+	End If
+End Sub
+
+'Atualiza textos do Welcome (após escolher idioma)
+Private Sub RefreshWelcomeTexts
+	lblWelcomeTitle.Text = ModLang.T("onb_welcome_title")
+	lblWelcomeText.Text = ModLang.T("onb_welcome_text")
+	btnWelcomeNext.Text = ModLang.T("continue")
+	lblWarningTitle.Text = ModLang.T("onb_warning_title")
+	lblWarningText.Text = ModLang.T("onb_warning_text")
+	chkUnderstand.Text = ModLang.T("onb_understand")
+	btnWarningNext.Text = ModLang.T("onb_accept")
+	lblCompleteTitle.Text = ModLang.T("onb_complete_title")
+	lblCompleteText.Text = ModLang.T("onb_complete_text")
+	btnStart.Text = ModLang.T("onb_start")
 End Sub
 
 Private Sub btnWelcomeNext_Click
-	ShowStep(1)
+	ShowStep(2)
 End Sub
 
 Private Sub chkUnderstand_CheckedChange(Checked As Boolean)
@@ -172,7 +273,7 @@ Private Sub btnWarningNext_Click
 	End If
 
 	'Usuario cria seus proprios grupos quando quiser
-	ShowStep(2)
+	ShowStep(3)
 End Sub
 
 ' ============================================
@@ -194,6 +295,13 @@ End Sub
 
 Private Sub ApplyTheme
 	Root.Color = ModTheme.HomeBg
+
+	'Language
+	pnlLanguage.Color = ModTheme.HomeBg
+	optLangPT.TextColor = Colors.White
+	optLangEN.TextColor = Colors.White
+	btnLangNext.Color = ModTheme.HomeIconBg
+	btnLangNext.TextColor = Colors.White
 
 	'Welcome
 	pnlWelcome.Color = ModTheme.HomeBg
@@ -224,7 +332,7 @@ End Sub
 
 Private Sub B4XPage_CloseRequest As ResumableSub
 	'Nao permite fechar o onboarding antes de completar
-	If CurrentStep < 2 Then
+	If CurrentStep < 3 Then
 		ToastMessageShow(ModLang.T("onb_complete_setup"), True)
 		Return False
 	End If
