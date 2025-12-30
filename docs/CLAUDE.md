@@ -80,6 +80,62 @@ Para NUNCA perder trabalho, seguir este fluxo SEMPRE:
 
 ---
 
+## LEITURA OBRIGATORIA POR TIPO DE TAREFA
+
+> **⚠️ ANTES DE PLANEJAR OU IMPLEMENTAR - LER ARQUIVOS OBRIGATORIOS ⚠️**
+
+Dependendo do tipo de tarefa, o Claude DEVE ler os arquivos de padrao correspondentes ANTES de comecar qualquer planejamento ou implementacao.
+
+### Matriz de Leitura Obrigatoria
+
+| Tipo de Tarefa | Arquivos a Ler |
+|----------------|----------------|
+| **Nova Pagina/Tela** | `UI_PATTERNS.md` |
+| **Novo Modulo (CRUD)** | `UI_PATTERNS.md`, modulo similar existente |
+| **Nova Classe (cls*)** | Classe similar existente (ex: clsPasswordEntry) |
+| **Modificar UI** | `UI_PATTERNS.md` |
+| **Textos/Traducao** | `ModLang.bas` (ver padrao PT/EN) |
+| **Cores/Tema** | `ModTheme.bas` |
+| **Criptografia** | `ModSecurity.bas` |
+| **Sessao** | `ModSession.bas` |
+| **Especificacao de Feature** | `LOCKZERO_SPEC.md`, specs existentes |
+
+### Arquivos de Padrao
+
+| Arquivo | Conteudo |
+|---------|----------|
+| `docs/UI_PATTERNS.md` | Header, botoes, timer, dialogs, estrutura de pagina |
+| `docs/LOCKZERO_SPEC.md` | Especificacao geral do app |
+| `docs/DICAS_B4A.md` | Dicas de desenvolvimento B4A |
+| `docs/DECISOES_ARQUITETURA.md` | Decisoes tecnicas do projeto |
+
+### Exemplo de Uso
+
+```
+Usuario: "Crie uma nova pagina para gerenciar Cartoes"
+
+Claude DEVE:
+1. Ler docs/UI_PATTERNS.md
+2. Ler uma pagina similar (PagePasswords.bas ou PageNotesGroups.bas)
+3. Seguir EXATAMENTE o padrao documentado
+4. Usar constantes Starter.FONT_*, Starter.HEIGHT_*
+5. Usar ModLang.T() para textos
+6. Usar ModTheme.* para cores
+```
+
+### Checklist Pre-Implementacao
+
+Antes de criar qualquer arquivo novo:
+- [ ] Li UI_PATTERNS.md?
+- [ ] Li um modulo similar como referencia?
+- [ ] Sei quais constantes usar (FONT, HEIGHT, MARGIN)?
+- [ ] Sei quais textos adicionar no ModLang?
+- [ ] Entendi a estrutura padrao de header/content/dialog?
+
+**IMPORTANTE:** Se o Claude nao ler os arquivos obrigatorios ANTES de implementar, o codigo provavelmente estara fora do padrao e precisara ser refatorado.
+
+---
+
 ## REGRAS OBRIGATORIAS DE CODIGO
 
 > **⚠️ ANTES DE ESCREVER QUALQUER LINHA DE CODIGO ⚠️**
@@ -134,13 +190,148 @@ NUNCA: pnl.Color = Colors.RGB(28, 58, 106)
 SEMPRE: pnl.Color = ModTheme.HomeBg
 ```
 
-### 5. Checklist antes de salvar arquivo
+### 5. Headers - SEMPRE usar breadcrumb
+
+```
+NUNCA: lblTitle.Text = "Nome do Grupo"
+SEMPRE: lblTitle.Text = ModLang.T("categoria") & " → " & nomeGrupo
+```
+
+**Exemplos:**
+- Senhas: `"Senhas → Bancos"`
+- Notas: `"Notas → Compras"`
+- Cartoes: `"Cartões → Pessoais"`
+
+### 6. Capitalize - InputType com CAP_WORDS
+
+Para capitalizar primeira letra de cada palavra automaticamente, usar InputType:
+
+```vb
+NUNCA: Criar funcao Capitalize() manual
+SEMPRE: edtCampo.InputType = Bit.Or(1, 8192)  'TEXT + CAP_WORDS
+```
+
+**Usar em:**
+- Nome do grupo: `edtGroupName.InputType = Bit.Or(1, 8192)`
+- Titulo da nota: `edtTitle.InputType = Bit.Or(1, 8192)`
+- Itens de lista: `edtItemText.InputType = Bit.Or(1, 8192)`
+
+**Outros InputTypes comuns:**
+| Tipo | Codigo | Uso |
+|------|--------|-----|
+| TEXT | 1 | Texto normal |
+| TEXT + CAP_WORDS | Bit.Or(1, 8192) | Capitaliza palavras |
+| TEXT + PASSWORD | Bit.Or(1, 128) | Senha oculta |
+| NUMBER | 2 | Apenas numeros |
+
+### 7. Botao + circular (padrao para adicionar)
+
+```vb
+NUNCA: btnAdd com largura total
+SEMPRE: Label circular com SetColorAndBorder
+```
+
+**Padrao:**
+```vb
+Dim lblAdd As Label
+lblAdd.Initialize("lblAdd")
+lblAdd.Text = "+"
+lblAdd.TextSize = 26
+lblAdd.Typeface = Typeface.DEFAULT_BOLD
+lblAdd.Gravity = Gravity.CENTER
+lblAdd.TextColor = Colors.White
+pnlParent.AddView(lblAdd, x, y, 44dip, 44dip)
+
+'Arredondar (circular)
+Dim xvAdd As B4XView = lblAdd
+xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 22dip)
+```
+
+### 8. Emojis para Android - Surrogate Pairs
+
+Emojis acima de U+FFFF precisam de surrogate pairs no B4A:
+
+```vb
+NUNCA: Chr(0x1F4DD)  'NAO FUNCIONA no Android
+SEMPRE: Chr(0xD83D) & Chr(0xDCDD)  'Surrogate pair
+```
+
+**Emojis comuns:**
+| Emoji | Codepoint | Codigo B4A |
+|-------|-----------|------------|
+| 📝 | U+1F4DD | `Chr(0xD83D) & Chr(0xDCDD)` |
+| 🔒 | U+1F512 | `Chr(0xD83D) & Chr(0xDD12)` |
+| 🔓 | U+1F513 | `Chr(0xD83D) & Chr(0xDD13)` |
+
+**Emojis BMP (funcionam normal):**
+| Emoji | Codepoint | Codigo B4A |
+|-------|-----------|------------|
+| ☑ | U+2611 | `Chr(0x2611)` |
+| ★ | U+2605 | `Chr(0x2605)` |
+| ☰ | U+2630 | `Chr(0x2630)` |
+
+### 9. Botao Cancelar - OBRIGATORIO ao lado de Salvar
+
+```vb
+NUNCA: Apenas botao "Salvar" sozinho
+SEMPRE: Botao "Cancelar" + Botao "Salvar" lado a lado
+```
+
+**Padrao:**
+```vb
+'Cancelar (esquerda)
+Dim btnCancel As Button
+btnCancel.Initialize("btnCancel")
+btnCancel.Text = ModLang.T("cancel")
+btnCancel.Color = Colors.Transparent
+btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
+pnlParent.AddView(btnCancel, margin, y, 100dip, 44dip)
+
+'Salvar (direita)
+Dim btnSave As Button
+btnSave.Initialize("btnSave")
+btnSave.Text = ModLang.T("save")
+btnSave.Color = ModTheme.HomeIconBg
+btnSave.TextColor = Colors.White
+pnlParent.AddView(btnSave, width - margin - 100dip, y, 100dip, 44dip)
+```
+
+### 10. Fluxo de trabalho OBRIGATORIO
+
+```
+1. ANALISAR - Entender o problema/requisito
+2. ATUALIZAR TODO_LIST - Anotar tarefas ANTES de implementar
+3. IMPLEMENTAR - Executar as tarefas
+4. AGUARDAR APROVACAO - Usuario testa e aprova
+5. ATUALIZAR TODO_LIST - Marcar como concluido
+6. ATUALIZAR HISTORICO.md - Registrar o que foi feito
+```
+
+**NUNCA** comecar a implementar sem antes atualizar o TODO_LIST.md
+
+### 11. Checklist antes de salvar arquivo
 
 - [ ] TextSize usa Starter.FONT_*?
 - [ ] Heights usam Starter.HEIGHT_*?
 - [ ] Textos usam ModLang.T()?
 - [ ] Cores usam ModTheme.*?
+- [ ] Header usa breadcrumb (Categoria → Nome)?
+- [ ] Nomes/titulos usam Capitalize()?
+- [ ] Botao + e circular (Label com SetColorAndBorder)?
+- [ ] Emojis acima U+FFFF usam surrogate pairs?
 - [ ] Tarefa esta marcada em TODO_LIST.md?
+
+### 12. NAO dizer o obvio sobre compilacao
+
+```
+NUNCA: "Compile novamente e teste"
+NUNCA: "Voce precisa recompilar o projeto"
+NUNCA: "Pressione F5 para compilar"
+```
+
+**REGRA:** O usuario SABE que precisa compilar. Nao e possivel testar codigo novo sem compilar no B4A. Dizer isso e perda de tempo e insulto a inteligencia do usuario.
+
+**O QUE FAZER:** Simplesmente terminar a alteracao e aguardar o feedback do teste. O usuario vai compilar automaticamente.
 
 ---
 

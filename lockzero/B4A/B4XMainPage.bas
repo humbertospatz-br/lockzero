@@ -512,16 +512,8 @@ Private Sub AnimatePulseAndNavigateNotes(pnl As Panel)
 End Sub
 
 Private Sub NavigateToNotes
-	'Usa o grupo "Geral" por padrao para notas
-	Dim groups As List = ModPasswords.GetAllGroups
-	If groups.Size > 0 Then
-		Dim grp As clsPasswordGroup = groups.Get(0)
-		Dim pg As PageNotesList = B4XPages.GetPage("PageNotesList")
-		pg.SetParams(CreateMap("groupId": grp.Id, "groupName": grp.Name))
-		B4XPages.ShowPage("PageNotesList")
-	Else
-		ToastMessageShow(ModLang.T("empty"), True)
-	End If
+	'Navega para lista de grupos de notas
+	B4XPages.ShowPage("PageNotesGroups")
 End Sub
 
 ' ============================================

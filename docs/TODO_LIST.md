@@ -11,6 +11,155 @@
 
 ---
 
+## CONCLUIDO - Modulo de Notas Fase 1 (2025-12-30)
+
+> **Origem:** SPEC_NOTAS.md - Grupos de notas com tipos (texto/lista)
+> **Status:** CONCLUIDO
+
+### Implementado
+
+**Classes:**
+- [x] [2025-12-30] `clsNoteGroup.bas` - Grupos seguros (criptografados) ou abertos
+- [x] [2025-12-30] `clsNoteEntry.bas` - NoteType (text/list), Items[], SortOrder
+
+**Modulos:**
+- [x] [2025-12-30] `ModNotes.bas` - CRUD grupos + notas com ordenacao
+
+**Paginas:**
+- [x] [2025-12-30] `PageNotesGroups.bas` - Lista grupos com cadeado, criar/editar/excluir
+- [x] [2025-12-30] `PageNotesList.bas` - Lista notas com icone tipo, preview por tipo
+- [x] [2025-12-30] `PageNoteEdit.bas` - Modo texto E modo lista (checkboxes)
+
+**Textos:**
+- [x] [2025-12-30] `ModLang.bas` - Todos textos PT/EN para notas
+
+### Funcionalidades
+
+- Grupos SEGUROS (com cadeado) - notas criptografadas AES-256
+- Grupos ABERTOS (sem cadeado) - notas em texto claro
+- Notas tipo TEXTO - titulo + conteudo multilinhas
+- Notas tipo LISTA - checkboxes com adicionar/editar/remover itens
+- Preview na lista: texto mostra conteudo, lista mostra "X de Y itens"
+- Dialog para escolher tipo ao criar nova nota
+
+### Pendente Fase 2 (Futuro)
+
+- [ ] Drag & drop para reordenacao manual
+- [ ] Exportacao/Share de notas
+
+---
+
+## CORRECOES - Modulo de Notas (2025-12-30)
+
+> **Origem:** Feedback de testes do usuario
+> **Status:** EM ANDAMENTO
+
+### UI/UX Corrigidos
+
+- [x] [2025-12-30] **InputType CAP_WORDS** - Capitaliza automaticamente nomes/titulos
+  - `edtGroupName.InputType = Bit.Or(1, 8192)` em PageNotesGroups
+  - `edtItemText.InputType = Bit.Or(1, 8192)` em PageNoteEdit
+  - `edtTitle.InputType = Bit.Or(1, 8192)` em PageNoteEdit
+  - **Regra anotada em CLAUDE.md secao 6**
+
+- [x] [2025-12-30] **Botao + circular** - Padrao Label com SetColorAndBorder
+  - PageNotesList: lblAdd (40x40dip, raio 20dip)
+  - PageNoteEdit: lblAddItem (44x44dip, raio 22dip)
+  - **Regra anotada em CLAUDE.md secao 7**
+
+- [x] [2025-12-30] **Emojis surrogate pairs** - Para Android
+  - 📝 = `Chr(0xD83D) & Chr(0xDCDD)`
+  - 🔒 = `Chr(0xD83D) & Chr(0xDD12)`
+  - Corrigido em clsNoteGroup, PageNotesGroups, PageNotesList
+  - **Regra anotada em CLAUDE.md secao 8**
+
+- [x] [2025-12-30] **Emoji automatico por tipo** - Sem campo editavel
+  - Grupo Seguro: 🔒 cadeado
+  - Grupo Aberto: 📝 nota
+  - Removido edtGroupIcon do dialog
+
+- [x] [2025-12-30] **Navegar apos criar grupo** - Abre automaticamente
+  - ProcessAddGroup chama NavigateToGroup(g.Id) apos salvar
+
+- [x] [2025-12-30] **Mostrar/esconder campo frase** - Ao alternar checkbox
+  - chkSecure_CheckedChange mostra/esconde lblPhraseLabel e pnlPhraseArea
+  - Limpa edtPassphrase se desmarcar seguro
+
+- [x] [2025-12-30] **Breadcrumb no header** - Padrao "Categoria → Nome"
+  - PageNotesList: "Notas → NomeGrupo"
+  - **Regra anotada em CLAUDE.md secao 5**
+
+### Erros Corrigidos
+
+- [x] [2025-12-30] **FromMap items** - Trata String ou List
+  - clsNoteEntry.FromMap converte List para JSON string se necessario
+
+### Pendente
+
+- [x] [2025-12-30] **Arquivo corrompido** - lockzero_notes.json com erro "Simple value expected"
+  - Usuario limpou dados do app
+
+---
+
+## PARA AMANHA - Refinamentos UI (2025-12-31)
+
+> **Origem:** Feedback de testes do usuario
+> **Status:** PENDENTE
+
+### Tarefas
+
+- [ ] [2025-12-30] **Icones menores e mais nitidos** - Lixeira e Compartilhar
+  - Icones atuais (ic_menu_delete, ic_menu_share) parecem borrados
+  - Reduzir tamanho dos ImageViews (de 44dip para ~32dip)
+  - Pesquisar drawables Android mais nitidos ou usar PNG customizados
+  - Alternativa: usar icones de biblioteca Material Design
+
+- [ ] [2025-12-30] **Animacoes de transicao entre telas**
+  - Transicoes atuais muito rapidas, causam "susto"
+  - B4A suporta animacoes via B4XPages ou Activity transitions
+  - Pesquisar: `B4XPages.ShowPageAndRemovePreviousPages` com animacao
+  - Opcoes: slide left/right, fade in/out, zoom
+  - Referencia: https://www.b4x.com/android/forum/threads/b4x-b4xpages-cross-platform-pages-framework.115993/
+
+---
+
+## EM ANDAMENTO - Correcoes PageNoteEdit (2025-12-30)
+
+> **Origem:** Feedback de testes do usuario
+> **Status:** PARCIALMENTE CONCLUIDO
+
+### Tarefas
+
+- [ ] [2025-12-30] **Checkbox borda visivel** - Todos checkboxes precisam borda de outra cor
+  - chkFavorite em PageNoteEdit
+  - chkSecure em PageNotesGroups
+  - chkItem em itens de lista
+  - **Problema:** Dificil de visualizar sem contraste
+
+- [ ] [2025-12-30] **Breadcrumb completo** - "Nota → NomeGrupo → Novo Texto" ou "Nova Lista"
+  - Novo: "Nota → Aberto → Novo Texto" / "Nova Lista"
+  - Editar: "Nota → Aberto → Editar"
+  - Atualizar PageNoteEdit.B4XPage_Appear e lblHeaderTitle
+
+- [ ] [2025-12-30] **Botao Cancelar** - Adicionar ao lado do Salvar no header
+  - Padrao: Cancelar (transparente) + Salvar (HomeIconBg)
+
+- [ ] [2025-12-30] **Botao + com texto** - "(Incluir Item)" ao lado
+  - Manter botao circular + adicionar label explicativo
+
+- [ ] [2025-12-30] **Checkbox Favorito** - Reposicionar abaixo do conteudo
+  - Modo texto: abaixo do campo de conteudo (nao no meio)
+  - Modo lista: abaixo da lista de itens
+
+- [ ] [2025-12-30] **Campo conteudo maior** - Aumentar altura do edtContent
+  - Altura atual: 200dip
+  - Aumentar para 300dip ou mais
+
+- [ ] [2025-12-30] **Titulo correto** - "Novo Texto" em vez de "Nova Nota"
+  - Adicionar textos em ModLang: new_text, new_list, edit_note
+
+---
+
 ## EM ANDAMENTO - PIN e Biometria (2025-12-29)
 
 > **Origem:** Seguranca adicional para operacoes sensiveis

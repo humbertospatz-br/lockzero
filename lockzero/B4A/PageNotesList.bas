@@ -12,15 +12,21 @@ Sub Class_Globals
 	Private xui As XUI
 
 	'UI
-	Private btnAdd As Button
+	Private lblAdd As Label
+	Private btnBack As Button
 
 	Private svNotes As ScrollView
 	Private pnlNotes As B4XView
 
 	Private lblEmpty As Label
+	Private lblTitle As Label
 
 	'Estado
 	Private CurrentGroupId As String = ""
+	Private IsNoteGroup As Boolean = False  'True = NoteGroup, False = PasswordGroup (legado)
+	Private CurrentGroup As clsNoteGroup    'Referencia ao grupo atual
+	Private GroupPassphrase As String = ""  'Passphrase para grupos seguros
+	Private IsNavigating As Boolean = False  'Flag para evitar navegacao dupla
 End Sub
 
 Public Sub Initialize
@@ -34,17 +40,43 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
-	'Define titulo na ActionBar
-	CallSub2(Main, "SetPageTitle", ModLang.T("notes"))
+	Log("PageNotesList.B4XPage_Appear - IsNavigating=" & IsNavigating)
 
-	ModSession.Touch
+	'Atualiza titulo com breadcrumb: Notas → NomeGrupo
+	If IsNoteGroup And CurrentGroup <> Null Then
+		lblTitle.Text = ModLang.T("notes") & " → " & CurrentGroup.Name
+		CallSub2(Main, "SetPageTitle", CurrentGroup.Name)
+	Else
+		lblTitle.Text = ModLang.T("notes")
+		CallSub2(Main, "SetPageTitle", ModLang.T("notes"))
+	End If
+
+	'Touch na sessao se grupo seguro
+	If IsNoteGroup And CurrentGroup <> Null And CurrentGroup.IsSecure Then
+		ModSession.Touch
+	End If
+
 	LoadNotes
+
+	'Reset da flag de navegacao com delay para evitar cliques fantasma
+	Sleep(100)
+	IsNavigating = False
+	Log("PageNotesList - IsNavigating resetado para False")
 End Sub
 
 'Recebe parametros da pagina anterior
 Public Sub SetParams(params As Map)
 	If params = Null Then Return
 	CurrentGroupId = params.GetDefault("groupId", "")
+	IsNoteGroup = params.GetDefault("isNoteGroup", False)
+	GroupPassphrase = params.GetDefault("passphrase", "")
+
+	'Se for NoteGroup, obtem referencia ao grupo
+	If IsNoteGroup Then
+		CurrentGroup = ModNotes.GetNoteGroupById(CurrentGroupId)
+	Else
+		CurrentGroup = Null
+	End If
 End Sub
 
 ' ============================================
@@ -62,23 +94,36 @@ Private Sub CreateUI
 	pnlHeader.Color = ModTheme.HomeHeaderBg
 	Root.AddView(pnlHeader, 0, 0, width, headerH)
 
-	Dim lblTitle As Label
+	'Botao voltar
+	btnBack.Initialize("btnBack")
+	btnBack.Text = "<"
+	btnBack.TextSize = 20
+	btnBack.TextColor = Colors.White
+	btnBack.Color = Colors.Transparent
+	btnBack.Gravity = Gravity.CENTER
+	pnlHeader.AddView(btnBack, 0, 0, 48dip, headerH)
+
+	'Titulo (sera atualizado em B4XPage_Appear)
 	lblTitle.Initialize("")
-	lblTitle.Text = "NOTAS"
-	lblTitle.TextSize = 14
+	lblTitle.Text = ModLang.T("notes")
+	lblTitle.TextSize = Starter.FONT_BODY
 	lblTitle.TextColor = Colors.ARGB(200, 255, 255, 255)
 	lblTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblTitle, 16dip, 0, width - 80dip, headerH)
+	pnlHeader.AddView(lblTitle, 48dip, 0, width - 110dip, headerH)
 
 	'Botao adicionar no header (circular)
-	btnAdd.Initialize("btnAdd")
-	btnAdd.Text = "+"
-	btnAdd.TextSize = 22
-	btnAdd.Color = ModTheme.HomeIconBg
-	btnAdd.TextColor = Colors.White
-	btnAdd.Gravity = Gravity.CENTER
-	pnlHeader.AddView(btnAdd, width - 54dip, 10dip, 36dip, 36dip)
+	lblAdd.Initialize("lblAdd")
+	lblAdd.Text = "+"
+	lblAdd.TextSize = 26
+	lblAdd.Typeface = Typeface.DEFAULT_BOLD
+	lblAdd.Gravity = Gravity.CENTER
+	lblAdd.TextColor = Colors.White
+	pnlHeader.AddView(lblAdd, width - 50dip, 8dip, 40dip, 40dip)
+
+	'Arredondar (circular)
+	Dim xvAdd As B4XView = lblAdd
+	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 20dip)
 
 	'Lista de notas (sem separador, fundo continuo)
 	svNotes.Initialize(0)
@@ -90,8 +135,8 @@ Private Sub CreateUI
 
 	'Label vazio
 	lblEmpty.Initialize("")
-	lblEmpty.Text = "Nenhuma nota neste grupo"
-	lblEmpty.TextSize = 16
+	lblEmpty.Text = ModLang.T("empty")
+	lblEmpty.TextSize = Starter.FONT_BODY
 	lblEmpty.Gravity = Gravity.CENTER
 	lblEmpty.Visible = False
 	Root.AddView(lblEmpty, 0, height / 2 - 20dip, width, 40dip)
@@ -139,29 +184,77 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	Dim xv As B4XView = pnl
 	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 12dip)
 
+	'Determina se precisa descriptografar
+	Dim needsDecrypt As Boolean = True
+	Dim passphrase As String = ""
+
+	If IsNoteGroup And CurrentGroup <> Null Then
+		If CurrentGroup.IsSecure = False Then
+			'Grupo ABERTO - notas em texto claro
+			needsDecrypt = False
+		Else
+			'Grupo SEGURO - usa passphrase da sessao ou passada por parametro
+			passphrase = GroupPassphrase
+			If passphrase = "" Then passphrase = ModSession.GetPassphrase
+		End If
+	Else
+		'Legado (PasswordGroup) - sempre descriptografa
+		passphrase = ModSession.GetPassphrase
+	End If
+
+	'Icone do tipo de nota (text/list)
+	Dim lblTypeIcon As Label
+	lblTypeIcon.Initialize("")
+	If note.IsListNote Then
+		lblTypeIcon.Text = Chr(0x2611)  'Checkbox marcado ☑
+	Else
+		lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCDD)  'Nota 📝 (surrogate pair)
+	End If
+	lblTypeIcon.TextSize = 20
+	lblTypeIcon.Gravity = Gravity.CENTER
+	pnl.AddView(lblTypeIcon, 8dip, 25dip, 30dip, 30dip)
+
 	'Titulo
-	Dim title As String = note.GetDecryptedTitle(ModSession.GetPassphrase)
-	If title.Length > 30 Then title = title.SubString2(0, 30) & "..."
+	Dim title As String
+	If needsDecrypt Then
+		title = note.GetDecryptedTitle(passphrase)
+	Else
+		title = note.Title  'Texto claro para grupos abertos
+	End If
+	If title.Length > 25 Then title = title.SubString2(0, 25) & "..."
 
 	Dim lblNoteTitle As Label
 	lblNoteTitle.Initialize("")
 	lblNoteTitle.Text = title
-	lblNoteTitle.TextSize = 16
+	lblNoteTitle.TextSize = Starter.FONT_BODY
 	lblNoteTitle.TextColor = Colors.White
 	lblNoteTitle.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
-	pnl.AddView(lblNoteTitle, 12dip, 10dip, cardWidth - 60dip, 25dip)
+	pnl.AddView(lblNoteTitle, 42dip, 10dip, cardWidth - 90dip, 25dip)
 
-	'Preview do conteudo
-	Dim content As String = note.GetDecryptedContent(ModSession.GetPassphrase)
-	If content.Length > 50 Then content = content.SubString2(0, 50) & "..."
-	content = content.Replace(Chr(10), " ").Replace(Chr(13), " ")
+	'Preview baseado no tipo de nota
+	Dim preview As String
+	If note.IsListNote Then
+		'Lista: mostra "X de Y itens"
+		Dim total As Int = note.GetItemsCount
+		Dim checked As Int = note.GetCheckedCount
+		preview = checked & " " & ModLang.T("of") & " " & total & " " & ModLang.T("items")
+	Else
+		'Texto: preview do conteudo
+		If needsDecrypt Then
+			preview = note.GetDecryptedContent(passphrase)
+		Else
+			preview = note.Content
+		End If
+		If preview.Length > 40 Then preview = preview.SubString2(0, 40) & "..."
+		preview = preview.Replace(Chr(10), " ").Replace(Chr(13), " ")
+	End If
 
 	Dim lblPreview As Label
 	lblPreview.Initialize("")
-	lblPreview.Text = content
-	lblPreview.TextSize = 13
+	lblPreview.Text = preview
+	lblPreview.TextSize = Starter.FONT_LABEL
 	lblPreview.TextColor = Colors.ARGB(180, 255, 255, 255)
-	pnl.AddView(lblPreview, 12dip, 38dip, cardWidth - 60dip, 30dip)
+	pnl.AddView(lblPreview, 42dip, 38dip, cardWidth - 90dip, 30dip)
 
 	'Favorito
 	If note.IsFavorite Then
@@ -178,19 +271,41 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 End Sub
 
 Private Sub pnlNote_Click
+	Log("pnlNote_Click - IsNavigating=" & IsNavigating)
 	Dim pnl As Panel = Sender
 	Dim noteId As String = pnl.Tag
 	OpenNote(noteId)
 End Sub
 
 Private Sub OpenNote(noteId As String)
-	ModSession.Touch
+	'Evita navegacao dupla
+	If IsNavigating Then Return
+	IsNavigating = True
+
+	'Touch na sessao se grupo seguro
+	If IsNoteGroup And CurrentGroup <> Null And CurrentGroup.IsSecure Then
+		ModSession.Touch
+	End If
 
 	Dim note As clsNoteEntry = ModNotes.GetNoteById(noteId)
-	If note = Null Then Return
+	If note = Null Then
+		IsNavigating = False
+		Return
+	End If
+
+	Dim params As Map
+	params.Initialize
+	params.Put("noteId", noteId)
+	params.Put("groupId", CurrentGroupId)
+	params.Put("isNoteGroup", IsNoteGroup)
+	If IsNoteGroup And CurrentGroup <> Null Then
+		params.Put("isSecure", CurrentGroup.IsSecure)
+		params.Put("passphrase", GroupPassphrase)
+		params.Put("groupName", CurrentGroup.Name)
+	End If
 
 	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
-	pg.SetParams(CreateMap("noteId": noteId, "groupId": CurrentGroupId))
+	pg.SetParams(params)
 	B4XPages.ShowPage("PageNoteEdit")
 End Sub
 
@@ -198,10 +313,48 @@ End Sub
 '  EVENTOS
 ' ============================================
 
-Private Sub btnAdd_Click
-	ModSession.Touch
+Private Sub btnBack_Click
+	B4XPages.ClosePage(Me)
+End Sub
+
+Private Sub lblAdd_Click
+	Log("lblAdd_Click - IsNavigating=" & IsNavigating)
+	'Evita navegacao dupla
+	If IsNavigating Then Return
+
+	'Touch na sessao se grupo seguro
+	If IsNoteGroup And CurrentGroup <> Null And CurrentGroup.IsSecure Then
+		ModSession.Touch
+	End If
+
+	'Dialog para escolher tipo de nota
+	Wait For (xui.Msgbox2Async(ModLang.T("note_type_choose"), ModLang.T("new_note"), ModLang.T("note_type_text"), ModLang.T("cancel"), ModLang.T("note_type_list"), Null)) Msgbox_Result(Result As Int)
+
+	Dim noteType As String = ""
+	If Result = xui.DialogResponse_Positive Then
+		noteType = "text"
+	Else If Result = xui.DialogResponse_Negative Then
+		noteType = "list"
+	Else
+		Return  'Cancelou
+	End If
+
+	IsNavigating = True
+
+	Dim params As Map
+	params.Initialize
+	params.Put("noteId", "")
+	params.Put("groupId", CurrentGroupId)
+	params.Put("isNoteGroup", IsNoteGroup)
+	params.Put("noteType", noteType)
+	If IsNoteGroup And CurrentGroup <> Null Then
+		params.Put("isSecure", CurrentGroup.IsSecure)
+		params.Put("passphrase", GroupPassphrase)
+		params.Put("groupName", CurrentGroup.Name)
+	End If
+
 	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
-	pg.SetParams(CreateMap("noteId": "", "groupId": CurrentGroupId))
+	pg.SetParams(params)
 	B4XPages.ShowPage("PageNoteEdit")
 End Sub
 
@@ -212,8 +365,9 @@ End Sub
 Private Sub ApplyTheme
 	Root.Color = ModTheme.HomeBg
 
-	btnAdd.Color = ModTheme.HomeIconBg
-	btnAdd.TextColor = Colors.White
+
+	btnBack.Color = Colors.Transparent
+	btnBack.TextColor = Colors.White
 
 	lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
 End Sub
