@@ -8,6 +8,38 @@
 
 ---
 
+## 2025-12-30
+
+### [2025-12-30 12:30] - Fix Biometria + Implementacao PIN
+
+**Descricao:** Correcao completa do sistema de biometria e implementacao do dialog de PIN
+
+**Problema 1 - App nao iniciava:**
+- Erro: "You need to use a Theme.AppCompat theme"
+- Causa: `#Extends: android.support.v7.app.AppCompatActivity` incompativel com `Themes.LightTheme`
+- Solucao: Usar `#Extends: android.support.v4.app.FragmentActivity` (igual LockSeed)
+
+**Problema 2 - PIN nao funcionava:**
+- Causa: `ShowCreatePINDialog` tinha apenas TODO, nao estava implementado
+- Solucao: Implementado dialog completo com fluxo criar/confirmar/remover
+
+**Problema 3 - PINs nao coincidiam:**
+- Causa: Variavel `TempPIN` declarada fora de `Class_Globals`
+- Solucao: Mover `TempPIN` para `Class_Globals`
+
+**Arquivos modificados:**
+- lockzero.b4a - `#Extends: android.support.v4.app.FragmentActivity`
+- PageSettings.bas - Dialog completo de PIN
+- ModLang.bas - Adicionado `pin_digits` (PT/EN)
+- B4XMainPage.bas - `Biometric.Initialize` em B4XPage_Created
+- docs/DICAS_B4A.md - Secao 34 reescrita com implementacao correta
+- docs/HISTORICO.md - Este arquivo
+
+**Licao aprendida:**
+> "SE ALGUEM JA FEZ, EU TAMBEM FACO" - Verificar LockSeed quando algo nao funciona
+
+---
+
 ## 2025-12-29
 
 ### [2025-12-29 18:30] - Fix Biometria - Contexto da Activity

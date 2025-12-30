@@ -51,12 +51,15 @@ End Sub
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	Root.Color = ModTheme.Background
-	Biometric.Initialize(Me, "Biometric")
-	Log("Biometric initialized, CanAuthenticate: " & Biometric.CanAuthenticate)
-	
+
 	CreateMainPanel
 	CreateSideMenu
 	CreateLockScreen		'Overlay de PIN/Biometria
+
+	'Inicializa biometria (precisa ser depois do context estar pronto)
+	Biometric.Initialize(Me, "Biometric")
+	Log("Biometric initialized, CanAuthenticate: " & Biometric.CanAuthenticate)
+
 	ShowHome
 	ApplyTheme
 End Sub

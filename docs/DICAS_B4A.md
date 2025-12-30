@@ -1449,80 +1449,220 @@ End Sub
 
 ---
 
-## 34. Biometria / Leitura Digital
+## 34. Biometria com BiometricManager (androidx.biometric)
 
-### Biblioteca necessaria:
-- `Fingerprint2` (B4A)
+### IMPORTANTE - Configuracao Correta
 
-### Verificar se dispositivo suporta:
+A implementacao de biometria usa `BiometricManager` (androidx.biometric), que e a forma moderna recomendada pelo Google.
+
+### 1. Arquivo BiometricManager.bas
+
+Copie este arquivo para seu projeto:
+
 ```vb
-Private fp As Fingerprint2
+'BiometricManager.bas
+'version: 1.00
+'Requires: androidx.biometric library via SDK Manager
 
-Sub CheckBiometricSupport As Boolean
-    fp.Initialize("fp")
+#Event: Complete (Success As Boolean, ErrorMessage As String)
 
-    If fp.IsHardwareDetected = False Then
-        Log("Hardware biometrico nao detectado")
-        Return False
-    End If
-
-    If fp.HasEnrolledFingerprints = False Then
-        Log("Nenhuma digital cadastrada")
-        Return False
-    End If
-
-    Return True
-End Sub
-```
-
-### Solicitar autenticacao:
-```vb
-Sub RequestBiometric
-    If CheckBiometricSupport = False Then
-        ' Fallback para senha/frase
-        ShowPassphraseDialog
-        Return
-    End If
-
-    fp.StartListening("fp")
-    ToastMessageShow("Toque no sensor", False)
+Sub Class_Globals
+    Private ctxt As JavaObject
+    Private Manager As JavaObject
+    Private Handler As JavaObject
+    Private Executor As Object
+    Private mTarget As Object
+    Private mEventName As String
 End Sub
 
-Sub fp_Success
-    ' Autenticacao bem sucedida
-    Log("Biometria OK!")
-    UnlockApp
+Public Sub Initialize (Target As Object, EventName As String)
+    mTarget = Target
+    mEventName = EventName
+    ctxt.InitializeContext
+    Manager = Manager.InitializeStatic("androidx.biometric.BiometricManager").RunMethod("from", Array(ctxt))
+    Handler.InitializeNewInstance("android.os.Handler", Null)
+    Executor = Handler.CreateEvent("java.util.concurrent.Executor", "Executor", Null)
 End Sub
 
-Sub fp_Failed(ErrorCode As Int, Help As String)
-    Log("Biometria falhou: " & Help)
+Private Sub Executor_Event (MethodName As String, Args() As Object) As Object
+    If MethodName = "execute" Then
+        Handler.RunMethod("post", Array(Args(0)))
+    End If
+    Return Null
+End Sub
 
-    Select ErrorCode
-        Case fp.ERROR_LOCKOUT
-            ToastMessageShow("Muitas tentativas. Tente mais tarde.", True)
+Public Sub CanAuthenticate As String
+    Dim v As Int = Manager.RunMethod("canAuthenticate", Null)
+    Select v
+        Case 1
+            Return "UNAVAILABLE"
+        Case 11
+            Return "NONE_ENROLLED"
+        Case 12
+            Return "NO_HARDWARE"
+        Case 0
+            Return "SUCCESS"
         Case Else
-            ToastMessageShow("Tente novamente", False)
+            Return "UNKNOWN"
     End Select
 End Sub
 
-Sub fp_NonRecoverableError(ErrorCode As Int, Help As String)
-    Log("Erro nao recuperavel: " & Help)
-    ' Fallback para senha
-    ShowPassphraseDialog
+Public Sub Show (Msg As String)
+    Dim PromptInfoBuilder As JavaObject
+    PromptInfoBuilder.InitializeNewInstance("androidx.biometric.BiometricPrompt$PromptInfo$Builder", Null)
+    PromptInfoBuilder.RunMethod("setTitle", Array(Msg))
+    PromptInfoBuilder.RunMethod("setNegativeButtonText", Array("Cancel"))
+    Dim Ev As JavaObject
+    Ev.InitializeNewInstance(Application.PackageName & ".biometricmanager.BiometricPromptAuthentication", Array(Me))
+    Dim Prompt As JavaObject
+    Prompt.InitializeNewInstance("androidx.biometric.BiometricPrompt", Array(ctxt, Executor, Ev))
+    Prompt.RunMethod("authenticate", Array(PromptInfoBuilder.RunMethod("build", Null)))
+End Sub
+
+Private Sub Auth_Complete (Success As Boolean, ErrorCode As Int, ErrorMessage As String)
+    CallSubDelayed3(mTarget, mEventName & "_complete", Success, ErrorMessage)
+End Sub
+
+#if java
+import androidx.biometric.*;
+public static class BiometricPromptAuthentication extends BiometricPrompt.AuthenticationCallback {
+    private BA ba;
+    public BiometricPromptAuthentication(B4AClass parent) {
+        ba = parent.getBA();
+    }
+    @Override
+    public void onAuthenticationError(int errorCode, CharSequence errString) {
+        super.onAuthenticationError(errorCode, errString);
+        ba.raiseEventFromUI(this, "auth_complete", false, errorCode, errString);
+    }
+    @Override
+    public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+        super.onAuthenticationSucceeded(result);
+        ba.raiseEventFromUI(this, "auth_complete", true, 0, "");
+    }
+    @Override
+    public void onAuthenticationFailed() {
+        super.onAuthenticationFailed();
+    }
+}
+#end if
+```
+
+### 2. Configuracao no arquivo .b4a (Main)
+
+```vb
+' OBRIGATORIO - Biblioteca biometrica via SDK Manager
+#AdditionalJar: androidx.biometric:biometric
+
+' OBRIGATORIO - Usar FragmentActivity (NAO AppCompatActivity!)
+#Extends: android.support.v4.app.FragmentActivity
+
+' Tema - usar Themes.LightTheme (compativel com FragmentActivity)
+' NO ManifestCode:
+' CreateResourceFromFile(Macro, Themes.LightTheme)
+```
+
+### 3. Manifest - Permissoes
+
+```vb
+AddPermission(android.permission.USE_BIOMETRIC)
+AddPermission(android.permission.USE_FINGERPRINT)
+```
+
+### 4. Instalar biblioteca via B4A SDK Manager
+
+1. Abra B4A SDK Manager
+2. Pesquise "biometric"
+3. Instale `androidx.biometric:biometric`
+
+### 5. Uso na pagina (B4XMainPage ou outra)
+
+```vb
+Sub Class_Globals
+    Private Biometric As BiometricManager
+End Sub
+
+' IMPORTANTE: Inicializar em B4XPage_Created (NAO em Initialize)
+Private Sub B4XPage_Created(Root1 As B4XView)
+    Root = Root1
+
+    ' ... criar UI ...
+
+    ' Inicializar biometria DEPOIS do contexto estar pronto
+    Biometric.Initialize(Me, "Biometric")
+    Log("Biometric CanAuthenticate: " & Biometric.CanAuthenticate)
+End Sub
+
+' Mostrar dialog de biometria
+Private Sub ShowBiometric
+    If Biometric.CanAuthenticate = "SUCCESS" Then
+        Biometric.Show("Use sua digital para continuar")
+    Else
+        Log("Biometria nao disponivel: " & Biometric.CanAuthenticate)
+        ' Fallback para PIN ou frase
+    End If
+End Sub
+
+' Callback - OBRIGATORIO implementar
+Private Sub Biometric_Complete(Success As Boolean, ErrorMessage As String)
+    If Success Then
+        Log("Biometria: Sucesso!")
+        ' Desbloquear app
+        HideLockScreen
+    Else
+        Log("Biometria falhou: " & ErrorMessage)
+        ' Nao mostrar erro, usuario pode digitar PIN
+    End If
 End Sub
 ```
 
-### Manifest (opcional - garantir API):
-```vb
-AddManifestText(<uses-permission android:name="android.permission.USE_BIOMETRIC"/>)
-AddManifestText(<uses-permission android:name="android.permission.USE_FINGERPRINT"/>)
+### ERROS COMUNS E SOLUCOES
+
+#### Erro: "You need to use a Theme.AppCompat theme"
+**Causa:** Usando `#Extends: android.support.v7.app.AppCompatActivity`
+**Solucao:** Usar `#Extends: android.support.v4.app.FragmentActivity`
+
+#### Erro: Breakpoint em B4XPage_Created nao e atingido
+**Causa:** App crasha antes de iniciar por problema no Manifest
+**Solucao:** Verificar #Extends e tema no Manifest
+
+#### Erro: Biometria nao aparece
+**Causa:** `Biometric.Initialize` chamado muito cedo (antes do contexto)
+**Solucao:** Chamar em `B4XPage_Created`, NAO em `Initialize`
+
+#### Erro: CanAuthenticate retorna UNAVAILABLE
+**Causa:** Dispositivo nao tem hardware biometrico ou esta desabilitado
+**Solucao:** Implementar fallback para PIN/frase
+
+### Fluxo recomendado
+
+```
+1. App inicia
+2. Verifica se PIN esta configurado (ModSecurity.HasPIN)
+3. Se sim, mostra LockScreen
+4. Se biometria habilitada E disponivel:
+   - Tenta biometria automaticamente
+   - Se sucesso: desbloqueia
+   - Se falha: usuario digita PIN
+5. Se biometria nao disponivel:
+   - Usuario digita PIN diretamente
 ```
 
-### Fluxo recomendado:
-1. Verificar se biometria esta disponivel
-2. Se sim, mostrar opcao "Usar digital"
-3. Se falhar, fazer fallback para frase-senha
-4. Sempre ter opcao manual disponivel
+### Valores de CanAuthenticate
+
+| Valor | Significado |
+|-------|-------------|
+| `SUCCESS` | Pode autenticar - hardware OK e digital cadastrada |
+| `NONE_ENROLLED` | Hardware OK mas nenhuma digital cadastrada |
+| `NO_HARDWARE` | Dispositivo nao tem sensor biometrico |
+| `UNAVAILABLE` | Hardware indisponivel (desabilitado, erro, etc) |
+| `UNKNOWN` | Estado desconhecido |
+
+### REGRA DE OURO
+
+> **SEMPRE use `#Extends: android.support.v4.app.FragmentActivity`**
+> **NUNCA use `#Extends: android.support.v7.app.AppCompatActivity` com biometria**
+> **SEMPRE inicialize Biometric em B4XPage_Created, NAO em Initialize**
 
 ---
 
@@ -1593,5 +1733,5 @@ End Sub
 
 ---
 
-**Ultima atualizacao:** 2025-12-28
+**Ultima atualizacao:** 2025-12-30
 **Projeto:** LockZero (e familia Lockseed Products)

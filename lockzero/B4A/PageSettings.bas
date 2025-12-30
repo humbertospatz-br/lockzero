@@ -25,6 +25,9 @@ Sub Class_Globals
 	'Dialog
 	Private pnlOverlay As Panel
 	Private pnlDialog As Panel
+
+	'PIN temporario para confirmacao
+	Private TempPIN As String
 End Sub
 
 Public Sub Initialize
@@ -576,28 +579,144 @@ Private Sub chkPIN_CheckedChange(Checked As Boolean)
 End Sub
 
 Private Sub ShowCreatePINDialog
-	Wait For (xui.Msgbox2Async(ModLang.T("create_pin_msg"), ModLang.T("use_pin"), ModLang.T("continue"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+	'Abre dialog customizado para criar PIN
+	ShowPINInputDialog("create")
+End Sub
 
-	If Result = xui.DialogResponse_Positive Then
-		'TODO: Implementar dialog de criacao de PIN
-		ToastMessageShow(ModLang.T("loading"), False)
-		chkPIN.Checked = False
+'Dialog customizado para entrada de PIN
+Private Sub ShowPINInputDialog(mode As String)
+	Dim dialogW As Int = Root.Width - 40dip
+	pnlDialog.RemoveAllViews
+	pnlDialog.Tag = mode 'Guarda o modo: "create", "confirm", "remove"
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	If mode = "create" Then
+		lblTitle.Text = ModLang.T("pin_create")
+	Else If mode = "confirm" Then
+		lblTitle.Text = ModLang.T("pin_confirm")
 	Else
-		chkPIN.Checked = False
+		lblTitle.Text = ModLang.T("pin_enter")
 	End If
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, 16dip, dialogW, 30dip)
+
+	'Subtitulo
+	Dim lblSub As Label
+	lblSub.Initialize("")
+	lblSub.Text = ModLang.T("pin_digits")
+	lblSub.TextSize = 12
+	lblSub.TextColor = Colors.ARGB(150, 255, 255, 255)
+	lblSub.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblSub, 0, 46dip, dialogW, 20dip)
+
+	'Campo PIN
+	Dim edtPIN As EditText
+	edtPIN.Initialize("edtPIN")
+	edtPIN.Hint = "PIN"
+	edtPIN.InputType = Bit.Or(2, 8192) 'NUMBER + PASSWORD
+	edtPIN.TextSize = 24
+	edtPIN.TextColor = Colors.White
+	edtPIN.HintColor = Colors.ARGB(100, 255, 255, 255)
+	edtPIN.Gravity = Gravity.CENTER
+	Dim xvPIN As B4XView = edtPIN
+	xvPIN.SetColorAndBorder(Colors.ARGB(40, 255, 255, 255), 1dip, Colors.ARGB(80, 255, 255, 255), 8dip)
+	pnlDialog.AddView(edtPIN, dialogW/2 - 80dip, 75dip, 160dip, 50dip)
+
+	'Botao OK
+	Dim btnOK As Button
+	btnOK.Initialize("btnPINOK")
+	btnOK.Text = ModLang.T("ok")
+	btnOK.TextSize = 14
+	btnOK.Color = ModTheme.HomeIconBg
+	btnOK.TextColor = Colors.White
+	pnlDialog.AddView(btnOK, 20dip, 145dip, (dialogW - 50dip) / 2, 44dip)
+
+	'Botao Cancelar
+	Dim btnCancel As Button
+	btnCancel.Initialize("btnPINCancel")
+	btnCancel.Text = ModLang.T("cancel")
+	btnCancel.TextSize = 14
+	btnCancel.Color = Colors.Transparent
+	btnCancel.TextColor = Colors.ARGB(180, 255, 255, 255)
+	pnlDialog.AddView(btnCancel, dialogW/2 + 5dip, 145dip, (dialogW - 50dip) / 2, 44dip)
+
+	pnlDialog.SetLayoutAnimated(0, 20dip, 150dip, dialogW, 210dip)
+	pnlOverlay.Visible = True
+	pnlOverlay.BringToFront
+End Sub
+
+Private Sub btnPINOK_Click
+	'Obtem o campo PIN do dialog
+	Dim edtPIN As EditText
+	For i = 0 To pnlDialog.NumberOfViews - 1
+		Dim v As View = pnlDialog.GetView(i)
+		If v Is EditText Then
+			edtPIN = v
+			Exit
+		End If
+	Next
+
+	Dim pin As String = edtPIN.Text.Trim
+	Dim mode As String = pnlDialog.Tag
+
+	'Valida tamanho (4-8 digitos)
+	If pin.Length < 4 Or pin.Length > 8 Then
+		ToastMessageShow(ModLang.T("pin_too_short"), False)
+		Return
+	End If
+
+	If mode = "create" Then
+		'Guarda PIN e pede confirmacao
+		TempPIN = pin
+		HideDialog
+		Sleep(200)
+		ShowPINInputDialog("confirm")
+
+	Else If mode = "confirm" Then
+		'Verifica se bate com o PIN temporario
+		If pin = TempPIN Then
+			ModSecurity.SavePIN(pin)
+			HideDialog
+			chkPIN.Checked = True
+			ToastMessageShow(ModLang.T("pin_saved"), False)
+		Else
+			ToastMessageShow(ModLang.T("pin_mismatch"), False)
+			'Volta para criar
+			TempPIN = ""
+			HideDialog
+			Sleep(200)
+			ShowPINInputDialog("create")
+		End If
+
+	Else If mode = "remove" Then
+		'Verifica PIN atual para remover
+		If ModSecurity.ValidatePIN(pin) Then
+			ModSecurity.RemovePIN
+			HideDialog
+			chkPIN.Checked = False
+			ToastMessageShow(ModLang.T("pin_removed"), False)
+		Else
+			ToastMessageShow(ModLang.T("pin_wrong"), False)
+		End If
+	End If
+End Sub
+
+Private Sub btnPINCancel_Click
+	HideDialog
+	TempPIN = ""
+	'Reverte o checkbox
+	chkPIN.Checked = ModSecurity.HasPIN
 End Sub
 
 Private Sub ShowRemovePINDialog
 	If ModSecurity.HasPIN = False Then Return
-
-	Wait For (xui.Msgbox2Async(ModLang.T("remove_pin_msg"), ModLang.T("use_pin"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
-
-	If Result = xui.DialogResponse_Positive Then
-		ModSecurity.RemovePIN
-		ToastMessageShow(ModLang.T("success"), False)
-	Else
-		chkPIN.Checked = True
-	End If
+	'Pede PIN atual para confirmar remocao
+	ShowPINInputDialog("remove")
 End Sub
 
 '=== BIOMETRIA ===
