@@ -134,16 +134,11 @@
   - Migracao automatica do formato antigo (Base64) para novo
   - Comparacao em tempo constante (evita timing attacks)
 
-- [ ] [2026-01-02] **IV aleatorio por operacao** - Corrigir criptografia
-  - **Problema:** IV derivado de MD5(reverse(frase)) - sempre igual
-  - Mesmo plaintext + mesma frase = mesmo ciphertext (detectavel)
-  - **Solucao:** Gerar IV aleatorio, salvar junto com ciphertext
-  ```
-  Encrypt():
-    iv = RandomBytes(16)
-    ciphertext = AES-CBC(plaintext, key, iv)
-    Return Base64(iv + ciphertext)  'IV concatenado
-  ```
+- [x] [2026-01-02] **IV aleatorio por operacao** - CONCLUIDO
+  - IV agora usa SecureRandom (16 bytes aleatorios por operacao)
+  - Formato novo: `AES:iv_hex:base64_ciphertext`
+  - Compatibilidade com dados antigos (detecta formato automaticamente)
+  - Mesmo plaintext + mesma frase = ciphertexts diferentes
 
 - [ ] [2026-01-02] **Adicionar HMAC para integridade** - Detectar alteracao
   - **Problema:** Ciphertext pode ser modificado sem deteccao

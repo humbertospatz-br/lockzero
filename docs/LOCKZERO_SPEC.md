@@ -700,12 +700,12 @@ Border radius:    8-12dip
 - [ ] Confirmacao de exclusao com re-digitacao de frase
 - [ ] Contador de itens nos cards da Home
 
-### v0.1.2 - Hardening de Criptografia (proximo)
+### v0.1.2 - Hardening de Criptografia (atual)
 
 **IV Aleatorio por Operacao:**
-- [ ] Gerar IV aleatorio de 16 bytes para cada criptografia
-- [ ] Formato: `AES:iv_hex:ciphertext_base64`
-- [ ] Compatibilidade com dados antigos (IV deterministico)
+- [x] Gerar IV aleatorio de 16 bytes para cada criptografia
+- [x] Formato: `AES:iv_hex:ciphertext_base64`
+- [x] Compatibilidade com dados antigos (IV deterministico)
 
 **HMAC para Integridade:**
 - [ ] Adicionar HMAC-SHA256 apos criptografia (Encrypt-then-MAC)

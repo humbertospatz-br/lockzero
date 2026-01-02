@@ -278,10 +278,15 @@ Private Sub DeriveKeyPBKDF2(passPhrase As String, salt As String) As Byte()
 	Return keyBytes
 End Sub
 
-'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC)
+'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC + IV aleatorio)
 'passPhrase: frase ou PIN do grupo
 'salt: salt aleatorio do grupo (hex string)
 'plainText: texto a criptografar
+'
+'FORMATO DE SAIDA: AES:iv_hex:base64_ciphertext
+'- iv_hex: 32 caracteres hex (16 bytes aleatorios)
+'- base64_ciphertext: ciphertext em Base64
+'
 Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As String) As String
 	If passPhrase.Length < 1 Or plainText.Length < 1 Or salt.Length < 1 Then Return ""
 
@@ -289,9 +294,8 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 		'Deriva chave com PBKDF2 (100.000 iteracoes)
 		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
 
-		'IV derivado do salt (16 bytes para AES)
-		Dim md As MessageDigest
-		Dim ivBytes() As Byte = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
+		'Gera IV aleatorio de 16 bytes (SecureRandom)
+		Dim ivBytes() As Byte = GenerateRandomIV
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -304,8 +308,10 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 		Dim dataBytes() As Byte = plainText.GetBytes("UTF8")
 		Dim encrypted() As Byte = c.Encrypt(dataBytes, kg.Key, True)
 
+		'Formato: AES:iv_hex:base64_ciphertext
 		Dim su As StringUtils
-		Return "AES:" & su.EncodeBase64(encrypted)
+		Dim ivHex As String = BytesToHex(ivBytes)
+		Return "AES:" & ivHex & ":" & su.EncodeBase64(encrypted)
 
 	Catch
 		Log("ModSecurity.EncryptWithSalt erro: " & LastException)
@@ -314,22 +320,42 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 End Sub
 
 'Descriptografa com salt do grupo (PBKDF2 + AES-256-CBC)
+'Suporta dois formatos:
+'- NOVO: AES:iv_hex:base64_ciphertext (IV aleatorio)
+'- LEGADO: AES:base64_ciphertext (IV = MD5(salt))
+'
 Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As String) As String
 	If passPhrase.Length < 1 Or encText.Length < 1 Or salt.Length < 1 Then Return ""
 
 	Try
 		If encText.StartsWith("AES:") = False Then Return ""
-		Dim encData As String = encText.SubString(4)
 
 		'Deriva chave com PBKDF2 (100.000 iteracoes)
 		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
 
-		'IV derivado do salt
-		Dim md As MessageDigest
-		Dim ivBytes() As Byte = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
+		'Detecta formato pelo numero de ":"
+		Dim afterPrefix As String = encText.SubString(4)
+		Dim colonPos As Int = afterPrefix.IndexOf(":")
 
+		Dim ivBytes() As Byte
+		Dim encrypted() As Byte
 		Dim su As StringUtils
-		Dim encrypted() As Byte = su.DecodeBase64(encData)
+
+		If colonPos > 0 And colonPos = 32 Then
+			'FORMATO NOVO: AES:iv_hex:base64_ciphertext
+			Dim ivHex As String = afterPrefix.SubString2(0, 32)
+			Dim encData As String = afterPrefix.SubString(33)
+
+			ivBytes = HexToBytes(ivHex)
+			encrypted = su.DecodeBase64(encData)
+			'Log("DecryptWithSalt: usando IV aleatorio")
+		Else
+			'FORMATO LEGADO: AES:base64_ciphertext (IV = MD5(salt))
+			Dim md As MessageDigest
+			ivBytes = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
+			encrypted = su.DecodeBase64(afterPrefix)
+			'Log("DecryptWithSalt: usando IV legado (MD5)")
+		End If
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -347,6 +373,30 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 		Log("ModSecurity.DecryptWithSalt erro: " & LastException)
 		Return ""
 	End Try
+End Sub
+
+'Gera IV aleatorio de 16 bytes usando SecureRandom
+Private Sub GenerateRandomIV As Byte()
+	Dim sr As JavaObject
+	sr.InitializeNewInstance("java.security.SecureRandom", Null)
+
+	Dim ivBytes(16) As Byte
+	sr.RunMethod("nextBytes", Array(ivBytes))
+
+	Return ivBytes
+End Sub
+
+'Converte string hex para array de bytes
+Private Sub HexToBytes(hex As String) As Byte()
+	Dim length As Int = hex.Length / 2
+	Dim bytes(length) As Byte
+
+	For i = 0 To length - 1
+		Dim hexByte As String = hex.SubString2(i * 2, i * 2 + 2)
+		bytes(i) = Bit.ParseInt(hexByte, 16)
+	Next
+
+	Return bytes
 End Sub
 
 'Gera salt aleatorio de 32 caracteres hex
