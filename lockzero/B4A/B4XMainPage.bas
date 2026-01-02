@@ -532,6 +532,7 @@ End Sub
 Private Sub NavigateToNotes
 	'Navega para lista de grupos de notas
 	Dim pg As PageNotesGroups = B4XPages.GetPage("PageNotesGroups")
+	pg.PrepareForShow  'Esconde ANTES de mostrar
 	B4XPages.ShowPage("PageNotesGroups")
 	pg.AnimateIn
 End Sub

@@ -42,6 +42,14 @@ Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
+'Prepara pagina para transicao - chamar ANTES de B4XPages.ShowPage
+Public Sub PrepareForShow
+	If Root.IsInitialized Then
+		Root.Alpha = 0
+		Root.Left = 100%x
+	End If
+End Sub
+
 'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
 Public Sub AnimateIn
 	ModTransition.SlideFromRight(Root)
