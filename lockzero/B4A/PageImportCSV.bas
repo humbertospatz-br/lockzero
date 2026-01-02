@@ -1116,7 +1116,10 @@ Private Sub DoImport
 	ToastMessageShow(msg, True)
 
 	'Se tinha filtro ativo, permanece na pagina para mais importacoes
-	If CurrentFilter <> "" Then
+	Dim hasFilter As Boolean = edtSearch.IsInitialized And edtSearch.Text.Trim.Length > 0
+	Log("DoImport - hasFilter: " & hasFilter & ", edtSearch.Text: " & edtSearch.Text)
+
+	If hasFilter Then
 		'Remove as entradas importadas da lista (em ordem reversa para nao baguncar indices)
 		Dim toRemove As List
 		toRemove.Initialize
