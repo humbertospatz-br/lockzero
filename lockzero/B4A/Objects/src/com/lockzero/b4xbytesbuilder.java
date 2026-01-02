@@ -31,11 +31,12 @@ public com.lockzero.main _main = null;
 public com.lockzero.starter _starter = null;
 public com.lockzero.modbackup _modbackup = null;
 public com.lockzero.modlang _modlang = null;
-public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modpasswords _modpasswords = null;
 public com.lockzero.modsecurity _modsecurity = null;
+public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modsession _modsession = null;
 public com.lockzero.modtheme _modtheme = null;
+public com.lockzero.modtransition _modtransition = null;
 public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
@@ -177,7 +178,7 @@ byte[] _afterindex = null;
 if (_index>=_mlength) { 
  //BA.debugLineNum = 45;BA.debugLine="If Index > mLength Then Log(\"Index too large\")";
 if (_index>_mlength) { 
-__c.LogImpl("99895938","Index too large",0);};
+__c.LogImpl("945154306","Index too large",0);};
  //BA.debugLineNum = 46;BA.debugLine="Append(Data)";
 _append(_data);
  }else {
@@ -219,7 +220,7 @@ public String  _set(int _index,byte[] _data) throws Exception{
 if (_index>=_mlength) { 
  //BA.debugLineNum = 58;BA.debugLine="If Index > mLength Then Log(\"Index too large\")";
 if (_index>_mlength) { 
-__c.LogImpl("99961474","Index too large",0);};
+__c.LogImpl("945219842","Index too large",0);};
  //BA.debugLineNum = 59;BA.debugLine="Append(Data)";
 _append(_data);
  }else {

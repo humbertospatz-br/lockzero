@@ -18,6 +18,9 @@ Sub Class_Globals
 	Private svMenu As ScrollView
 	Private MenuVisible As Boolean = False
 
+	'=== CSV IMPORT DIALOG ===
+	Private pnlCSVOverlay As Panel
+
 	'=== LAYOUT HOME (LOCKZERO_HOME_DEFINITIONS.md) ===
 	Private pnlHeader As Panel
 	Private pnlContent As Panel
@@ -169,6 +172,9 @@ Public Sub RebuildMenuItems
 	top = top + btnH + gap
 
 	AddMenuButton(ModLang.T("backup"), "mnuBackup", top, btnW, btnH)
+	top = top + btnH + gap
+
+	AddMenuButton(ModLang.T("import_csv"), "mnuImportCSV", top, btnW, btnH)
 	top = top + btnH + gap
 
 	svMenu.Panel.Height = top + 50dip
@@ -452,6 +458,96 @@ Private Sub mnuBackup_Click
 	B4XPages.ShowPage("PageBackup")
 End Sub
 
+Private Sub mnuImportCSV_Click
+	HideMenu
+	ShowImportCSVInstructions
+End Sub
+
+'Mostra dialog com instrucoes de como exportar CSV do Chrome
+Private Sub ShowImportCSVInstructions
+	Dim width As Int = Root.Width
+	Dim height As Int = Root.Height
+
+	'Cria overlay (usa variavel de classe)
+	pnlCSVOverlay.Initialize("pnlCSVOverlay")
+	pnlCSVOverlay.Color = Colors.ARGB(180, 0, 0, 0)
+	Root.AddView(pnlCSVOverlay, 0, 0, width, height)
+
+	'Dialog
+	Dim dialogW As Int = width - 32dip
+	Dim dialogH As Int = 300dip
+	Dim pnlDialog As Panel
+	pnlDialog.Initialize("")
+	pnlDialog.Color = ModTheme.HomeHeaderBg
+	pnlCSVOverlay.AddView(pnlDialog, 16dip, 60dip, dialogW, dialogH)
+
+	Dim xvDialog As B4XView = pnlDialog
+	xvDialog.SetColorAndBorder(ModTheme.HomeHeaderBg, 0, ModTheme.HomeHeaderBg, 12dip)
+
+	Dim y As Int = 12dip
+
+	'Titulo
+	Dim lblTitle As Label
+	lblTitle.Initialize("")
+	lblTitle.Text = ModLang.T("csv_how_to_title")
+	lblTitle.TextSize = 16
+	lblTitle.TextColor = Colors.White
+	lblTitle.Typeface = Typeface.DEFAULT_BOLD
+	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblTitle, 0, y, dialogW, 26dip)
+	y = y + 35dip
+
+	'Instrucoes
+	Dim instructions As List
+	instructions.Initialize
+	instructions.Add(ModLang.T("csv_how_to_1"))
+	instructions.Add(ModLang.T("csv_how_to_2"))
+	instructions.Add(ModLang.T("csv_how_to_3"))
+	instructions.Add(ModLang.T("csv_how_to_4"))
+	instructions.Add(ModLang.T("csv_how_to_5"))
+
+	For Each instruction As String In instructions
+		Dim lbl As Label
+		lbl.Initialize("")
+		lbl.Text = instruction
+		lbl.TextSize = 13
+		lbl.TextColor = Colors.ARGB(220, 255, 255, 255)
+		lbl.Gravity = Gravity.CENTER_VERTICAL
+		pnlDialog.AddView(lbl, 16dip, y, dialogW - 32dip, 36dip)
+		y = y + 36dip
+	Next
+
+	y = y + 15dip
+
+	'Botao Entendi
+	Dim btnOk As Button
+	btnOk.Initialize("btnCancelCSV")
+	btnOk.Text = ModLang.T("understood")
+	btnOk.TextSize = 14
+	btnOk.Color = ModTheme.HomeIconBg
+	btnOk.TextColor = Colors.White
+	pnlDialog.AddView(btnOk, (dialogW - 120dip) / 2, y, 120dip, 44dip)
+
+	pnlCSVOverlay.BringToFront
+End Sub
+
+Private Sub pnlCSVOverlay_Click
+	'Fecha dialog ao clicar fora
+	CloseCSVDialog
+End Sub
+
+Private Sub btnCancelCSV_Click
+	CloseCSVDialog
+End Sub
+
+Private Sub CloseCSVDialog
+	'Remove overlay usando variavel de classe
+	If pnlCSVOverlay.IsInitialized Then
+		pnlCSVOverlay.RemoveView
+	End If
+End Sub
+
+
 ' ============================================
 '  EVENTOS DE CATEGORIAS (HOME)
 ' ============================================
@@ -558,10 +654,10 @@ Private Sub UpdateSessionDisplay
 			lblSessionTimer.Text = remaining & " ◀"
 		End If
 
-		'Cor amarela quando tempo baixo (< 60s)
+		'Cor azul gelo quando tempo baixo (< 60s) - melhor visibilidade
 		Dim remainingSecs As Int = ModSession.GetRemainingSeconds
 		If remainingSecs < 60 Then
-			lblSessionTimer.TextColor = ModTheme.Warning
+			lblSessionTimer.TextColor = Colors.RGB(0, 220, 255)  'Azul gelo
 		Else
 			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
 		End If

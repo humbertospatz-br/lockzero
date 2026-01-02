@@ -40,11 +40,12 @@ public com.lockzero.main _main = null;
 public com.lockzero.starter _starter = null;
 public com.lockzero.modbackup _modbackup = null;
 public com.lockzero.modlang _modlang = null;
-public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modpasswords _modpasswords = null;
 public com.lockzero.modsecurity _modsecurity = null;
+public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modsession _modsession = null;
 public com.lockzero.modtheme _modtheme = null;
+public com.lockzero.modtransition _modtransition = null;
 public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
@@ -270,7 +271,7 @@ _imageviewheight = (float) (_mbitmap.getHeight());
  break; }
 default: {
  //BA.debugLineNum = 104;BA.debugLine="Log(\"Invalid resize mode: \"  & mResizeMode)";
-__c.LogImpl("928639259","Invalid resize mode: "+_mresizemode,0);
+__c.LogImpl("964159771","Invalid resize mode: "+_mresizemode,0);
  break; }
 }
 ;

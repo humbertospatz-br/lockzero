@@ -385,6 +385,55 @@ Public Sub Search(query As String) As List
 	Return lst
 End Sub
 
+'Busca global com suporte a campos criptografados
+'query: texto a buscar
+'passphrase: frase-senha para descriptografar (opcional, "" = so campos publicos)
+'Retorna lista de clsPasswordEntry
+Public Sub SearchAll(query As String, passphrase As String) As List
+	Init
+	Dim lst As List
+	lst.Initialize
+	Dim q As String = query.ToLowerCase.Trim
+
+	If q.Length < 2 Then Return lst
+
+	'Prepara frase normalizada se fornecida
+	Dim normalizedPhrase As String = ""
+	If passphrase.Length > 0 Then
+		normalizedPhrase = ModSecurity.NormalizePassphrase(passphrase)
+	End If
+
+	For Each k As String In Entries.Keys
+		Dim e As clsPasswordEntry = Entries.Get(k)
+		Dim found As Boolean = False
+
+		'Busca em campos publicos (sempre)
+		If e.Name.ToLowerCase.Contains(q) Or e.Url.ToLowerCase.Contains(q) Then
+			found = True
+		End If
+
+		'Busca em Username (se frase fornecida)
+		If found = False And normalizedPhrase.Length >= 10 Then
+			Try
+				'Obtem salt do grupo
+				Dim group As clsPasswordGroup = GetGroupById(e.GroupId)
+				If group.IsInitialized And group.Salt.Length > 0 Then
+					Dim decUsername As String = ModSecurity.DecryptWithSalt(passphrase, group.Salt, e.Username)
+					If decUsername.ToLowerCase.Contains(q) Then
+						found = True
+					End If
+				End If
+			Catch
+				'Ignora erro de descriptografia (frase errada para este grupo)
+				Log("SearchAllGroups decrypt error: " & LastException.Message)
+			End Try
+		End If
+
+		If found Then lst.Add(e)
+	Next
+	Return lst
+End Sub
+
 ' ============================================
 '  CRIPTOGRAFIA (USA SESSAO ATIVA)
 ' ============================================

@@ -58,11 +58,12 @@ public com.lockzero.main _main = null;
 public com.lockzero.starter _starter = null;
 public com.lockzero.modbackup _modbackup = null;
 public com.lockzero.modlang _modlang = null;
-public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modpasswords _modpasswords = null;
 public com.lockzero.modsecurity _modsecurity = null;
+public com.lockzero.modnotes _modnotes = null;
 public com.lockzero.modsession _modsession = null;
 public com.lockzero.modtheme _modtheme = null;
+public com.lockzero.modtransition _modtransition = null;
 public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
@@ -730,7 +731,7 @@ case 17:
 //C
 this.state = 18;
  //BA.debugLineNum = 121;BA.debugLine="Log(\"Warning: dialog shown with zero sized paren";
-parent.__c.LogImpl("924969240","Warning: dialog shown with zero sized parent.",0);
+parent.__c.LogImpl("960489752","Warning: dialog shown with zero sized parent.",0);
  if (true) break;
 
 case 18:

@@ -708,14 +708,35 @@ Border radius:    8-12dip
 | Backup .lockzero | Sim |
 | Gerador senhas | Basico |
 | OCR Scanner | Nao |
-| Import/Export CSV | Nao |
+| Import CSV | Sim (Chrome, Edge, Firefox) |
+| Export CSV | Nao |
 
 ### PREMIUM (futuro)
 
-- Itens ilimitados em todas categorias
-- OCR Scanner (cartoes, documentos)
-- Import/Export CSV
-- Gerador avancado (memoravel, passphrase)
+| Recurso | Descricao |
+|---------|-----------|
+| Itens ilimitados | Todas categorias sem limite |
+| OCR Scanner | Cartoes, documentos |
+| Export CSV | Exportar para outros gerenciadores |
+| Gerador avancado | Memoravel, passphrase, PIN |
+| Detector senhas fracas | Lista senhas com forca baixa |
+| Detector duplicadas | Avisa senhas repetidas |
+| Historico senhas | Ultimas 3-5 versoes |
+| Alerta expiracao | Senhas antigas >6 meses |
+
+### Modelo de Monetizacao
+
+**Opcao 1 - Freemium (recomendado):**
+- FREE: Limites generosos para uso pessoal
+- PREMIUM: Pagamento unico (sem assinatura)
+- Preco sugerido: R$ 19,90 - R$ 29,90
+
+**Opcao 2 - Totalmente gratis:**
+- Todas funcionalidades liberadas
+- Monetizacao via doacoes (Buy me a coffee)
+- Codigo aberto (GitHub)
+
+**Filosofia:** Zero Assinatura - usuario paga uma vez, usa para sempre
 
 ---
 
@@ -750,7 +771,7 @@ Border radius:    8-12dip
 - [x] Timer de sessao visivel no header e Home com bloqueio manual
 - [x] Modo frase unica/por categoria (configuravel)
 - [ ] Tela de configuracoes (PageSettings)
-- [ ] Auto-lock em background (Activity_Pause)
+- [x] Auto-lock em background (Activity_Pause)
 - [ ] Confirmacao de exclusao com re-digitacao de frase
 - [ ] Contador de itens nos cards da Home
 
@@ -871,6 +892,50 @@ MIGRACAO:
 - [ ] Google Play Store
 - [ ] Documentacao usuario
 
+### Funcionalidades Futuras (pos-v1.0)
+
+**Integracao Android:**
+- [ ] **Autofill Service** - Preencher senhas automaticamente em outros apps
+  - API: AutofillService (Android 8+)
+  - Usuario seleciona LockZero como provedor de senhas
+  - Requer permissao especial do sistema
+
+- [ ] **Atalhos de App** - Long press no icone mostra favoritos
+  - API: ShortcutManager (Android 7.1+)
+  - Acesso rapido as 3-4 senhas mais usadas
+
+- [ ] **Widget Home** - Mostrar contagem de itens e acesso rapido
+  - Widget 2x1 ou 4x1
+  - Nao mostra dados sensiveis
+
+**Seguranca Avancada:**
+- [ ] **Verificacao de Vazamentos** - Comparar com base HIBP offline
+  - Have I Been Pwned oferece base de dados k-anonymity
+  - Comparacao 100% local (sem internet)
+  - Alertar senhas potencialmente comprometidas
+
+- [ ] **Passkeys (WebAuthn/FIDO2)** - Autenticacao sem senha
+  - Padrao emergente (Google, Apple, Microsoft)
+  - Implementar quando API Android estiver madura
+  - Substituira senhas tradicionais gradualmente
+
+**Protecao Especial:**
+- [ ] **PIN de Panico** - Abre cofre vazio sob coacao
+  - PIN diferente do normal
+  - Mostra dados falsos ou cofre vazio
+  - Protecao contra coacao fisica
+
+- [ ] **Modo Disfarce** - Icone de calculadora/relogio
+  - App aparenta ser calculadora ou relogio
+  - Sequencia especial revela cofre real
+  - Protecao contra acesso fisico ao dispositivo
+
+**Compartilhamento:**
+- [ ] **QR Code Temporario** - Compartilhar senha via QR
+  - QR expira apos X segundos
+  - Criptografado com chave temporaria
+  - Util para compartilhar Wi-Fi com visitas
+
 ---
 
 ## Referencias
@@ -882,3 +947,21 @@ MIGRACAO:
 ---
 
 **Ultima atualizacao:** 2026-01-02
+
+---
+
+## Status de Implementacao
+
+| Categoria | Status | Observacao |
+|-----------|--------|------------|
+| Senhas | ✅ 100% | CRUD completo, busca, favoritos |
+| Notas | ✅ 99% | Texto e lista, falta drag&drop |
+| Cartoes | ⏳ 0% | Pendente |
+| Documentos | ⏳ 0% | Pendente |
+| Wi-Fi | ⏳ 0% | Pendente |
+| Backup | ✅ 100% | Export/Import .lockzero |
+| Import CSV | ✅ 100% | Chrome, Edge, Firefox, Safari |
+| Multi-idioma | ✅ 100% | PT/EN |
+| PIN/Biometria | ✅ 90% | Funcional, falta PageSettings completo |
+| Indicador Forca | ✅ 100% | Em PagePasswordEdit |
+| Busca | ✅ 100% | Por categoria (senhas, notas) |

@@ -236,6 +236,58 @@ Public Sub SearchNotes(query As String, passPhrase As String) As List
 	Return result
 End Sub
 
+'Busca global em notas
+'query: texto a buscar
+'passphrase: frase-senha para descriptografar grupos seguros (opcional, "" = so grupos abertos)
+'Retorna lista de clsNoteEntry
+Public Sub SearchAll(query As String, passphrase As String) As List
+	EnsureInit
+	Dim result As List
+	result.Initialize
+	Dim q As String = query.ToLowerCase.Trim
+
+	If q.Length < 2 Then Return result
+
+	For i = 0 To Notes.Size - 1
+		Dim note As clsNoteEntry = Notes.Get(i)
+		Dim found As Boolean = False
+
+		'Obtem grupo da nota
+		Dim group As clsNoteGroup = GetNoteGroupById(note.GroupId)
+
+		If group = Null Or group.IsSecure = False Then
+			'Grupo aberto - titulo e conteudo em texto claro
+			If note.Title.ToLowerCase.Contains(q) Then
+				found = True
+			Else If note.Content.ToLowerCase.Contains(q) Then
+				found = True
+			End If
+		Else
+			'Grupo seguro - tenta descriptografar se frase fornecida
+			If passphrase.Length > 0 Then
+				Try
+					Dim title As String = note.GetDecryptedTitle(passphrase).ToLowerCase
+					If title.Contains(q) Then
+						found = True
+					Else
+						Dim content As String = note.GetDecryptedContent(passphrase).ToLowerCase
+						If content.Contains(q) Then
+							found = True
+						End If
+					End If
+				Catch
+					'Ignora erro de descriptografia (frase errada para este grupo)
+					Log("SearchAllGroups decrypt error: " & LastException.Message)
+				End Try
+			End If
+		End If
+
+		If found Then result.Add(note)
+	Next
+
+	Return result
+End Sub
+
 'Busca nota por ID
 Public Sub GetNoteById(noteId As String) As clsNoteEntry
 	EnsureInit

@@ -33,6 +33,11 @@ Sub Class_Globals
 	Private btnShowPassword As Button
 
 	Private IsPasswordVisible As Boolean = False
+
+	'Indicador de forca da senha
+	Private pnlStrength As Panel
+	Private pnlStrengthBar As Panel
+	Private lblStrengthText As Label
 End Sub
 
 Public Sub Initialize
@@ -157,7 +162,33 @@ Private Sub CreateUI
 	btnShowPassword.Text = ModLang.T("view")
 	btnShowPassword.TextSize = Starter.FONT_CAPTION
 	pnlForm.AddView(btnShowPassword, width - 85dip, y, 65dip, fieldHeight)
-	y = y + fieldHeight + gap
+	y = y + fieldHeight + 8dip
+
+	'Indicador de forca da senha
+	pnlStrength.Initialize("")
+	pnlStrength.Color = Colors.Transparent
+	pnlForm.AddView(pnlStrength, 20dip, y, fieldWidth, 24dip)
+
+	'Barra de forca (fundo escuro)
+	Dim pnlBarBg As Panel
+	pnlBarBg.Initialize("")
+	pnlBarBg.Color = Colors.ARGB(60, 255, 255, 255)
+	pnlStrength.AddView(pnlBarBg, 0, 4dip, fieldWidth - 100dip, 16dip)
+
+	'Barra de forca colorida (preenchimento)
+	pnlStrengthBar.Initialize("")
+	pnlStrengthBar.Color = Colors.Gray
+	pnlStrength.AddView(pnlStrengthBar, 0, 4dip, 0, 16dip)  'Largura inicial 0
+
+	'Texto da forca
+	lblStrengthText.Initialize("")
+	lblStrengthText.Text = ""
+	lblStrengthText.TextSize = Starter.FONT_CAPTION
+	lblStrengthText.TextColor = Colors.Gray
+	lblStrengthText.Gravity = Gravity.RIGHT
+	pnlStrength.AddView(lblStrengthText, fieldWidth - 95dip, 0, 95dip, 24dip)
+
+	y = y + 24dip + 12dip
 
 	'Notas
 	Dim lblNotes As Label = CreateFieldLabel(ModLang.T("note"))
@@ -204,6 +235,9 @@ Private Sub LoadEntry
 	edtPassword.Text = ModPasswords.DecryptValue(e.PasswordEnc)
 	edtNotes.Text = ModPasswords.DecryptValue(e.Notes)
 	chkFavorite.Checked = e.IsFavorite
+
+	'Atualiza indicador de forca
+	UpdateStrengthIndicator(edtPassword.Text)
 End Sub
 
 Private Sub ClearForm
@@ -272,6 +306,36 @@ Private Sub btnShowPassword_Click
 		btnShowPassword.Text = ModLang.T("view")
 		btnShowPassword.TextColor = Colors.ARGB(200, 255, 255, 255)
 	End If
+End Sub
+
+'Atualiza indicador de forca quando senha muda
+Private Sub edtPassword_TextChanged(Old As String, New As String)
+	UpdateStrengthIndicator(New)
+End Sub
+
+'Atualiza a barra e texto do indicador de forca
+Private Sub UpdateStrengthIndicator(password As String)
+	If password.Length = 0 Then
+		'Esconde indicador se vazio
+		pnlStrengthBar.Width = 0
+		lblStrengthText.Text = ""
+		Return
+	End If
+
+	'Calcula forca
+	Dim strength As Int = ModSecurity.CalculatePasswordStrength(password)
+	Dim strengthColor As Int = ModSecurity.GetStrengthColor(strength)
+	Dim strengthText As String = ModSecurity.GetStrengthText(strength)
+
+	'Calcula largura da barra (0=25%, 1=50%, 2=75%, 3=100%)
+	Dim maxBarWidth As Int = pnlStrength.Width - 100dip
+	Dim barWidth As Int = maxBarWidth * (strength + 1) / 4
+
+	'Atualiza UI
+	pnlStrengthBar.Color = strengthColor
+	pnlStrengthBar.Width = barWidth
+	lblStrengthText.Text = strengthText
+	lblStrengthText.TextColor = strengthColor
 End Sub
 
 ' ============================================

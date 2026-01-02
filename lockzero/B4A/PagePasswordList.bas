@@ -27,6 +27,7 @@ Sub Class_Globals
 	Private lblClearSearch As Label
 	Private AllEntries As List 'Lista completa de entradas
 	Private FilteredEntries As List 'Lista filtrada pela busca
+	Private InitialSearchQuery As String = "" 'Busca inicial passada por parametro
 
 	'Timer para limpar clipboard
 	Private tmrClipboard As Timer
@@ -93,33 +94,7 @@ End Sub
 Public Sub SetParams(params As Map)
 	If params = Null Then Return
 	CurrentGroupId = params.GetDefault("groupId", "")
-End Sub
-
-'Capitalize - primeira letra de cada palavra em maiuscula
-Private Sub Capitalize(text As String) As String
-	If text.Length = 0 Then Return text
-
-	Dim result As StringBuilder
-	result.Initialize
-	Dim capitalizeNext As Boolean = True
-	Dim lower As String = text.ToLowerCase
-
-	For i = 0 To lower.Length - 1
-		Dim c As String = lower.SubString2(i, i + 1)
-		If c = " " Then
-			result.Append(c)
-			capitalizeNext = True
-		Else
-			If capitalizeNext Then
-				result.Append(c.ToUpperCase)
-				capitalizeNext = False
-			Else
-				result.Append(c)
-			End If
-		End If
-	Next
-
-	Return result.ToString
+	InitialSearchQuery = params.GetDefault("searchQuery", "")
 End Sub
 
 Private Sub B4XPage_Disappear
@@ -271,14 +246,21 @@ Private Sub LoadEntries
 	'Carrega todas as entradas do grupo
 	AllEntries = ModPasswords.GetEntriesByGroup(CurrentGroupId)
 
-	'Limpa busca e exibe todas
-	edtSearch.Text = ""
-	FilteredEntries.Initialize
-	For Each e As clsPasswordEntry In AllEntries
-		FilteredEntries.Add(e)
-	Next
-
-	DisplayEntries
+	'Se tem busca inicial, aplica
+	If InitialSearchQuery.Length > 0 Then
+		edtSearch.Text = InitialSearchQuery
+		lblClearSearch.Visible = True
+		FilterEntries(InitialSearchQuery)
+		InitialSearchQuery = "" 'Limpa para proxima vez
+	Else
+		'Limpa busca e exibe todas
+		edtSearch.Text = ""
+		FilteredEntries.Initialize
+		For Each e As clsPasswordEntry In AllEntries
+			FilteredEntries.Add(e)
+		Next
+		DisplayEntries
+	End If
 End Sub
 
 'Filtra entradas com base no texto de busca
@@ -462,7 +444,7 @@ Private Sub ShowPassphraseDialog
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -503,11 +485,11 @@ End Sub
 Private Sub btnShowPass_Click
 	IsPassVisible = Not(IsPassVisible)
 	If IsPassVisible Then
-		edtPassphrase.InputType = 1
+		edtPassphrase.InputType = ModSecurity.GetSecureVisibleInputType 'TEXT + NO_SUGGESTIONS (visivel)
 		btnShowPass.Text = ModLang.T("hide")
 		btnShowPass.TextColor = Colors.White
 	Else
-		edtPassphrase.InputType = Bit.Or(1, 128)
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 		btnShowPass.Text = ModLang.T("view")
 		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	End If
@@ -522,6 +504,8 @@ Private Sub btnDialogOk_Click
 	Dim phrase As String = edtPassphrase.Text.Trim
 	If phrase.Length >= 8 Then
 		ModSession.StartSessionWithCategory(phrase, "passwords")
+		'Limpa campo e clipboard por seguranca
+		ModSecurity.ClearSecureField(edtPassphrase)
 		HideDialog
 		NavigateToAddPassword
 	Else
@@ -623,10 +607,10 @@ Private Sub UpdateSessionTimer
 	If ModSession.IsSessionActive Then
 		lblSessionTimer.Text = ModSession.GetRemainingFormatted
 
-		'Muda cor quando tempo baixo (< 60s)
+		'Muda cor quando tempo baixo (< 60s) - azul gelo para visibilidade
 		Dim remaining As Int = ModSession.GetRemainingSeconds
 		If remaining < 60 Then
-			lblSessionTimer.TextColor = ModTheme.Warning
+			lblSessionTimer.TextColor = Colors.RGB(0, 220, 255)  'Azul gelo
 		Else
 			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
 		End If

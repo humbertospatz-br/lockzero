@@ -283,7 +283,7 @@ Private Sub CreatePhraseDialog
 	edtPhrase.Initialize("edtPhrase")
 	edtPhrase.Hint = ModLang.T("backup_phrase_hint")
 	edtPhrase.SingleLine = True
-	edtPhrase.InputType = Bit.Or(1, 128) 'Password
+	edtPhrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPhrase.TextColor = Colors.White
 	edtPhrase.HintColor = Colors.ARGB(120, 255, 255, 255)
 
@@ -331,7 +331,7 @@ Private Sub ShowPhraseDialog(mode As String, title As String)
 	CurrentDialogMode = mode
 	edtPhrase.Text = ""
 	PhraseVisible = False
-	edtPhrase.InputType = Bit.Or(1, 128) 'PASSWORD
+	edtPhrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	btnPhraseShow.Text = ModLang.T("show")
 
 	Log("ShowPhraseDialog: atualizando titulo")
@@ -371,10 +371,10 @@ End Sub
 Private Sub btnPhraseShow_Click
 	PhraseVisible = Not(PhraseVisible)
 	If PhraseVisible Then
-		edtPhrase.InputType = 1 'TEXT
+		edtPhrase.InputType = ModSecurity.GetSecureVisibleInputType 'TEXT + NO_SUGGESTIONS (visivel)
 		btnPhraseShow.Text = ModLang.T("hide")
 	Else
-		edtPhrase.InputType = Bit.Or(1, 128) 'PASSWORD
+		edtPhrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 		btnPhraseShow.Text = ModLang.T("show")
 	End If
 	'Manter cursor no final
@@ -388,6 +388,9 @@ Private Sub btnPhraseOk_Click
 		ToastMessageShow(ModLang.T("backup_phrase_min"), True)
 		Return
 	End If
+
+	'Limpa campo e clipboard por seguranca
+	ModSecurity.ClearSecureField(edtPhrase)
 
 	HidePhraseDialog
 

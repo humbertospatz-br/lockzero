@@ -176,7 +176,7 @@ Private Sub CreateUI
 	pnlIconBar.Initialize("")
 	pnlIconBar.Color = ModTheme.HomeBg
 	Root.AddView(pnlIconBar, 0, headerH, width, iconBarH)
-	CreateIconBar(pnlIconBar, width, iconBarH)
+	CreateIconBar(pnlIconBar, width)
 
 	'Conteudo com scroll
 	Dim contentTop As Int = headerH + iconBarH
@@ -193,7 +193,7 @@ Private Sub CreateUI
 	CreateInputDialog
 End Sub
 
-Private Sub CreateIconBar(pnlIconBar As Panel, width As Int, barH As Int)
+Private Sub CreateIconBar(pnlIconBar As Panel, width As Int)
 	Dim iconSize As Int = 44dip
 	Dim spacing As Int = 8dip
 	Dim startX As Int = width - (iconSize * 4) - (spacing * 3) - 16dip  'Alinha a direita

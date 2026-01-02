@@ -160,10 +160,10 @@
 
 ### ALTO - Protecao de Sessao
 
-- [ ] [2026-01-02] **Auto-lock quando app vai para background**
-  - **Problema:** Sessao permanece ativa mesmo com app minimizado
-  - **Solucao:** Em Activity_Pause, encerrar ou pausar sessao
-  - Opcao: Configuracao "Bloquear ao minimizar" (on/off)
+- [x] [2026-01-02] **Auto-lock quando app vai para background** - IMPLEMENTADO
+  - Sessao encerrada automaticamente em Activity_Pause
+  - Usuario precisa re-autenticar ao voltar para o app
+  - Protege contra acesso fisico ao dispositivo desbloqueado
 
 - [ ] [2026-01-02] **Limpar clipboard automaticamente**
   - **Problema:** Senha copiada permanece no clipboard indefinidamente
@@ -1059,24 +1059,46 @@ Facebook,https://facebook.com,usuario,senha456
 
 ### Alta Prioridade (impacto na conversao)
 - [ ] Onboarding tutorial interativo (3-4 telas)
-- [ ] Indicador visual de forca da frase-senha
+- [x] Indicador visual de forca da frase-senha - IMPLEMENTADO v0.1.3
 - [ ] Widget home (acesso rapido, mostra qtd itens)
+- [ ] **Autofill Android** - Integrar com sistema de preenchimento automatico
+  - AutofillService API (Android 8+)
+  - Usuario seleciona LockZero para preencher senhas em outros apps
+  - Referencia: https://developer.android.com/guide/topics/text/autofill
 
 ### Media Prioridade (melhora experiencia)
 - [ ] Icones personalizados por grupo/entrada
 - [ ] Limpeza automatica de clipboard configuravel
 - [ ] Ordenacao manual (arrastar itens)
-- [ ] Busca global (todas categorias)
+- [x] Busca por categoria - IMPLEMENTADO v0.1.3
+- [ ] **Detector de senhas duplicadas** - Avisar quando mesma senha em multiplos sites
+- [ ] **Detector de senhas fracas** - Listar todas senhas com forca < 2
+- [ ] **Historico de senhas** - Guardar ultimas 3-5 versoes ao editar
+- [ ] **Expiracao de senha** - Alertar senhas antigas (>6 meses sem alterar)
+- [ ] **Atalhos de app** - Long press no icone mostra favoritos (Android 7.1+)
 
 ### Baixa Prioridade (diferenciacao)
 - [ ] PIN de panico (mostra cofre vazio sob coacao)
 - [ ] Modo disfarce (icone de calculadora/relogio)
 - [ ] Compartilhamento seguro via QR temporario
 - [ ] Tema personalizado (cores do usuario)
+- [ ] **Passkeys (futuro)** - Suporte a autenticacao sem senha (WebAuthn/FIDO2)
+  - Padrao emergente, substituira senhas tradicionais
+  - Google, Apple, Microsoft ja suportam
+  - Implementar quando API Android estiver madura
+
+### Backup e Seguranca Avancada
+- [ ] **Backup automatico periodico** - Criar backup a cada X dias (configuravel)
+- [ ] **Multiplos backups** - Manter ultimos N arquivos .lockzero
+- [ ] **Verificacao de vazamentos** - Comparar hashes com base HIBP offline
+  - Have I Been Pwned oferece base de dados para download
+  - Comparacao 100% offline (k-anonymity)
+- [ ] **Notificacao de seguranca** - Alertar senhas potencialmente vazadas
 
 ### NAO RECOMENDADO (quebra filosofia)
 - ~~Backup em nuvem~~ - quebra filosofia 100% offline
 - ~~Sincronizacao entre dispositivos~~ - adiciona complexidade e riscos
+- ~~Senhas salvas em servidor~~ - contra principio Zero Conhecimento
 
 ---
 
@@ -1162,4 +1184,4 @@ Facebook,https://facebook.com,usuario,senha456
 - [x] Concluido
 - [-] Cancelado
 
-**Ultima atualizacao:** 2025-12-29
+**Ultima atualizacao:** 2026-01-02

@@ -283,6 +283,9 @@ Sub Activity_Resume
 End Sub
 
 Sub Activity_Pause (UserClosed As Boolean)
+	'Auto-lock: encerra sessao quando app vai para background
+	'Isso garante que ao voltar, usuario precisa re-autenticar
+	ModSession.EndSession
 	B4XPages.Delegate.Activity_Pause
 End Sub
 

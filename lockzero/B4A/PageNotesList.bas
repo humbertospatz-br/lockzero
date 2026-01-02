@@ -21,6 +21,15 @@ Sub Class_Globals
 	Private lblEmpty As Label
 	Private lblTitle As Label
 
+	'Busca
+	Private lblSearch As Label         'Icone de lupa no header
+	Private pnlSearchBar As Panel      'Barra de busca expansivel
+	Private edtSearch As EditText      'Campo de busca
+	Private lblClearSearch As Label    'Botao X para limpar
+	Private IsSearchVisible As Boolean = False  'Controla visibilidade da busca
+	Private AllNotes As List           'Lista completa de notas
+	Private FilteredNotes As List      'Lista filtrada pela busca
+
 	'Estado
 	Private CurrentGroupId As String = ""
 	Private IsNoteGroup As Boolean = False  'True = NoteGroup, False = PasswordGroup (legado)
@@ -30,7 +39,8 @@ Sub Class_Globals
 End Sub
 
 Public Sub Initialize
-
+	AllNotes.Initialize
+	FilteredNotes.Initialize
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -88,6 +98,7 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 	Dim headerH As Int = 56dip
+	Dim searchH As Int = 54dip
 
 	'Header com titulo e botao + (cores da Home)
 	Dim pnlHeader As Panel
@@ -111,7 +122,19 @@ Private Sub CreateUI
 	lblTitle.TextColor = Colors.ARGB(200, 255, 255, 255)
 	lblTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblTitle, 48dip, 0, width - 110dip, headerH)
+	pnlHeader.AddView(lblTitle, 48dip, 0, width - 150dip, headerH)
+
+	'Icone de busca (lupa) no header
+	lblSearch.Initialize("lblSearch")
+	lblSearch.Text = Chr(0xD83D) & Chr(0xDD0D)  '🔍 (surrogate pair)
+	lblSearch.TextSize = 18
+	lblSearch.TextColor = Colors.White
+	lblSearch.Gravity = Gravity.CENTER
+	pnlHeader.AddView(lblSearch, width - 90dip, 8dip, 40dip, 40dip)
+
+	'Fundo arredondado para a lupa (indica que e clicavel)
+	Dim xvSearch As B4XView = lblSearch
+	xvSearch.SetColorAndBorder(Colors.ARGB(60, 255, 255, 255), 0, Colors.Transparent, 20dip)
 
 	'Botao adicionar no header (circular)
 	lblAdd.Initialize("lblAdd")
@@ -125,6 +148,39 @@ Private Sub CreateUI
 	'Arredondar (circular)
 	Dim xvAdd As B4XView = lblAdd
 	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 20dip)
+
+	'Barra de busca (inicialmente oculta)
+	pnlSearchBar.Initialize("")
+	pnlSearchBar.Color = ModTheme.HomeBg
+	pnlSearchBar.Visible = False
+	Root.AddView(pnlSearchBar, 0, headerH, width, searchH)
+
+	'Input de busca com fundo arredondado
+	Dim pnlSearchInput As Panel
+	pnlSearchInput.Initialize("")
+	pnlSearchInput.Color = ModTheme.HomeIconBg
+	pnlSearchBar.AddView(pnlSearchInput, 16dip, 5dip, width - 32dip, 44dip)
+
+	Dim xvSearchInput As B4XView = pnlSearchInput
+	xvSearchInput.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+
+	edtSearch.Initialize("edtSearch")
+	edtSearch.Hint = ModLang.T("search") & "..."
+	edtSearch.SingleLine = True
+	edtSearch.Text = ""
+	edtSearch.TextSize = Starter.FONT_BODY
+	edtSearch.TextColor = Colors.White
+	edtSearch.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlSearchInput.AddView(edtSearch, 12dip, 0, width - 100dip, 44dip)
+
+	'Botao X para limpar busca
+	lblClearSearch.Initialize("lblClearSearch")
+	lblClearSearch.Text = "X"
+	lblClearSearch.TextSize = 16
+	lblClearSearch.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblClearSearch.Gravity = Gravity.CENTER
+	lblClearSearch.Visible = False
+	pnlSearchInput.AddView(lblClearSearch, width - 80dip, 2dip, 40dip, 40dip)
 
 	'Lista de notas (sem separador, fundo continuo)
 	svNotes.Initialize(0)
@@ -148,12 +204,82 @@ End Sub
 ' ============================================
 
 Private Sub LoadNotes
-	'Limpa lista
+	'Carrega todas as notas do grupo
+	AllNotes = ModNotes.GetNotesByGroup(CurrentGroupId)
+
+	'Reseta busca e exibe todas
+	edtSearch.Text = ""
+	FilteredNotes.Initialize
+	For Each n As clsNoteEntry In AllNotes
+		FilteredNotes.Add(n)
+	Next
+
+	'Esconde barra de busca ao carregar
+	IsSearchVisible = False
+	UpdateSearchVisibility
+
+	DisplayNotes
+End Sub
+
+'Filtra notas com base no texto de busca
+Private Sub FilterNotes(query As String)
+	FilteredNotes.Initialize
+	Dim q As String = query.ToLowerCase.Trim
+
+	If q.Length = 0 Then
+		'Sem filtro - mostra todas
+		For Each n As clsNoteEntry In AllNotes
+			FilteredNotes.Add(n)
+		Next
+	Else
+		'Determina passphrase (vazia para grupos abertos)
+		Dim passphrase As String = ""
+		If IsNoteGroup And CurrentGroup <> Null And CurrentGroup.IsSecure Then
+			passphrase = GroupPassphrase
+			If passphrase = "" Then passphrase = ModSession.GetPassphrase
+		End If
+
+		'Filtra por titulo, conteudo e itens de lista
+		For Each n As clsNoteEntry In AllNotes
+			Dim found As Boolean = False
+
+			Try
+				'Busca no titulo
+				Dim title As String = n.GetDecryptedTitle(passphrase).ToLowerCase
+				If title.Contains(q) Then
+					found = True
+				End If
+
+				'Busca no conteudo (notas de texto)
+				If found = False Then
+					Dim content As String = n.GetDecryptedContent(passphrase).ToLowerCase
+					If content.Contains(q) Then found = True
+				End If
+
+				'Busca nos itens (notas de lista/checklist)
+				If found = False And n.IsListNote Then
+					Dim itemsJson As String = n.GetDecryptedItems(passphrase).ToLowerCase
+					If itemsJson.Contains(q) Then found = True
+				End If
+			Catch
+				'Fallback: busca em campos diretos
+				If n.Title.ToLowerCase.Contains(q) Then found = True
+				If found = False And n.Content.ToLowerCase.Contains(q) Then found = True
+				If found = False And n.Items.ToLowerCase.Contains(q) Then found = True
+			End Try
+
+			If found Then FilteredNotes.Add(n)
+		Next
+	End If
+
+	DisplayNotes
+End Sub
+
+'Exibe as notas filtradas na lista
+Private Sub DisplayNotes
 	pnlNotes.RemoveAllViews
 
-	Dim notes As List = ModNotes.GetNotesByGroup(CurrentGroupId)
-
-	If notes.Size = 0 Then
+	If FilteredNotes.Size = 0 Then
 		lblEmpty.Visible = True
 		pnlNotes.Height = 0
 		Return
@@ -166,8 +292,8 @@ Private Sub LoadNotes
 	Dim cardHeight As Int = 80dip
 	Dim margin As Int = 16dip
 
-	For i = 0 To notes.Size - 1
-		Dim note As clsNoteEntry = notes.Get(i)
+	For i = 0 To FilteredNotes.Size - 1
+		Dim note As clsNoteEntry = FilteredNotes.Get(i)
 		Dim pnlCard As Panel = CreateNoteCard(note, width - (margin * 2))
 		pnlCard.Tag = note.Id
 		pnlNotes.AddView(pnlCard, margin, y, width - (margin * 2), cardHeight)
@@ -175,6 +301,27 @@ Private Sub LoadNotes
 	Next
 
 	pnlNotes.Height = y + 20dip
+End Sub
+
+'Atualiza visibilidade da barra de busca e ajusta posicao da lista
+Private Sub UpdateSearchVisibility
+	Dim headerH As Int = 56dip
+	Dim searchH As Int = 54dip
+
+	pnlSearchBar.Visible = IsSearchVisible
+
+	If IsSearchVisible Then
+		svNotes.Top = headerH + searchH
+		svNotes.Height = Root.Height - headerH - searchH
+		edtSearch.RequestFocus
+	Else
+		svNotes.Top = headerH
+		svNotes.Height = Root.Height - headerH
+		'Esconde teclado
+		Dim ime As IME
+		ime.Initialize("")
+		ime.HideKeyboard
+	End If
 End Sub
 
 Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
@@ -304,6 +451,10 @@ Private Sub OpenNote(noteId As String)
 		params.Put("passphrase", GroupPassphrase)
 		params.Put("groupName", CurrentGroup.Name)
 	End If
+	'Passa termo de busca para destacar/filtrar na nota
+	If edtSearch.Text.Trim.Length > 0 Then
+		params.Put("searchQuery", edtSearch.Text.Trim)
+	End If
 
 	Dim pg As PageNoteEdit = B4XPages.GetPage("PageNoteEdit")
 	pg.SetParams(params)
@@ -317,6 +468,36 @@ End Sub
 
 Private Sub btnBack_Click
 	B4XPages.ClosePage(Me)
+End Sub
+
+'Toggle da barra de busca ao clicar na lupa
+Private Sub lblSearch_Click
+	IsSearchVisible = Not(IsSearchVisible)
+	UpdateSearchVisibility
+
+	If IsSearchVisible = False Then
+		'Limpa busca ao fechar
+		edtSearch.Text = ""
+		FilterNotes("")
+	End If
+End Sub
+
+'Evento de busca - filtra conforme digita
+Private Sub edtSearch_TextChanged(Old As String, New As String)
+	'Touch na sessao se grupo seguro
+	If IsNoteGroup And CurrentGroup <> Null And CurrentGroup.IsSecure Then
+		ModSession.Touch
+	End If
+	FilterNotes(New)
+	'Mostra/esconde botao X
+	lblClearSearch.Visible = (New.Length > 0)
+End Sub
+
+'Limpa o campo de busca
+Private Sub lblClearSearch_Click
+	edtSearch.Text = ""
+	lblClearSearch.Visible = False
+	FilterNotes("")
 End Sub
 
 Private Sub lblAdd_Click
