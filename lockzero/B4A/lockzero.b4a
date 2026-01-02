@@ -26,19 +26,19 @@ Module10=ModPasswords
 Module11=ModSecurity
 Module12=ModSession
 Module13=ModTheme
-Module14=PageBackup
-Module15=PageImportCSV
-Module16=PageNoteEdit
-Module17=PageNotesGroups
-Module18=PageNotesList
-Module19=PageOnboarding
+Module14=ModTransition
+Module15=PageBackup
+Module16=PageImportCSV
+Module17=PageNoteEdit
+Module18=PageNotesGroups
+Module19=PageNotesList
 Module2=BiometricManager
-Module20=PagePasswordEdit
-Module21=PagePasswordList
-Module22=PagePasswords
-Module23=PageSettings
-Module24=Starter
-Module25=ModTransition
+Module20=PageOnboarding
+Module21=PagePasswordEdit
+Module22=PagePasswordList
+Module23=PagePasswords
+Module24=PageSettings
+Module25=Starter
 Module3=clsNoteEntry
 Module4=clsNoteGroup
 Module5=clsPasswordEntry
@@ -201,6 +201,7 @@ Private Sub CheckIncomingIntent
 			'Configura e abre PageImportCSV
 			pgImportCSV.SetCSVFile(destFolder, fileName)
 			B4XPages.ShowPage("PageImportCSV")
+			pgImportCSV.AnimateIn
 		Else
 			'=== LOCKZERO - Backup ===
 			Log("Detectado arquivo .lockzero")
@@ -222,7 +223,9 @@ Private Sub CheckIncomingIntent
 			PendingBackupFile = fileName
 
 			'Abre tela de backup
+			Dim pgBackup As PageBackup = B4XPages.GetPage("PageBackup")
 			B4XPages.ShowPage("PageBackup")
+			pgBackup.AnimateIn
 		End If
 
 	Catch

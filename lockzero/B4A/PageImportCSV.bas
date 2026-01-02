@@ -60,6 +60,11 @@ Public Sub Initialize
 	LastParsedFile = ""
 End Sub
 
+'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
+Public Sub AnimateIn
+	ModTransition.SlideFromRight(Root)
+End Sub
+
 'Recebe o caminho do arquivo CSV
 Public Sub SetCSVFile(folder As String, fileName As String)
 	CSVFolder = folder

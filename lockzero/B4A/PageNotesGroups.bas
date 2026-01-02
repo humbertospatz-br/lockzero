@@ -42,6 +42,11 @@ Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
+'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
+Public Sub AnimateIn
+	ModTransition.SlideFromRight(Root)
+End Sub
+
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	CreateUI
@@ -299,6 +304,7 @@ Private Sub NavigateToGroup(groupId As String)
 	Dim pg As PageNotesList = B4XPages.GetPage("PageNotesList")
 	pg.SetParams(params)
 	B4XPages.ShowPage("PageNotesList")
+	pg.AnimateIn
 End Sub
 
 ' ============================================

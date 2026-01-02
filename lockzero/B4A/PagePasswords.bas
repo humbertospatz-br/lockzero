@@ -37,6 +37,11 @@ Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
+'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
+Public Sub AnimateIn
+	ModTransition.SlideFromRight(Root)
+End Sub
+
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	CreateUI
@@ -399,6 +404,7 @@ Private Sub NavigateToGroup(groupId As String)
 	Dim pg As PagePasswordList = B4XPages.GetPage("PagePasswordList")
 	pg.SetParams(params)
 	B4XPages.ShowPage("PagePasswordList")
+	pg.AnimateIn
 End Sub
 
 Private Sub pnlGroup_LongClick

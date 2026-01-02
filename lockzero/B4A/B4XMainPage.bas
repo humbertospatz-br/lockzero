@@ -418,7 +418,9 @@ End Sub
 
 Private Sub mnuPasswords_Click
 	HideMenu
+	Dim pg As PagePasswords = B4XPages.GetPage("PagePasswords")
 	B4XPages.ShowPage("PagePasswords")
+	pg.AnimateIn
 End Sub
 
 Private Sub mnuCards_Click
@@ -438,12 +440,16 @@ End Sub
 
 Private Sub mnuSettings_Click
 	HideMenu
+	Dim pg As PageSettings = B4XPages.GetPage("PageSettings")
 	B4XPages.ShowPage("PageSettings")
+	pg.AnimateIn
 End Sub
 
 Private Sub mnuBackup_Click
 	HideMenu
+	Dim pg As PageBackup = B4XPages.GetPage("PageBackup")
 	B4XPages.ShowPage("PageBackup")
+	pg.AnimateIn
 End Sub
 
 ' ============================================
@@ -502,6 +508,18 @@ Private Sub AnimatePulseAndNavigate(pnl As Panel, pageName As String)
 	AnimatePulse(pnl)
 	Sleep(150)
 	B4XPages.ShowPage(pageName)
+	'Chama AnimateIn na pagina destino
+	Select pageName
+		Case "PagePasswords"
+			Dim pgPass As PagePasswords = B4XPages.GetPage(pageName)
+			pgPass.AnimateIn
+		Case "PageBackup"
+			Dim pgBackup As PageBackup = B4XPages.GetPage(pageName)
+			pgBackup.AnimateIn
+		Case "PageSettings"
+			Dim pgSettings As PageSettings = B4XPages.GetPage(pageName)
+			pgSettings.AnimateIn
+	End Select
 End Sub
 
 'Pulse + navegar para notas
@@ -513,7 +531,9 @@ End Sub
 
 Private Sub NavigateToNotes
 	'Navega para lista de grupos de notas
+	Dim pg As PageNotesGroups = B4XPages.GetPage("PageNotesGroups")
 	B4XPages.ShowPage("PageNotesGroups")
+	pg.AnimateIn
 End Sub
 
 ' ============================================

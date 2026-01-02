@@ -73,6 +73,11 @@ Public Sub Initialize
 	ItemPanels.Initialize
 End Sub
 
+'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
+Public Sub AnimateIn
+	ModTransition.SlideFromRight(Root)
+End Sub
+
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	CreateUI

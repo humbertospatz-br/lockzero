@@ -51,6 +51,11 @@ Public Sub Initialize
 	FilteredEntries.Initialize
 End Sub
 
+'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
+Public Sub AnimateIn
+	ModTransition.SlideFromRight(Root)
+End Sub
+
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
 	CreateUI
@@ -430,6 +435,7 @@ Private Sub NavigateToAddPassword
 	Dim pg As PagePasswordEdit = B4XPages.GetPage("PagePasswordEdit")
 	pg.SetParams(params)
 	B4XPages.ShowPage("PagePasswordEdit")
+	pg.AnimateIn
 End Sub
 
 ' ============================================
@@ -707,6 +713,7 @@ Private Sub EditEntry(entryId As String)
 	Dim pg As PagePasswordEdit = B4XPages.GetPage("PagePasswordEdit")
 	pg.SetParams(params)
 	B4XPages.ShowPage("PagePasswordEdit")
+	pg.AnimateIn
 End Sub
 
 Private Sub ConfirmDeleteEntry(entryId As String)

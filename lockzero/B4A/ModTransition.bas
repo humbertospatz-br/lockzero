@@ -6,44 +6,71 @@ Version=9.85
 @EndOfDesignText@
 'ModTransition.bas - Transicoes entre telas
 'LockZero - Animacoes suaves de navegacao
+'
+'USO CORRETO (baseado em https://www.b4x.com/android/forum/threads/119447):
+'  1. Chamar B4XPages.ShowPage("PageX")
+'  2. IMEDIATAMENTE depois, chamar PageX.AnimateIn
+'  3. O AnimateIn move off-screen e anima para posicao final
+'
+'NAO usar em B4XPage_Appear - causa flash branco
 
 Sub Process_Globals
-	'Duracao das animacoes (ms)
-	Private Const DURATION_ENTER As Int = 150
-	Private Const DURATION_EXIT As Int = 120
-
-	'Distancia do slide (porcentagem da largura)
-	Private Const SLIDE_OFFSET As Float = 0.25  '25% da largura
+	'Duracao da animacao (ms) - curta e agradavel
+	Public Const DURATION As Int = 200
 End Sub
 
 'Anima entrada da pagina (slide da direita)
-'Chamar no inicio de B4XPage_Appear
-'NOTA: Desabilitado temporariamente - causa flash branco antes da transicao
-'      B4XPages mostra a pagina ANTES do nosso codigo rodar
+'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
+Public Sub SlideFromRight(root As B4XView)
+	If root = Null Then Return
+
+	'Move para direita (off-screen) instantaneamente
+	root.Left = 100%x
+	root.Alpha = 1
+
+	'Anima para posicao final
+	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
+End Sub
+
+'Anima entrada da pagina (slide de baixo)
+'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
+Public Sub SlideFromBottom(root As B4XView)
+	If root = Null Then Return
+
+	'Move para baixo (off-screen) instantaneamente
+	root.Top = 100%y
+	root.Alpha = 1
+
+	'Anima para posicao final
+	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
+End Sub
+
+'Anima entrada suave (pequeno slide de baixo)
+'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
+Public Sub SlideFromBottomShort(root As B4XView)
+	If root = Null Then Return
+
+	'Move um pouco para baixo instantaneamente
+	root.Top = 50dip
+	root.Alpha = 1
+
+	'Anima para posicao final
+	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
+End Sub
+
+'Versoes antigas - mantidas para compatibilidade mas nao fazem nada
 Public Sub SlideIn(root As B4XView)
-	'Transicao desabilitada - apenas garante posicao correta
 	If root = Null Then Return
 	root.Left = 0
 	root.Alpha = 1
 End Sub
 
-'Anima entrada da pagina (slide de baixo - para dialogs/modals)
-'NOTA: Desabilitado temporariamente
 Public Sub SlideUp(root As B4XView)
 	If root = Null Then Return
 	root.Alpha = 1
 End Sub
 
-'Anima entrada suave (fade in)
-'NOTA: Desabilitado temporariamente
 Public Sub FadeIn(root As B4XView)
 	If root = Null Then Return
-	root.Alpha = 1
-End Sub
-
-'Reseta posicao (sem animacao) - para uso antes de sair
-Public Sub ResetPosition(root As B4XView)
-	If root = Null Then Return
-	root.Left = 0
 	root.Alpha = 1
 End Sub
