@@ -1,4 +1,4 @@
-B4A=true
+﻿B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=StaticCode
@@ -24,13 +24,14 @@ Public Sub SlideIn(root As B4XView)
 	Dim screenWidth As Int = 100%x
 	Dim offset As Int = screenWidth * SLIDE_OFFSET
 
-	'Posiciona fora da tela (direita) com transparencia
+	'Garante alpha em 1 (visivel)
+	root.Alpha = 1
+
+	'Posiciona fora da tela (direita)
 	root.Left = offset
-	root.Alpha = 0.3
 
 	'Anima para posicao final
 	root.SetLayoutAnimated(DURATION_ENTER, 0, root.Top, root.Width, root.Height)
-	root.SetVisibleAnimated(DURATION_ENTER, True)
 End Sub
 
 'Anima entrada da pagina (slide de baixo - para dialogs/modals)
@@ -39,21 +40,27 @@ Public Sub SlideUp(root As B4XView)
 
 	Dim offset As Int = 50dip
 
-	'Posiciona abaixo com transparencia
+	'Garante alpha em 1 (visivel)
+	root.Alpha = 1
+
+	'Posiciona abaixo
 	root.Top = root.Top + offset
-	root.Alpha = 0.3
 
 	'Anima para posicao final
 	root.SetLayoutAnimated(DURATION_ENTER, root.Left, root.Top - offset, root.Width, root.Height)
-	root.SetVisibleAnimated(DURATION_ENTER, True)
 End Sub
 
-'Anima entrada suave (fade in)
+'Anima entrada suave (fade in) - usa slide suave ao inves de fade
 Public Sub FadeIn(root As B4XView)
 	If root = Null Then Return
 
-	root.Alpha = 0
-	root.SetVisibleAnimated(DURATION_ENTER, True)
+	'Garante alpha em 1 (visivel)
+	root.Alpha = 1
+
+	'Pequeno slide de baixo para cima
+	Dim offset As Int = 30dip
+	root.Top = root.Top + offset
+	root.SetLayoutAnimated(DURATION_ENTER, root.Left, root.Top - offset, root.Width, root.Height)
 End Sub
 
 'Reseta posicao (sem animacao) - para uso antes de sair

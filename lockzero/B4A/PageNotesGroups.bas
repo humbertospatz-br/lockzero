@@ -203,18 +203,7 @@ Private Sub LoadGroups
 		xvItem.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 12dip)
 		pnlGroups.AddView(pnlItem, 16dip, y, width - 32dip, itemHeight)
 
-		'Icone de cadeado (se seguro)
-		Dim lockIcon As String = g.GetLockIcon
-		If lockIcon.Length > 0 Then
-			Dim lblLock As Label
-			lblLock.Initialize("")
-			lblLock.Text = lockIcon
-			lblLock.TextSize = Starter.FONT_SUBTITLE
-			lblLock.Gravity = Gravity.CENTER
-			pnlItem.AddView(lblLock, 8dip, 0, 35dip, itemHeight)
-		End If
-
-		'Nome do grupo
+		'Nome do grupo (g.Icon ja inclui cadeado se seguro)
 		Dim lblName As Label
 		lblName.Initialize("")
 		lblName.Text = g.Icon & " " & g.Name
@@ -222,10 +211,7 @@ Private Sub LoadGroups
 		lblName.TextColor = Colors.White
 		lblName.Typeface = Typeface.DEFAULT_BOLD
 		lblName.Gravity = Gravity.CENTER_VERTICAL
-
-		Dim nameX As Int = 16dip
-		If lockIcon.Length > 0 Then nameX = 40dip
-		pnlItem.AddView(lblName, nameX, 0, width - 140dip, itemHeight)
+		pnlItem.AddView(lblName, 16dip, 0, width - 140dip, itemHeight)
 
 		'Contador de notas
 		Dim count As Int = ModNotes.CountByGroup(g.Id)
