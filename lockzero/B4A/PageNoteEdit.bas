@@ -80,6 +80,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Transicao de entrada
+	ModTransition.SlideIn(Root)
+
 	'Breadcrumb: Nota → NomeGrupo → Titulo
 	Dim lastPart As String
 	If IsNewNote Then

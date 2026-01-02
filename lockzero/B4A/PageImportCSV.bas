@@ -73,6 +73,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Transicao de entrada
+	ModTransition.SlideIn(Root)
+
 	CallSub2(Main, "SetPageTitle", ModLang.T("import_csv"))
 
 	'Carrega CSV se ainda nao carregou OU se arquivo mudou

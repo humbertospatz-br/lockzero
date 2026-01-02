@@ -22,30 +22,33 @@ Library8=stringutils
 Library9=xui views
 ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="35"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.LightTheme)~\n~'End of default text.~\n~AddPermission(android.permission.USE_BIOMETRIC)~\n~AddPermission(android.permission.USE_FINGERPRINT)~\n~~\n~SetActivityAttribute(Main, android:launchMode, "singleTask")~\n~'FileProvider~\n~  AddApplicationText(~\n~  <provider~\n~  android:name="androidx.core.content.FileProvider"~\n~  android:authorities="$PACKAGE$.provider"~\n~  android:exported="false"~\n~  android:grantUriPermissions="true">~\n~  <meta-data~\n~  android:name="android.support.FILE_PROVIDER_PATHS"~\n~  android:resource="@xml/provider_paths"/>~\n~  </provider>~\n~  )~\n~~\n~  CreateResource(xml, provider_paths,~\n~  <files-path name="name" path="shared" />~\n~  )~\n~'Intent-filter para arquivos .lockzero~\n~ AddActivityText(Main,~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content" android:mimeType="application/vnd.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="file" android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  <intent-filter>~\n~    <action android:name="android.intent.action.VIEW"/>~\n~    <category android:name="android.intent.category.DEFAULT"/>~\n~    <data android:scheme="content"~\n~          android:mimeType="application/octet-stream"~\n~          android:pathPattern=".*\.lockzero"/>~\n~  </intent-filter>~\n~  )~\n~  'Intent-filter para arquivos .csv~\n~ AddActivityText(Main,~\n~ <intent-filter>~\n~   <action android:name="android.intent.action.VIEW"/>~\n~   <category android:name="android.intent.category.DEFAULT"/>~\n~   <data android:scheme="content" android:mimeType="text/csv"/>~\n~ </intent-filter>~\n~ <intent-filter>~\n~   <action android:name="android.intent.action.VIEW"/>~\n~   <category android:name="android.intent.category.DEFAULT"/>~\n~   <data android:scheme="content" android:mimeType="text/comma-separated-values"/>~\n~ </intent-filter>~\n~ )~\n~~\n~
 Module1=B4XMainPage
-Module10=ModSecurity
-Module11=ModSession
-Module12=ModTheme
-Module13=PageBackup
-Module14=PageImportCSV
-Module15=PageNoteEdit
-Module16=PageNotesList
-Module17=PageOnboarding
-Module18=PagePasswordEdit
-Module19=PagePasswordList
+Module10=ModPasswords
+Module11=ModSecurity
+Module12=ModSession
+Module13=ModTheme
+Module14=PageBackup
+Module15=PageImportCSV
+Module16=PageNoteEdit
+Module17=PageNotesGroups
+Module18=PageNotesList
+Module19=PageOnboarding
 Module2=BiometricManager
-Module20=PagePasswords
-Module21=PageSettings
-Module22=Starter
+Module20=PagePasswordEdit
+Module21=PagePasswordList
+Module22=PagePasswords
+Module23=PageSettings
+Module24=Starter
+Module25=ModTransition
 Module3=clsNoteEntry
-Module4=clsPasswordEntry
-Module5=clsPasswordGroup
-Module6=ModBackup
-Module7=ModLang
-Module8=ModNotes
-Module9=ModPasswords
+Module4=clsNoteGroup
+Module5=clsPasswordEntry
+Module6=clsPasswordGroup
+Module7=ModBackup
+Module8=ModLang
+Module9=ModNotes
 NumberOfFiles=5
 NumberOfLibraries=10
-NumberOfModules=22
+NumberOfModules=25
 Version=13.4
 @EndOfDesignText@
 #Region  Project Attributes
@@ -87,6 +90,7 @@ Sub Globals
 	Private pgOnboarding As PageOnboarding
 	Private pgNotesList As PageNotesList
 	Private pgNoteEdit As PageNoteEdit
+	Private pgNotesGroups As PageNotesGroups
 	Private pgSettings As PageSettings
 	Private pgImportCSV As PageImportCSV
 End Sub
@@ -109,6 +113,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	pgOnboarding.Initialize
 	pgNotesList.Initialize
 	pgNoteEdit.Initialize
+	pgNotesGroups.Initialize
 	pgSettings.Initialize
 	pgImportCSV.Initialize
 
@@ -119,6 +124,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	B4XPages.AddPageAndCreate("PageOnboarding", pgOnboarding)
 	B4XPages.AddPageAndCreate("PageNotesList", pgNotesList)
 	B4XPages.AddPageAndCreate("PageNoteEdit", pgNoteEdit)
+	B4XPages.AddPageAndCreate("PageNotesGroups", pgNotesGroups)
 	B4XPages.AddPageAndCreate("PageSettings", pgSettings)
 	B4XPages.AddPageAndCreate("PageImportCSV", pgImportCSV)
 

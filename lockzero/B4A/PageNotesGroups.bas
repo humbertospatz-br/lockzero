@@ -49,6 +49,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Transicao de entrada
+	ModTransition.SlideIn(Root)
+
 	'Reset da flag de navegacao
 	IsNavigating = False
 

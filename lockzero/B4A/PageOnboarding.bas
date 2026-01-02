@@ -62,6 +62,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Transicao de entrada (fade para primeira tela)
+	ModTransition.FadeIn(Root)
+
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", "LockZero")
 End Sub

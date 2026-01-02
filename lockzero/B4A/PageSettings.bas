@@ -44,6 +44,9 @@ Private Sub B4XPage_Appear
 	CreateUI
 	ApplyTheme
 
+	'Transicao de entrada (apos reconstruir UI)
+	ModTransition.SlideIn(Root)
+
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", ModLang.T("settings"))
 

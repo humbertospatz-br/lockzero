@@ -65,6 +65,9 @@ Private Sub B4XPage_Appear
 		Return
 	End If
 
+	'Transicao de entrada
+	ModTransition.SlideIn(Root)
+
 	'Atualiza titulo do header com breadcrumb (Senhas → NomeGrupo)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
 	If g.IsInitialized Then

@@ -40,6 +40,9 @@ Private Sub B4XPage_Created(Root1 As B4XView)
 End Sub
 
 Private Sub B4XPage_Appear
+	'Transicao de entrada
+	ModTransition.SlideIn(Root)
+
 	Log("PageNotesList.B4XPage_Appear - IsNavigating=" & IsNavigating)
 
 	'Atualiza titulo com breadcrumb: Notas → NomeGrupo
