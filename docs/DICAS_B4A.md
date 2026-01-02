@@ -1733,5 +1733,181 @@ End Sub
 
 ---
 
-**Ultima atualizacao:** 2025-12-30
+## 36. Save Atomico - Evitar Corrupcao de Arquivo (OBRIGATORIO)
+
+### O Problema
+
+```vb
+' PERIGOSO - Se app crashar durante WriteString, arquivo fica corrompido
+File.WriteString(File.DirInternal, "dados.json", conteudo)
+```
+
+**Cenarios de falha:**
+- Bateria acaba durante escrita
+- Android mata o processo por falta de memoria
+- App crasha por qualquer motivo
+- Usuario forca parada do app
+
+**Resultado:** Arquivo parcialmente escrito = JSON invalido = **PERDA TOTAL DE DADOS**
+
+### A Solucao: Transacao Atomica
+
+**Atomico** = "tudo ou nada" (indivisivel)
+
+```
+1. Escreve em arquivo TEMPORARIO (.tmp)
+2. Faz backup do arquivo atual (.bak)
+3. RENOMEIA temporario para arquivo final (operacao atomica)
+4. Se falhar em qualquer passo: arquivo original intacto
+```
+
+### Codigo B4A - Funcao Reutilizavel
+
+```vb
+'Salva conteudo em arquivo de forma atomica (segura)
+'Retorna True se sucesso, False se falha
+Public Sub SaveFileAtomic(folder As String, fileName As String, content As String) As Boolean
+    Dim tempFile As String = fileName & ".tmp"
+    Dim backupFile As String = fileName & ".bak"
+
+    Try
+        '1. Escreve no arquivo temporario
+        File.WriteString(folder, tempFile, content)
+
+        '2. Verifica se escreveu corretamente (opcional mas recomendado)
+        Dim verify As String = File.ReadString(folder, tempFile)
+        If verify <> content Then
+            Log("SaveFileAtomic: verificacao falhou")
+            File.Delete(folder, tempFile)
+            Return False
+        End If
+
+        '3. Se arquivo original existe, faz backup
+        If File.Exists(folder, fileName) Then
+            'Remove backup antigo se existir
+            If File.Exists(folder, backupFile) Then
+                File.Delete(folder, backupFile)
+            End If
+            'Renomeia original para .bak
+            File.Copy(folder, fileName, folder, backupFile)
+        End If
+
+        '4. Renomeia temporario para arquivo final (ATOMICO!)
+        File.Delete(folder, fileName)  'Remove original
+        File.Copy(folder, tempFile, folder, fileName)  'Copia temp para final
+        File.Delete(folder, tempFile)  'Remove temp
+
+        Log("SaveFileAtomic: " & fileName & " salvo com sucesso")
+        Return True
+
+    Catch
+        Log("SaveFileAtomic ERRO: " & LastException.Message)
+        'Em caso de erro, tenta limpar temp
+        If File.Exists(folder, tempFile) Then
+            File.Delete(folder, tempFile)
+        End If
+        Return False
+    End Try
+End Sub
+```
+
+### Uso
+
+```vb
+' ANTES (perigoso)
+File.WriteString(File.DirInternal, "senhas.json", json)
+
+' DEPOIS (seguro)
+If SaveFileAtomic(File.DirInternal, "senhas.json", json) = False Then
+    'Tratar erro - avisar usuario
+    Log("ERRO: Falha ao salvar dados!")
+End If
+```
+
+### Recuperar de Backup (se arquivo principal corrompido)
+
+```vb
+Public Sub LoadFileWithFallback(folder As String, fileName As String) As String
+    Dim backupFile As String = fileName & ".bak"
+
+    '1. Tenta carregar arquivo principal
+    If File.Exists(folder, fileName) Then
+        Try
+            Dim content As String = File.ReadString(folder, fileName)
+            'Valida JSON basico
+            If content.StartsWith("{") Or content.StartsWith("[") Then
+                Return content
+            End If
+        Catch
+            Log("LoadFileWithFallback: arquivo principal corrompido")
+        End Try
+    End If
+
+    '2. Fallback para backup
+    If File.Exists(folder, backupFile) Then
+        Try
+            Dim backup As String = File.ReadString(folder, backupFile)
+            Log("LoadFileWithFallback: usando backup!")
+            'Restaura backup como principal
+            File.Copy(folder, backupFile, folder, fileName)
+            Return backup
+        Catch
+            Log("LoadFileWithFallback: backup tambem corrompido!")
+        End Try
+    End If
+
+    '3. Nenhum arquivo disponivel
+    Return ""
+End Sub
+```
+
+### Fluxo Visual
+
+```
+SAVE ATOMICO:
+┌─────────────────────────────────────────────────────────┐
+│ 1. Escreve "dados.json.tmp"                             │
+│    ↓                                                    │
+│ 2. Verifica se .tmp esta correto                        │
+│    ↓                                                    │
+│ 3. Copia "dados.json" → "dados.json.bak"                │
+│    ↓                                                    │
+│ 4. Copia "dados.json.tmp" → "dados.json" (ATOMICO)      │
+│    ↓                                                    │
+│ 5. Deleta "dados.json.tmp"                              │
+└─────────────────────────────────────────────────────────┘
+
+SE CRASH EM QUALQUER PASSO:
+- Passo 1-2: .tmp incompleto, original intacto
+- Passo 3: .bak criado, original intacto
+- Passo 4: impossivel corromper (atomico)
+- Passo 5: .tmp fica sobrando (inofensivo)
+```
+
+### Cenarios de Recuperacao
+
+| Crash em | Estado dos Arquivos | Recuperacao |
+|----------|---------------------|-------------|
+| Passo 1 | .tmp parcial, original OK | Usa original |
+| Passo 2 | .tmp invalido, original OK | Usa original |
+| Passo 3 | .tmp OK, .bak OK, original OK | Usa original |
+| Passo 4 | Impossivel - operacao atomica | - |
+| Passo 5 | .tmp sobrando (lixo), novo OK | Usa novo |
+
+### REGRA DE OURO
+
+> **NUNCA use `File.WriteString` direto para dados importantes.**
+> **SEMPRE use `SaveFileAtomic` para evitar perda de dados.**
+> **SEMPRE tenha fallback para `.bak` ao carregar.**
+
+### Onde Aplicar (LockZero)
+
+- `ModPasswords.SaveToDisk` - senhas e grupos
+- `ModNotes.SaveData` - notas
+- `ModBackup.ExportBackup` - backups
+- Qualquer arquivo JSON com dados do usuario
+
+---
+
+**Ultima atualizacao:** 2026-01-02
 **Projeto:** LockZero (e familia Lockseed Products)

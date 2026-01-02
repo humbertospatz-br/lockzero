@@ -101,6 +101,200 @@
 
 ---
 
+## AUDITORIA DE SEGURANCA - Analise Profunda (2026-01-02)
+
+> **Origem:** Analise completa do codigo por Claude
+> **Status:** PENDENTE
+> **Prioridade:** CRITICA - Resolver antes de lancar
+
+---
+
+### CRITICO - Risco de Perda de Dados
+
+- [ ] [2026-01-02] **Salvar com transacao atomica** - Evitar corrupcao de arquivo
+  - **Problema:** `File.WriteString` sobrescreve arquivo diretamente
+  - Se app crashar durante save: arquivo corrompido/truncado
+  - **Solucao:** Escrever em arquivo temporario, depois renomear (atomico)
+  ```
+  1. Salvar em "lockzero_passwords.json.tmp"
+  2. Se sucesso: File.Rename para "lockzero_passwords.json"
+  3. Se falha: arquivo original intacto
+  ```
+  - Aplicar em: ModPasswords.SaveToDisk, ModNotes.SaveData
+
+- [ ] [2026-01-02] **Backup automatico antes de salvar** - Segunda linha de defesa
+  - Antes de sobrescrever, copiar para ".bak"
+  - Manter ultimos 3 backups automaticos
+  - Se corrupcao detectada: tentar restaurar do .bak
+
+- [ ] [2026-01-02] **Validar JSON antes de carregar** - Evitar dados vazios
+  - **Problema:** Se JSON invalido, LoadFromDisk retorna vazio silenciosamente
+  - **Solucao:** Verificar estrutura minima antes de aceitar
+  - Se invalido: tentar .bak, avisar usuario
+
+---
+
+### CRITICO - Vulnerabilidades de Seguranca
+
+- [ ] [2026-01-02] **PIN criptografado em vez de Base64** - URGENTE
+  - **Problema:** PIN armazenado em Base64 (decodificavel trivialmente)
+  - `Base64.Decode("MTIzNDU2") = "123456"` (qualquer um consegue)
+  - **Solucao:** Usar PBKDF2 + salt (igual aos grupos)
+  ```
+  SavePIN(pin):
+    salt = GenerateRandomSalt()
+    hashedPIN = PBKDF2(pin, salt, 100000)
+    Salvar: {salt, hashedPIN}
+
+  ValidatePIN(inputPin):
+    hashedInput = PBKDF2(inputPin, savedSalt, 100000)
+    Return hashedInput == savedHashedPIN
+  ```
+
+- [ ] [2026-01-02] **IV aleatorio por operacao** - Corrigir criptografia
+  - **Problema:** IV derivado de MD5(reverse(frase)) - sempre igual
+  - Mesmo plaintext + mesma frase = mesmo ciphertext (detectavel)
+  - **Solucao:** Gerar IV aleatorio, salvar junto com ciphertext
+  ```
+  Encrypt():
+    iv = RandomBytes(16)
+    ciphertext = AES-CBC(plaintext, key, iv)
+    Return Base64(iv + ciphertext)  'IV concatenado
+  ```
+
+- [ ] [2026-01-02] **Adicionar HMAC para integridade** - Detectar alteracao
+  - **Problema:** Ciphertext pode ser modificado sem deteccao
+  - **Solucao:** Encrypt-then-MAC
+  ```
+  Encrypt():
+    ciphertext = AES(plaintext)
+    mac = HMAC-SHA256(key, ciphertext)
+    Return ciphertext + mac
+
+  Decrypt():
+    Verificar MAC antes de descriptografar
+    Se MAC invalido: rejeitar
+  ```
+
+---
+
+### ALTO - Protecao de Sessao
+
+- [ ] [2026-01-02] **Auto-lock quando app vai para background**
+  - **Problema:** Sessao permanece ativa mesmo com app minimizado
+  - **Solucao:** Em Activity_Pause, encerrar ou pausar sessao
+  - Opcao: Configuracao "Bloquear ao minimizar" (on/off)
+
+- [ ] [2026-01-02] **Limpar clipboard automaticamente**
+  - **Problema:** Senha copiada permanece no clipboard indefinidamente
+  - **Solucao:** Timer para limpar apos X segundos (configuravel)
+  - Padrao: 30 segundos
+
+- [ ] [2026-01-02] **FLAG_SECURE para prevenir screenshots**
+  - **Problema:** Usuario pode tirar screenshot com senhas visiveis
+  - **Solucao:** `Activity.Window.addFlags(FLAG_SECURE)`
+  - Impede screenshots e gravacao de tela
+
+---
+
+### MEDIO - Integridade de Backup
+
+- [ ] [2026-01-02] **Checksum externo ao backup**
+  - **Problema:** Checksum SHA-256 esta DENTRO do arquivo criptografado
+  - Se backup corrompido em disco, checksum tambem corrompido
+  - **Solucao:** Salvar checksum em arquivo separado ou no nome
+  ```
+  lockzero_backup_20260102_143000.lockzero
+  lockzero_backup_20260102_143000.sha256  (checksum separado)
+  ```
+
+- [ ] [2026-01-02] **Verificar integridade periodica dos dados**
+  - Ao abrir app: verificar se arquivos JSON sao validos
+  - Se corrupcao detectada: avisar usuario, oferecer restaurar backup
+
+---
+
+### MEDIO - Campos Faltantes nas Classes
+
+- [ ] [2026-01-02] **clsPasswordEntry - Adicionar campos uteis**
+  - `ExpiresAt` - Para senhas temporarias/tokens
+  - `PasswordHistory` - Ultimas 3-5 senhas anteriores
+  - `StrengthScore` - Cache da analise de forca
+  - `Tags` - Para busca/organizacao
+
+- [ ] [2026-01-02] **clsPasswordGroup - Adicionar campos**
+  - `SortOrder` - Ordenacao manual de grupos
+  - `IsArchived` - Grupos antigos/inativos
+
+---
+
+### BAIXO - Melhorias de Seguranca
+
+- [ ] [2026-01-02] **Criptografar arquivo de tentativas**
+  - `lockzero_attempts.json` revela quantas tentativas por grupo
+  - Nao e critico, mas viola principio de defesa em profundidade
+
+- [ ] [2026-01-02] **Ofuscar settings sensiveis**
+  - `lockzero_settings.dat` em texto claro
+  - Opcoes sensiveis (useBiometric, sessionTimeout) visiveis
+
+- [ ] [2026-01-02] **Detectar root/jailbreak**
+  - Avisar usuario se dispositivo comprometido
+  - Nao bloquear, apenas informar risco
+
+---
+
+### DOCUMENTACAO - Responsabilidade Legal
+
+- [ ] [2026-01-02] **Termos de Uso claros**
+  - "Voce e responsavel por manter sua frase-senha segura"
+  - "Sem a frase, dados NAO podem ser recuperados"
+  - "LockZero nao armazena sua frase em nenhum servidor"
+
+- [ ] [2026-01-02] **Aviso no Onboarding**
+  - Explicar claramente: "Se perder a frase, perde os dados"
+  - Forcar usuario a confirmar que entendeu
+  - Checkbox: "Entendo que sou responsavel pela minha frase"
+
+- [ ] [2026-01-02] **Lembrete periodico de backup**
+  - A cada X dias sem backup: notificar usuario
+  - "Ultimo backup: 15 dias atras. Fazer backup agora?"
+
+---
+
+## NOVOS REQUISITOS - Backup e Animacoes (2026-01-02)
+
+> **Origem:** Solicitacao do usuario
+> **Status:** PENDENTE
+
+### Backup - Melhorias
+
+- [ ] [2026-01-02] **Data de alteracao em cada item** - Cada entrada (senha, nota, etc) deve ter updatedAt no backup
+  - Verificar se clsPasswordEntry, clsNoteEntry ja tem updatedAt
+  - Garantir que updatedAt e atualizado ao editar
+
+- [ ] [2026-01-02] **Importacao inteligente** - Perguntar ao usuario antes de importar
+  - Opcao 1: "Importar apenas itens mais novos" (comparar updatedAt)
+  - Opcao 2: "Substituir todos" (comportamento atual)
+  - Dialog com escolha antes de processar
+
+- [ ] [2026-01-02] **Validacao de integridade do backup** - Detectar alteracao por terceiros
+  - Adicionar hash/checksum do conteudo no arquivo .lockzero
+  - Ao importar, recalcular hash e comparar
+  - Se diferente: "Backup pode ter sido alterado. Importar mesmo assim?"
+
+### Animacoes de Transicao
+
+- [ ] [2026-01-02] **4 animacoes aleatorias entre telas**
+  - Slide left/right
+  - Fade in/out
+  - Zoom in/out
+  - Slide up/down
+  - Escolher aleatoriamente a cada navegacao
+  - Pesquisar: B4XPages transitions, Activity animations
+
+---
+
 ## PARA AMANHA - Refinamentos UI (2025-12-31)
 
 > **Origem:** Feedback de testes do usuario

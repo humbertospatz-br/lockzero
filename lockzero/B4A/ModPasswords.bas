@@ -33,22 +33,19 @@ Public Sub ForceReload
 End Sub
 
 ' ============================================
-'  CARREGAR DO DISCO
+'  CARREGAR DO DISCO (COM FALLBACK)
 ' ============================================
 
 Private Sub LoadFromDisk
-	If File.Exists(File.DirInternal, FILE_NAME) = False Then
-		Log("ModPasswords: arquivo nao existe, iniciando vazio")
+	'Tenta carregar com fallback para .bak se corrompido
+	Dim json As String = LoadFileWithFallback(File.DirInternal, FILE_NAME)
+
+	If json.Length = 0 Then
+		Log("ModPasswords: nenhum arquivo disponivel, iniciando vazio")
 		Return
 	End If
 
 	Try
-		Dim json As String = File.ReadString(File.DirInternal, FILE_NAME)
-		Log("=== DEBUG JSON ===")
-		Log(json)
-		Log("=== FIM DEBUG ===")
-		If json.Length = 0 Then Return
-
 		Dim parser As JSONParser
 		parser.Initialize(json)
 		Dim root As Map = parser.NextObject
@@ -76,12 +73,52 @@ Private Sub LoadFromDisk
 		End If
 
 	Catch
-		Log("ModPasswords.LoadFromDisk erro: " & LastException)
+		Log("ModPasswords.LoadFromDisk erro ao parsear: " & LastException)
 	End Try
 End Sub
 
+'Carrega arquivo com fallback para .bak se principal corrompido
+Private Sub LoadFileWithFallback(folder As String, fileName As String) As String
+	Dim backupFile As String = fileName & ".bak"
+
+	'1. Tenta carregar arquivo principal
+	If File.Exists(folder, fileName) Then
+		Try
+			Dim content As String = File.ReadString(folder, fileName)
+			'Valida JSON basico (deve comecar com { ou [)
+			If content.Length > 0 And (content.StartsWith("{") Or content.StartsWith("[")) Then
+				Log("LoadFileWithFallback: arquivo principal OK")
+				Return content
+			Else
+				Log("LoadFileWithFallback: arquivo principal invalido")
+			End If
+		Catch
+			Log("LoadFileWithFallback: erro ao ler principal - " & LastException.Message)
+		End Try
+	End If
+
+	'2. Fallback para backup
+	If File.Exists(folder, backupFile) Then
+		Try
+			Dim backup As String = File.ReadString(folder, backupFile)
+			If backup.Length > 0 And (backup.StartsWith("{") Or backup.StartsWith("[")) Then
+				Log("LoadFileWithFallback: USANDO BACKUP! Arquivo principal estava corrompido.")
+				'Restaura backup como principal
+				File.Copy(folder, backupFile, folder, fileName)
+				Return backup
+			End If
+		Catch
+			Log("LoadFileWithFallback: backup tambem corrompido!")
+		End Try
+	End If
+
+	'3. Nenhum arquivo disponivel
+	Log("LoadFileWithFallback: nenhum arquivo valido encontrado")
+	Return ""
+End Sub
+
 ' ============================================
-'  SALVAR NO DISCO
+'  SALVAR NO DISCO (ATOMICO)
 ' ============================================
 
 Public Sub SaveToDisk
@@ -109,9 +146,62 @@ Public Sub SaveToDisk
 
 	Dim gen As JSONGenerator
 	gen.Initialize(root)
-	File.WriteString(File.DirInternal, FILE_NAME, gen.ToString)
 
-	Log("ModPasswords: salvo " & Groups.Size & " grupos, " & Entries.Size & " senhas")
+	'SAVE ATOMICO - evita corrupcao se app crashar
+	If SaveFileAtomic(File.DirInternal, FILE_NAME, gen.ToString) Then
+		Log("ModPasswords: salvo " & Groups.Size & " grupos, " & Entries.Size & " senhas")
+	Else
+		Log("ModPasswords: ERRO ao salvar!")
+	End If
+End Sub
+
+' ============================================
+'  SAVE ATOMICO - Evita corrupcao de arquivo
+' ============================================
+
+'Salva conteudo em arquivo de forma atomica (segura)
+'Retorna True se sucesso, False se falha
+Private Sub SaveFileAtomic(folder As String, fileName As String, content As String) As Boolean
+	Dim tempFile As String = fileName & ".tmp"
+	Dim backupFile As String = fileName & ".bak"
+
+	Try
+		'1. Escreve no arquivo temporario
+		File.WriteString(folder, tempFile, content)
+
+		'2. Verifica se escreveu corretamente
+		Dim verify As String = File.ReadString(folder, tempFile)
+		If verify <> content Then
+			Log("SaveFileAtomic: verificacao falhou")
+			File.Delete(folder, tempFile)
+			Return False
+		End If
+
+		'3. Se arquivo original existe, faz backup
+		If File.Exists(folder, fileName) Then
+			'Remove backup antigo se existir
+			If File.Exists(folder, backupFile) Then
+				File.Delete(folder, backupFile)
+			End If
+			'Copia original para .bak
+			File.Copy(folder, fileName, folder, backupFile)
+		End If
+
+		'4. Substitui original pelo temporario (ATOMICO!)
+		File.Delete(folder, fileName)
+		File.Copy(folder, tempFile, folder, fileName)
+		File.Delete(folder, tempFile)
+
+		Return True
+
+	Catch
+		Log("SaveFileAtomic ERRO: " & LastException.Message)
+		'Em caso de erro, tenta limpar temp
+		If File.Exists(folder, tempFile) Then
+			File.Delete(folder, tempFile)
+		End If
+		Return False
+	End Try
 End Sub
 
 ' ============================================

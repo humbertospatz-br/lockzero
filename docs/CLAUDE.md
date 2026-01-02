@@ -106,7 +106,7 @@ Dependendo do tipo de tarefa, o Claude DEVE ler os arquivos de padrao correspond
 |---------|----------|
 | `docs/UI_PATTERNS.md` | Header, botoes, timer, dialogs, estrutura de pagina |
 | `docs/LOCKZERO_SPEC.md` | Especificacao geral do app |
-| `docs/DICAS_B4A.md` | Dicas de desenvolvimento B4A |
+| `C:\Basic4a\docs\DICAS_B4A.md` | Dicas de desenvolvimento B4A (arquivo global) |
 | `docs/DECISOES_ARQUITETURA.md` | Decisoes tecnicas do projeto |
 
 ### Exemplo de Uso
@@ -498,7 +498,7 @@ SEMPRE: ModLang.GetText("chave_do_texto")
 
 1. Ler este documento (CLAUDE.md)
 2. Ler `docs/agentes/SOFTWARE_BEST.md` (boas praticas de arquitetura e DevOps)
-3. Ler `docs/DICAS_B4A.md` (dicas essenciais de desenvolvimento B4A)
+3. Ler `C:\Basic4a\docs\DICAS_B4A.md` (dicas essenciais de desenvolvimento B4A - arquivo global)
 4. Verificar TODO_LIST.md para tarefas pendentes
 5. Verificar HISTORICO.md para contexto recente
 6. **OBRIGATORIO - Exibir mensagem:**
