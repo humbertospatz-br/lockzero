@@ -587,6 +587,53 @@ Quando app vai para segundo plano (Activity_Pause):
 - Usuario precisa re-digitar frase ao voltar
 - Protege contra acesso fisico ao dispositivo desbloqueado
 
+### Bloqueio de Screenshot (FLAG_SECURE)
+
+> **STATUS:** Planejado para implementacao
+> **TESTES:** Manter DESABILITADO durante desenvolvimento
+
+**Funcionalidade:**
+- Impede capturas de tela (screenshot) dentro do app
+- Impede gravacao de tela em video
+- Tela aparece preta em screenshots/gravacoes
+- Tela aparece preta no app switcher (recentes)
+
+**Implementacao Android:**
+```basic
+'Em Activity_Create ou Activity_Resume:
+Dim jo As JavaObject = GetActivity
+Dim window As JavaObject = jo.RunMethod("getWindow", Null)
+
+'FLAG_SECURE = 8192 (0x2000)
+window.RunMethod("addFlags", Array(8192))
+```
+
+**Onde aplicar:**
+| Tela | FLAG_SECURE | Motivo |
+|------|-------------|--------|
+| Main.bas | Sim | Activity principal |
+| Dialogs de frase | Sim | Usuario digita frase |
+| Lista de senhas | Sim | Dados sensiveis visiveis |
+| Detalhes de senha | Sim | Senha pode estar visivel |
+
+**Configuracao de desenvolvimento:**
+```basic
+'Starter.bas - Constante global
+Public ENABLE_SCREENSHOT_BLOCK As Boolean = False  'Testes: False, Producao: True
+
+'Main.bas - Aplicar condicionalmente
+If Starter.ENABLE_SCREENSHOT_BLOCK Then
+    Dim jo As JavaObject = GetActivity
+    jo.RunMethod("getWindow", Null).RunMethod("addFlags", Array(8192))
+End If
+```
+
+**Notas importantes:**
+- FLAG_SECURE deve ser definida ANTES de setContentView
+- Melhor aplicar em Activity_Create
+- Nao impede que usuario memorize ou anote manualmente
+- Protege contra captura automatica/malware
+
 ### Confirmacao de Exclusao
 
 Operacoes destrutivas (deletar grupo/senha) exigem:
