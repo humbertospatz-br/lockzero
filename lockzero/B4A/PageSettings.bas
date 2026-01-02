@@ -41,6 +41,7 @@ End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
+	Root.Left = 100%x  'Inicia off-screen para evitar flash
 End Sub
 
 Private Sub B4XPage_Appear
@@ -48,9 +49,6 @@ Private Sub B4XPage_Appear
 	Root.RemoveAllViews
 	CreateUI
 	ApplyTheme
-
-	'Transicao de entrada (apos reconstruir UI)
-	ModTransition.SlideIn(Root)
 
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", ModLang.T("settings"))

@@ -56,15 +56,13 @@ End Sub
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Log("PageBackup: B4XPage_Created inicio")
 	Root = Root1
+	Root.Left = 100%x  'Inicia off-screen para evitar flash
 	CreateUI
 	ApplyTheme
 	Log("PageBackup: B4XPage_Created fim")
 End Sub
 
 Private Sub B4XPage_Appear
-	'Transicao de entrada
-	ModTransition.SlideIn(Root)
-
 	'Define titulo na ActionBar
 	CallSub2(Main, "SetPageTitle", ModLang.T("backup"))
 

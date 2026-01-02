@@ -58,6 +58,7 @@ End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
+	Root.Left = 100%x  'Inicia off-screen para evitar flash
 	CreateUI
 	ApplyTheme
 End Sub
@@ -69,9 +70,6 @@ Private Sub B4XPage_Appear
 		B4XPages.ClosePage(Me)
 		Return
 	End If
-
-	'Transicao de entrada
-	ModTransition.SlideIn(Root)
 
 	'Atualiza titulo do header com breadcrumb (Senhas → NomeGrupo)
 	Dim g As clsPasswordGroup = ModPasswords.GetGroupById(CurrentGroupId)
