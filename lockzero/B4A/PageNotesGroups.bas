@@ -22,11 +22,14 @@ Sub Class_Globals
 	Private pnlDialog As Panel
 	Private edtGroupName As EditText
 	Private edtPassphrase As EditText
+	Private edtPassphraseConfirm As EditText
 	Private chkSecure As CheckBox
 	Private btnShowPass As Button
 	Private IsPassVisible As Boolean = False
 	Private pnlPhraseArea As Panel  'Container do campo de frase
+	Private pnlPhraseConfirmArea As Panel  'Container do campo de confirmacao
 	Private lblPhraseLabel As Label  'Label "Frase"
+	Private lblPhraseConfirmLabel As Label  'Label "Confirme"
 	Private CurrentDialogMode As String = "" 'add_group, unlock_group, edit_group
 	Private CurrentGroupId As String = ""
 
@@ -36,10 +39,15 @@ Sub Class_Globals
 
 	'Flag para evitar navegacao dupla
 	Private IsNavigating As Boolean = False
+
+	'Biometria
+	Private Biometric As BiometricManager
+	Private PendingDeleteGroupId As String = ""
 End Sub
 
 Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
+	Biometric.Initialize(Me, "Biometric")
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -309,6 +317,9 @@ Private Sub ShowAddGroupDialog
 	CurrentGroupId = ""
 	IsPassVisible = False
 
+	'Verifica se sessao esta ativa para notes
+	Dim sessionActive As Boolean = ModSession.IsSessionActive
+
 	Dim dialogW As Int = Root.Width - 40dip
 	pnlDialog.RemoveAllViews
 
@@ -357,35 +368,80 @@ Private Sub ShowAddGroupDialog
 	pnlDialog.AddView(chkSecure, 16dip, top, dialogW - 32dip, 40dip)
 	top = top + 45dip
 
-	'Campo frase (apenas se seguro)
-	lblPhraseLabel.Initialize("")
-	lblPhraseLabel.Text = ModLang.T("passphrase_hint")
-	lblPhraseLabel.TextSize = 12
-	lblPhraseLabel.TextColor = Colors.ARGB(180, 255, 255, 255)
-	pnlDialog.AddView(lblPhraseLabel, 16dip, top, dialogW - 32dip, 18dip)
-	top = top + 20dip
+	'Campo frase - apenas mostra se sessao NAO esta ativa
+	If sessionActive = False Then
+		lblPhraseLabel.Initialize("")
+		lblPhraseLabel.Text = ModLang.T("passphrase_hint")
+		lblPhraseLabel.TextSize = 12
+		lblPhraseLabel.TextColor = Colors.ARGB(180, 255, 255, 255)
+		pnlDialog.AddView(lblPhraseLabel, 16dip, top, dialogW - 32dip, 18dip)
+		top = top + 20dip
 
-	pnlPhraseArea.Initialize("")
-	pnlPhraseArea.Color = ModTheme.HomeBg
-	pnlDialog.AddView(pnlPhraseArea, 16dip, top, dialogW - 32dip, 44dip)
+		pnlPhraseArea.Initialize("")
+		pnlPhraseArea.Color = ModTheme.HomeBg
+		pnlDialog.AddView(pnlPhraseArea, 16dip, top, dialogW - 32dip, 44dip)
 
-	edtPassphrase.Initialize("edtPassphrase")
-	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
-	edtPassphrase.Text = ""
-	edtPassphrase.TextColor = Colors.White
-	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
-	pnlPhraseArea.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 44dip)
+		edtPassphrase.Initialize("edtPassphrase")
+		edtPassphrase.Hint = ModLang.T("passphrase_hint")
+		edtPassphrase.SingleLine = True
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		edtPassphrase.Text = ""
+		edtPassphrase.TextColor = Colors.White
+		edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+		pnlPhraseArea.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 44dip)
 
-	btnShowPass.Initialize("btnShowPass")
-	btnShowPass.Text = ModLang.T("view")
-	btnShowPass.TextSize = Starter.FONT_CAPTION
-	btnShowPass.Color = Colors.Transparent
-	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
-	btnShowPass.Gravity = Gravity.CENTER
-	pnlPhraseArea.AddView(btnShowPass, dialogW - 32dip - 65dip, 2dip, 60dip, 40dip)
-	top = top + 55dip
+		btnShowPass.Initialize("btnShowPass")
+		btnShowPass.Text = ModLang.T("view")
+		btnShowPass.TextSize = Starter.FONT_CAPTION
+		btnShowPass.Color = Colors.Transparent
+		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+		btnShowPass.Gravity = Gravity.CENTER
+		pnlPhraseArea.AddView(btnShowPass, dialogW - 32dip - 65dip, 2dip, 60dip, 40dip)
+		top = top + 50dip
+
+		'Campo confirmacao de frase
+		lblPhraseConfirmLabel.Initialize("")
+		lblPhraseConfirmLabel.Text = ModLang.T("passphrase_confirm_new")
+		lblPhraseConfirmLabel.TextSize = 12
+		lblPhraseConfirmLabel.TextColor = Colors.ARGB(180, 255, 255, 255)
+		pnlDialog.AddView(lblPhraseConfirmLabel, 16dip, top, dialogW - 32dip, 18dip)
+		top = top + 20dip
+
+		pnlPhraseConfirmArea.Initialize("")
+		pnlPhraseConfirmArea.Color = ModTheme.HomeBg
+		pnlDialog.AddView(pnlPhraseConfirmArea, 16dip, top, dialogW - 32dip, 44dip)
+
+		edtPassphraseConfirm.Initialize("edtPassphraseConfirm")
+		edtPassphraseConfirm.Hint = ModLang.T("passphrase_confirm_new")
+		edtPassphraseConfirm.SingleLine = True
+		edtPassphraseConfirm.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		edtPassphraseConfirm.Text = ""
+		edtPassphraseConfirm.TextColor = Colors.White
+		edtPassphraseConfirm.HintColor = Colors.ARGB(120, 255, 255, 255)
+		pnlPhraseConfirmArea.AddView(edtPassphraseConfirm, 8dip, 0, dialogW - 32dip - 16dip, 44dip)
+		top = top + 55dip
+
+		'Aviso se modo frase unica esta ativo
+		If ModSecurity.GetUseSinglePassphrase Then
+			Dim lblWarning As Label
+			lblWarning.Initialize("")
+			lblWarning.Text = "⚠ " & ModLang.T("single_passphrase_warning")
+			lblWarning.TextSize = 10
+			lblWarning.TextColor = ModTheme.Warning
+			pnlDialog.AddView(lblWarning, 16dip, top, dialogW - 32dip, 35dip)
+			top = top + 40dip
+		End If
+	Else
+		'Sessao ativa - mostra indicador
+		Dim lblSessionInfo As Label
+		lblSessionInfo.Initialize("")
+		lblSessionInfo.Text = "🔓 " & ModLang.T("session_active")
+		lblSessionInfo.TextSize = 12
+		lblSessionInfo.TextColor = Colors.RGB(0, 220, 255)  'Azul gelo
+		lblSessionInfo.Gravity = Gravity.CENTER_HORIZONTAL
+		pnlDialog.AddView(lblSessionInfo, 16dip, top, dialogW - 32dip, 24dip)
+		top = top + 30dip
+	End If
 
 	'Botoes
 	Dim btnCancel As Button
@@ -472,7 +528,7 @@ Private Sub ShowUnlockGroupDialog(groupId As String)
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -618,9 +674,23 @@ Private Sub ConfirmDeleteGroup(groupId As String)
 	Wait For (xui.Msgbox2Async(msg, ModLang.T("note_group_delete"), ModLang.T("delete"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
-		'Se grupo seguro, pede frase para confirmar
+		'Se grupo seguro, verifica sessao ou pede frase
 		If g.IsSecure Then
-			ShowDeleteGroupDialog(groupId)
+			If ModSession.IsSessionActive Then
+				'Sessao ativa - pede biometria se disponivel, senao exclui direto
+				If ModSecurity.GetUseBiometric And Biometric.CanAuthenticate = "SUCCESS" Then
+					PendingDeleteGroupId = groupId
+					Biometric.Show(ModLang.T("biometric_prompt"))
+				Else
+					'Sem biometria - exclui direto (sessao ja autenticada)
+					ModNotes.DeleteNoteGroup(groupId)
+					LoadGroups
+					ToastMessageShow(ModLang.T("success"), False)
+				End If
+			Else
+				'Sessao inativa - pede frase
+				ShowDeleteGroupDialog(groupId)
+			End If
 		Else
 			'Grupo aberto - deleta direto
 			ModNotes.DeleteNoteGroup(groupId)
@@ -669,7 +739,7 @@ Private Sub ShowDeleteGroupDialog(groupId As String)
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -714,11 +784,11 @@ End Sub
 Private Sub btnShowPass_Click
 	IsPassVisible = Not(IsPassVisible)
 	If IsPassVisible Then
-		edtPassphrase.InputType = 1
+		edtPassphrase.InputType = ModSecurity.GetSecureVisibleInputType 'TEXT + NO_SUGGESTIONS (visivel)
 		btnShowPass.Text = ModLang.T("hide")
 		btnShowPass.TextColor = Colors.White
 	Else
-		edtPassphrase.InputType = Bit.Or(1, 128)
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 		btnShowPass.Text = ModLang.T("view")
 		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	End If
@@ -760,7 +830,6 @@ Private Sub ProcessAddGroup
 	Else
 		groupIcon = Chr(0xD83D) & Chr(0xDCDD)  '📝 nota
 	End If
-	Dim phrase As String = edtPassphrase.Text.Trim
 
 	'Valida nome
 	If groupName.Length = 0 Then
@@ -768,12 +837,29 @@ Private Sub ProcessAddGroup
 		Return
 	End If
 
-	'Se grupo seguro, valida frase
-	If isSecure Then
-		Dim phraseError As String = ModSecurity.GetPassphraseError(phrase)
-		If phraseError.Length > 0 Then
-			ToastMessageShow(phraseError, True)
-			Return
+	'Determina frase-senha
+	Dim phrase As String = ""
+	If ModSession.IsSessionActive Then
+		'Usa frase da sessao ativa
+		phrase = ModSession.GetPassphrase
+	Else
+		'Usa frase digitada
+		phrase = edtPassphrase.Text.Trim
+
+		'Se grupo seguro, valida frase
+		If isSecure Then
+			Dim phraseError As String = ModSecurity.GetPassphraseError(phrase)
+			If phraseError.Length > 0 Then
+				ToastMessageShow(phraseError, True)
+				Return
+			End If
+
+			'Valida confirmacao de frase
+			Dim phraseConfirm As String = edtPassphraseConfirm.Text.Trim
+			If phrase <> phraseConfirm Then
+				ToastMessageShow(ModLang.T("passphrase_mismatch"), True)
+				Return
+			End If
 		End If
 	End If
 
@@ -787,8 +873,11 @@ Private Sub ProcessAddGroup
 	'Se seguro, configura seguranca
 	If isSecure Then
 		g.SetupSecurity(phrase)
-		'Inicia sessao com a frase (categoria: notes)
+		'Inicia ou renova sessao com a frase (categoria: notes)
 		ModSession.StartSessionWithCategory(phrase, "notes")
+		'Limpa campos e clipboard por seguranca
+		ModSecurity.ClearSecureField(edtPassphrase)
+		If edtPassphraseConfirm.IsInitialized Then ModSecurity.ClearSecureField(edtPassphraseConfirm)
 	End If
 
 	ModNotes.SaveNoteGroup(g)
@@ -813,6 +902,8 @@ Private Sub ProcessUnlockGroup
 	If g.ValidatePhrase(phrase) Then
 		ModSecurity.ResetFailedAttempts(CurrentGroupId)
 		ModSession.StartSessionWithCategory(phrase, "notes")
+		'Limpa campo e clipboard por seguranca
+		ModSecurity.ClearSecureField(edtPassphrase)
 		HideDialog
 		NavigateToGroup(CurrentGroupId)
 	Else
@@ -824,7 +915,7 @@ Private Sub ProcessUnlockGroup
 		Else
 			ToastMessageShow(ModLang.T("wrong_passphrase"), True)
 		End If
-		edtPassphrase.Text = ""
+		ModSecurity.ClearSecureField(edtPassphrase)
 	End If
 End Sub
 
@@ -871,6 +962,24 @@ Private Sub ProcessDeleteGroup
 End Sub
 
 ' ============================================
+'  BIOMETRIA
+' ============================================
+
+Private Sub Biometric_Complete(Success As Boolean, ErrorMessage As String)
+	If Success And PendingDeleteGroupId <> "" Then
+		ModNotes.DeleteNoteGroup(PendingDeleteGroupId)
+		PendingDeleteGroupId = ""
+		LoadGroups
+		ToastMessageShow(ModLang.T("success"), False)
+	Else
+		PendingDeleteGroupId = ""
+		If Success = False And ErrorMessage <> "" Then
+			ToastMessageShow(ModLang.T("biometric_failed"), True)
+		End If
+	End If
+End Sub
+
+' ============================================
 '  TEMA
 ' ============================================
 
@@ -890,9 +999,10 @@ Private Sub UpdateSessionTimer
 	If ModSession.IsSessionActive Then
 		lblSessionTimer.Text = ModSession.GetRemainingFormatted
 
+		'Muda cor quando tempo baixo (< 60s) - azul gelo para visibilidade
 		Dim remaining As Int = ModSession.GetRemainingSeconds
 		If remaining < 60 Then
-			lblSessionTimer.TextColor = ModTheme.Warning
+			lblSessionTimer.TextColor = Colors.RGB(0, 220, 255)  'Azul gelo
 		Else
 			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
 		End If

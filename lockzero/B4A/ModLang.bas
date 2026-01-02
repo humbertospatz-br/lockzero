@@ -81,6 +81,7 @@ Private Sub LoadPortuguese
 	Texts.Put("done", "Concluído")
 	Texts.Put("search", "Buscar")
 	Texts.Put("search_hint", "Buscar por nome ou URL...")
+	Texts.Put("search_no_results", "Nenhum resultado encontrado")
 	Texts.Put("copy", "Copiar")
 	Texts.Put("copied", "Copiado!")
 	Texts.Put("show", "Mostrar")
@@ -97,6 +98,8 @@ Private Sub LoadPortuguese
 	'=== AUTENTICACAO ===
 	Texts.Put("enter_passphrase", "Digite sua frase secreta")
 	Texts.Put("passphrase_hint", "Sua frase pessoal...")
+	Texts.Put("passphrase_confirm_new", "Confirme novamente a frase nova")
+	Texts.Put("passphrase_mismatch", "As frases não coincidem")
 	Texts.Put("passphrase_min_8", "Frase deve ter no mínimo 8 caracteres")
 	Texts.Put("passphrase_too_short", "Frase muito curta")
 	Texts.Put("confirm", "Confirmar")
@@ -111,6 +114,7 @@ Private Sub LoadPortuguese
 	Texts.Put("lock", "Bloquear")
 	Texts.Put("lock_confirm_msg", "Deseja bloquear a sessão agora?")
 	Texts.Put("locked", "Sessão bloqueada")
+	Texts.Put("session_active", "Sessão ativa")
 
 	'=== MODO DE FRASE-SENHA ===
 	Texts.Put("passphrase_mode", "Modo de frase-senha")
@@ -118,6 +122,7 @@ Private Sub LoadPortuguese
 	Texts.Put("single_passphrase_desc", "Usar a mesma frase para todas as categorias")
 	Texts.Put("multi_passphrase", "Frase por categoria")
 	Texts.Put("multi_passphrase_desc", "Cada categoria pode ter sua própria frase")
+	Texts.Put("single_passphrase_warning", "Modo frase única ativo. Para usar frases diferentes por grupo, altere em Configurações.")
 
 	'=== CATEGORIAS ===
 	Texts.Put("passwords", "Senhas")
@@ -387,6 +392,15 @@ Private Sub LoadPortuguese
 	Texts.Put("csv_select_at_least_one", "Selecione pelo menos uma entrada")
 	Texts.Put("csv_select_group_first", "Selecione ou crie um grupo primeiro")
 	Texts.Put("csv_error_parse", "Erro ao ler arquivo CSV")
+
+	'CSV Import Instructions
+	Texts.Put("csv_how_to_title", "Como Importar do Chrome")
+	Texts.Put("csv_how_to_1", "1. No PC: Chrome → Menu (⋮) → Senhas")
+	Texts.Put("csv_how_to_2", "2. Gerenciador de senhas → Configurações (⚙)")
+	Texts.Put("csv_how_to_3", "3. Exportar senhas → Download do arquivo")
+	Texts.Put("csv_how_to_4", "4. Envie o CSV para o celular (WhatsApp, etc)")
+	Texts.Put("csv_how_to_5", "5. Toque no arquivo → Abrir com → LockZero")
+	Texts.Put("understood", "Entendi")
 End Sub
 
 Private Sub LoadEnglish
@@ -409,6 +423,7 @@ Private Sub LoadEnglish
 	Texts.Put("done", "Done")
 	Texts.Put("search", "Search")
 	Texts.Put("search_hint", "Search by name or URL...")
+	Texts.Put("search_no_results", "No results found")
 	Texts.Put("copy", "Copy")
 	Texts.Put("copied", "Copied!")
 	Texts.Put("show", "Show")
@@ -425,6 +440,8 @@ Private Sub LoadEnglish
 	'=== AUTHENTICATION ===
 	Texts.Put("enter_passphrase", "Enter your secret phrase")
 	Texts.Put("passphrase_hint", "Your personal phrase...")
+	Texts.Put("passphrase_confirm_new", "Confirm the new phrase again")
+	Texts.Put("passphrase_mismatch", "Phrases do not match")
 	Texts.Put("passphrase_min_8", "Phrase must have at least 8 characters")
 	Texts.Put("passphrase_too_short", "Phrase too short")
 	Texts.Put("confirm", "Confirm")
@@ -439,6 +456,7 @@ Private Sub LoadEnglish
 	Texts.Put("lock", "Lock")
 	Texts.Put("lock_confirm_msg", "Lock the session now?")
 	Texts.Put("locked", "Session locked")
+	Texts.Put("session_active", "Session active")
 
 	'=== PASSPHRASE MODE ===
 	Texts.Put("passphrase_mode", "Passphrase mode")
@@ -446,6 +464,7 @@ Private Sub LoadEnglish
 	Texts.Put("single_passphrase_desc", "Use the same passphrase for all categories")
 	Texts.Put("multi_passphrase", "Per category passphrase")
 	Texts.Put("multi_passphrase_desc", "Each category can have its own passphrase")
+	Texts.Put("single_passphrase_warning", "Single passphrase mode active. To use different passphrases per group, change in Settings.")
 
 	'=== CATEGORIES ===
 	Texts.Put("passwords", "Passwords")
@@ -715,4 +734,13 @@ Private Sub LoadEnglish
 	Texts.Put("csv_select_at_least_one", "Select at least one entry")
 	Texts.Put("csv_select_group_first", "Select or create a group first")
 	Texts.Put("csv_error_parse", "Error reading CSV file")
+
+	'CSV Import Instructions
+	Texts.Put("csv_how_to_title", "How to Import from Chrome")
+	Texts.Put("csv_how_to_1", "1. On PC: Chrome → Menu (⋮) → Passwords")
+	Texts.Put("csv_how_to_2", "2. Password Manager → Settings (⚙)")
+	Texts.Put("csv_how_to_3", "3. Export passwords → Download file")
+	Texts.Put("csv_how_to_4", "4. Send CSV to your phone (WhatsApp, etc)")
+	Texts.Put("csv_how_to_5", "5. Tap file → Open with → LockZero")
+	Texts.Put("understood", "Got it")
 End Sub

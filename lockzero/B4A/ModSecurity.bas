@@ -799,6 +799,59 @@ Public Sub GetClipboardTimeout As Int
 End Sub
 
 ' ============================================
+'  ENTRADA SEGURA DE FRASE-SENHA
+' ============================================
+'
+' SEGURANCA: Campos de frase-senha devem:
+' 1. Desabilitar sugestoes do Android (NO_SUGGESTIONS)
+' 2. Desabilitar autocomplete
+' 3. Limpar clipboard apos digitacao
+'
+' InputType flags:
+' - TYPE_CLASS_TEXT = 1
+' - TYPE_TEXT_VARIATION_PASSWORD = 128
+' - TYPE_TEXT_FLAG_NO_SUGGESTIONS = 524288 (0x80000)
+'
+' Combinado: 1 + 128 + 524288 = 524417
+'
+' ============================================
+
+'Constante para InputType seguro de frase-senha
+Public Sub GetSecurePassphraseInputType As Int
+	'TEXT + PASSWORD + NO_SUGGESTIONS
+	Return Bit.Or(Bit.Or(1, 128), 524288)
+End Sub
+
+'Constante para InputType seguro visivel (quando mostrar senha)
+Public Sub GetSecureVisibleInputType As Int
+	'TEXT + NO_SUGGESTIONS (sem PASSWORD para ser visivel)
+	Return Bit.Or(1, 524288)
+End Sub
+
+'Limpa o clipboard do sistema
+Public Sub ClearClipboard
+	Try
+		Dim jo As JavaObject
+		jo = jo.InitializeContext
+		Dim cm As JavaObject = jo.RunMethod("getSystemService", Array("clipboard"))
+		Dim clipData As JavaObject
+		clipData.InitializeNewInstance("android.content.ClipData", _
+			Array("", Array As String("text/plain"), _
+			clipData.InitializeNewInstance("android.content.ClipData.Item", Array(""))))
+		cm.RunMethod("setPrimaryClip", Array(clipData))
+	Catch
+		Log("ClearClipboard error: " & LastException)
+	End Try
+End Sub
+
+'Limpa campo EditText de forma segura (previne cache do teclado)
+Public Sub ClearSecureField(edt As EditText)
+	edt.Text = ""
+	'Limpa clipboard caso usuario tenha colado algo
+	ClearClipboard
+End Sub
+
+' ============================================
 '  FRASE UNICA OU POR CATEGORIA
 ' ============================================
 
@@ -995,4 +1048,88 @@ End Sub
 'Limpa string sensivel
 Public Sub ClearString As String
 	Return ""
+End Sub
+
+' ============================================
+'  INDICADOR DE FORCA DE SENHA
+' ============================================
+'
+' Calcula forca da senha baseado em:
+' - Tamanho (8-11=fraca, 12-15=media, 16+=forte)
+' - Tipos de caracteres (minusculas, maiusculas, numeros, especiais)
+'
+' Retorna: 0=Fraca, 1=Media, 2=Forte, 3=MuitoForte
+'
+Public Sub CalculatePasswordStrength(password As String) As Int
+	If password.Length = 0 Then Return 0
+
+	'Conta tipos de caracteres
+	Dim hasLower As Boolean = False
+	Dim hasUpper As Boolean = False
+	Dim hasDigit As Boolean = False
+	Dim hasSpecial As Boolean = False
+
+	For i = 0 To password.Length - 1
+		Dim code As Int = Asc(password.CharAt(i))
+
+		If code >= 97 And code <= 122 Then       'a-z
+			hasLower = True
+		Else If code >= 65 And code <= 90 Then   'A-Z
+			hasUpper = True
+		Else If code >= 48 And code <= 57 Then   '0-9
+			hasDigit = True
+		Else
+			hasSpecial = True                     'Qualquer outro caractere
+		End If
+	Next
+
+	'Conta quantos tipos diferentes
+	Dim typeCount As Int = 0
+	If hasLower Then typeCount = typeCount + 1
+	If hasUpper Then typeCount = typeCount + 1
+	If hasDigit Then typeCount = typeCount + 1
+	If hasSpecial Then typeCount = typeCount + 1
+
+	'Calcula forca
+	Dim length As Int = password.Length
+
+	'Muito Forte: 16+ chars E 4 tipos OU 20+ chars E 3+ tipos
+	If (length >= 16 And typeCount >= 4) Or (length >= 20 And typeCount >= 3) Then
+		Return 3  'Muito Forte
+	End If
+
+	'Forte: 12-15 chars E 3+ tipos OU 16+ chars E 2+ tipos
+	If (length >= 12 And typeCount >= 3) Or (length >= 16 And typeCount >= 2) Then
+		Return 2  'Forte
+	End If
+
+	'Media: 8-11 chars E 2+ tipos OU 12+ chars
+	If (length >= 8 And typeCount >= 2) Or length >= 12 Then
+		Return 1  'Media
+	End If
+
+	'Fraca: menos de 8 chars OU apenas 1 tipo de caractere
+	Return 0  'Fraca
+End Sub
+
+'Retorna cor para o nivel de forca
+Public Sub GetStrengthColor(strength As Int) As Int
+	Select strength
+		Case 0: Return Colors.RGB(231, 76, 60)    'Vermelho - Fraca
+		Case 1: Return Colors.RGB(243, 156, 18)   'Laranja - Media
+		Case 2: Return Colors.RGB(39, 174, 96)    'Verde - Forte
+		Case 3: Return Colors.RGB(46, 204, 113)   'Verde brilhante - Muito Forte
+		Case Else: Return Colors.Gray
+	End Select
+End Sub
+
+'Retorna texto traduzido para o nivel de forca
+Public Sub GetStrengthText(strength As Int) As String
+	Select strength
+		Case 0: Return ModLang.T("weak")
+		Case 1: Return ModLang.T("medium")
+		Case 2: Return ModLang.T("strong")
+		Case 3: Return ModLang.T("very_strong")
+		Case Else: Return ""
+	End Select
 End Sub

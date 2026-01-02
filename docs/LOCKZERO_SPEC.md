@@ -561,8 +561,15 @@ Combinado com PBKDF2: ataque de forca bruta se torna impraticavel.
 **Timer de sessao visivel:**
 - Exibido no header da lista de senhas E no footer da Home
 - Formato MM:SS decrescente
-- Cor de alerta quando < 60 segundos
+- Cor azul gelo (RGB 0, 220, 255) quando < 60 segundos para melhor visibilidade
 - Clicavel para bloqueio imediato (com confirmacao)
+
+**Criacao de grupos com sessao ativa:**
+- Quando sessao esta ativa, nao solicita frase-senha ao criar novo grupo
+- Reutiliza a frase da sessao atual automaticamente
+- Mostra indicador "Sessao ativa" no dialog de criacao
+- Apenas checkbox seguro/nao-seguro visivel
+- Aplica-se a Senhas (PagePasswords) e Notas (PageNotesGroups)
 
 **Modo de frase-senha (configuravel):**
 - **Frase unica:** Mesma frase para todas as categorias (padrao)
@@ -734,6 +741,41 @@ MIGRACAO:
 - Formato novo (3 ":"): usar IV do campo, validar HMAC
 - Ao criptografar: sempre usar formato novo
 ```
+
+### v0.1.3 - Busca e Indicador de Forca (atual)
+
+**Indicador de Forca de Senha:**
+- [x] `ModSecurity.CalculatePasswordStrength()` - Calcula forca (0-3)
+- [x] `ModSecurity.GetStrengthColor()` - Cor por nivel
+- [x] `ModSecurity.GetStrengthText()` - Texto traduzido
+- [x] UI em `PagePasswordEdit.bas` - Barra visual + texto
+- [x] Atualiza em tempo real ao digitar
+
+**Busca por Categoria:**
+- [x] `ModPasswords.SearchAll()` - Busca senhas (nome, URL, username)
+- [x] `ModNotes.SearchAll()` - Busca notas (titulo, conteudo, itens de checklist)
+- [x] `PagePasswords.bas` - Icone lupa 🔍 no header + busca em grupos/senhas
+- [x] `PagePasswordList.bas` - Campo de busca sempre visivel (ja existia)
+- [x] `PageNotesList.bas` - Icone lupa 🔍 no header + campo expansivel
+- [x] Busca usa frase-senha ja autenticada do grupo
+- [x] Busca em tempo real conforme digita (FilterNotes/FilterEntries)
+- [x] Suporte a notas de texto E notas de lista (checklist)
+- [x] Termo de busca passa entre paginas (grupos → lista interna)
+
+**Importar CSV:**
+- [x] Item "Importar CSV" no menu lateral (B4XMainPage)
+- [x] Dialog com instrucoes de como exportar do Chrome
+- [x] Formato do CSV: name, url, username, password
+- [x] Seletor de arquivo (ContentChooser)
+- [x] PageImportCSV.bas - processa e importa senhas
+
+**Criterios de Forca:**
+| Nivel | Texto | Cor | Criterio |
+|-------|-------|-----|----------|
+| 0 | Fraca | Vermelho | <8 chars OU so 1 tipo |
+| 1 | Media | Laranja | 8-11 chars + 2 tipos OU 12+ chars |
+| 2 | Forte | Verde | 12-15 chars + 3 tipos OU 16+ chars + 2 tipos |
+| 3 | Muito forte | Verde brilhante | 16+ chars + 4 tipos OU 20+ chars + 3 tipos |
 
 ### v0.2.0 - Cartoes
 

@@ -18,11 +18,21 @@ Sub Class_Globals
 	Private svGroups As ScrollView
 	Private pnlGroups As B4XView
 
+	'Busca
+	Private lblSearch As Label         'Icone de lupa no header
+	Private pnlSearchBar As Panel      'Barra de busca expansivel
+	Private edtSearch As EditText      'Campo de busca
+	Private lblClearSearch As Label    'Botao X para limpar
+	Private IsSearchVisible As Boolean = False
+	Private AllGroups As List          'Lista completa de grupos
+	Private FilteredGroups As List     'Lista filtrada pela busca
+
 	'Dialog Overlay
 	Private pnlOverlay As Panel
 	Private pnlDialog As Panel
 	Private edtGroupName As EditText
 	Private edtPassphrase As EditText
+	Private edtPassphraseConfirm As EditText
 	Private btnShowPass As Button
 	Private IsPassVisible As Boolean = False
 	Private CurrentDialogMode As String = "" 'add_group, unlock_group, edit_group
@@ -35,6 +45,8 @@ End Sub
 
 Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
+	AllGroups.Initialize
+	FilteredGroups.Initialize
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -67,6 +79,7 @@ Private Sub CreateUI
 	Dim width As Int = Root.Width
 	Dim height As Int = Root.Height
 	Dim headerH As Int = 56dip
+	Dim searchH As Int = 54dip
 
 	'Header com seta voltar, titulo e botao +
 	Dim pnlHeader As Panel
@@ -90,7 +103,19 @@ Private Sub CreateUI
 	lblHeaderTitle.TextColor = Colors.White
 	lblHeaderTitle.Typeface = Typeface.DEFAULT_BOLD
 	lblHeaderTitle.Gravity = Gravity.CENTER_VERTICAL
-	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 160dip, headerH)
+	pnlHeader.AddView(lblHeaderTitle, 50dip, 0, width - 200dip, headerH)
+
+	'Icone de busca (lupa) no header
+	lblSearch.Initialize("lblSearch")
+	lblSearch.Text = Chr(0xD83D) & Chr(0xDD0D)  '🔍 (surrogate pair)
+	lblSearch.TextSize = 18
+	lblSearch.TextColor = Colors.White
+	lblSearch.Gravity = Gravity.CENTER
+	pnlHeader.AddView(lblSearch, width - 130dip, 8dip, 40dip, 40dip)
+
+	'Fundo arredondado para a lupa
+	Dim xvSearch As B4XView = lblSearch
+	xvSearch.SetColorAndBorder(Colors.ARGB(60, 255, 255, 255), 0, Colors.Transparent, 20dip)
 
 	'Timer de sessao no header
 	lblSessionTimer.Initialize("lblSessionTimer")
@@ -98,7 +123,7 @@ Private Sub CreateUI
 	lblSessionTimer.TextSize = 12
 	lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
 	lblSessionTimer.Gravity = Gravity.CENTER
-	pnlHeader.AddView(lblSessionTimer, width - 110dip, 12dip, 55dip, 32dip)
+	pnlHeader.AddView(lblSessionTimer, width - 90dip, 12dip, 40dip, 32dip)
 
 	'Fundo arredondado para o timer (indica que e clicavel)
 	Dim xvTimer As B4XView = lblSessionTimer
@@ -117,6 +142,39 @@ Private Sub CreateUI
 	'Arredondar o label
 	Dim xvAdd As B4XView = lblAdd
 	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 20dip)
+
+	'Barra de busca (inicialmente oculta)
+	pnlSearchBar.Initialize("")
+	pnlSearchBar.Color = ModTheme.HomeBg
+	pnlSearchBar.Visible = False
+	Root.AddView(pnlSearchBar, 0, headerH, width, searchH)
+
+	'Input de busca com fundo arredondado
+	Dim pnlSearchInput As Panel
+	pnlSearchInput.Initialize("")
+	pnlSearchInput.Color = ModTheme.HomeIconBg
+	pnlSearchBar.AddView(pnlSearchInput, 16dip, 5dip, width - 32dip, 44dip)
+
+	Dim xvSearchInput As B4XView = pnlSearchInput
+	xvSearchInput.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+
+	edtSearch.Initialize("edtSearch")
+	edtSearch.Hint = ModLang.T("search") & "..."
+	edtSearch.SingleLine = True
+	edtSearch.Text = ""
+	edtSearch.TextSize = Starter.FONT_BODY
+	edtSearch.TextColor = Colors.White
+	edtSearch.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlSearchInput.AddView(edtSearch, 12dip, 0, width - 100dip, 44dip)
+
+	'Botao X para limpar busca
+	lblClearSearch.Initialize("lblClearSearch")
+	lblClearSearch.Text = "X"
+	lblClearSearch.TextSize = 16
+	lblClearSearch.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblClearSearch.Gravity = Gravity.CENTER
+	lblClearSearch.Visible = False
+	pnlSearchInput.AddView(lblClearSearch, width - 80dip, 2dip, 40dip, 40dip)
 
 	'Lista de grupos
 	svGroups.Initialize(0)
@@ -174,14 +232,70 @@ End Sub
 Private Sub LoadGroups
 	ModPasswords.Init
 
+	'Carrega todos os grupos
+	AllGroups = ModPasswords.GetAllGroups
+
+	'Reseta busca e exibe todos
+	edtSearch.Text = ""
+	FilteredGroups.Initialize
+	For Each g As clsPasswordGroup In AllGroups
+		FilteredGroups.Add(g)
+	Next
+
+	'Esconde barra de busca ao carregar
+	IsSearchVisible = False
+	UpdateSearchVisibility
+
+	DisplayGroups
+End Sub
+
+'Filtra grupos com base no texto de busca (busca em senhas dentro dos grupos)
+Private Sub FilterGroups(query As String)
+	FilteredGroups.Initialize
+	Dim q As String = query.ToLowerCase.Trim
+
+	If q.Length = 0 Then
+		'Sem filtro - mostra todos
+		For Each g As clsPasswordGroup In AllGroups
+			FilteredGroups.Add(g)
+		Next
+	Else
+		'Filtra grupos que contem senhas correspondentes
+		For Each g As clsPasswordGroup In AllGroups
+			Dim found As Boolean = False
+
+			'Busca no nome do grupo
+			If g.Name.ToLowerCase.Contains(q) Then
+				found = True
+			End If
+
+			'Busca nas senhas do grupo (nome e URL - campos publicos)
+			If found = False Then
+				Dim entries As List = ModPasswords.GetEntriesByGroup(g.Id)
+				For Each e As clsPasswordEntry In entries
+					If e.Name.ToLowerCase.Contains(q) Or e.Url.ToLowerCase.Contains(q) Then
+						found = True
+						Exit
+					End If
+				Next
+			End If
+
+			If found Then FilteredGroups.Add(g)
+		Next
+	End If
+
+	DisplayGroups
+End Sub
+
+'Exibe os grupos filtrados na lista
+Private Sub DisplayGroups
 	pnlGroups.RemoveAllViews
 
-	Dim groups As List = ModPasswords.GetAllGroups
 	Dim width As Int = Root.Width
 	Dim itemHeight As Int = 70dip
 	Dim y As Int = 16dip
 
-	If groups.Size = 0 Then
+	If FilteredGroups.Size = 0 Then
 		'Mensagem vazia
 		Dim lblEmpty As B4XView = CreateLabel(ModLang.T("empty"), 14, False)
 		lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
@@ -190,7 +304,7 @@ Private Sub LoadGroups
 		Return
 	End If
 
-	For Each g As clsPasswordGroup In groups
+	For Each g As clsPasswordGroup In FilteredGroups
 		Dim pnlItem As Panel
 		pnlItem.Initialize("pnlGroup")
 		pnlItem.Tag = g.Id
@@ -235,12 +349,60 @@ Private Sub LoadGroups
 	pnlGroups.Height = y + 20dip
 End Sub
 
+'Atualiza visibilidade da barra de busca e ajusta posicao da lista
+Private Sub UpdateSearchVisibility
+	Dim headerH As Int = 56dip
+	Dim searchH As Int = 54dip
+
+	pnlSearchBar.Visible = IsSearchVisible
+
+	If IsSearchVisible Then
+		svGroups.Top = headerH + searchH
+		svGroups.Height = Root.Height - headerH - searchH
+		edtSearch.RequestFocus
+	Else
+		svGroups.Top = headerH
+		svGroups.Height = Root.Height - headerH
+		'Esconde teclado
+		Dim ime As IME
+		ime.Initialize("")
+		ime.HideKeyboard
+	End If
+End Sub
+
 ' ============================================
 '  EVENTOS
 ' ============================================
 
 Private Sub btnBack_Click
 	B4XPages.ClosePage(Me)
+End Sub
+
+'Toggle da barra de busca ao clicar na lupa
+Private Sub lblSearch_Click
+	IsSearchVisible = Not(IsSearchVisible)
+	UpdateSearchVisibility
+
+	If IsSearchVisible = False Then
+		'Limpa busca ao fechar
+		edtSearch.Text = ""
+		FilterGroups("")
+	End If
+End Sub
+
+'Evento de busca - filtra conforme digita
+Private Sub edtSearch_TextChanged(Old As String, New As String)
+	ModSession.Touch
+	FilterGroups(New)
+	'Mostra/esconde botao X
+	lblClearSearch.Visible = (New.Length > 0)
+End Sub
+
+'Limpa o campo de busca
+Private Sub lblClearSearch_Click
+	edtSearch.Text = ""
+	lblClearSearch.Visible = False
+	FilterGroups("")
 End Sub
 
 Private Sub btnAdd_Click
@@ -333,7 +495,7 @@ Private Sub ShowUnlockGroupDialog(groupId As String)
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -392,6 +554,10 @@ Private Sub NavigateToGroup(groupId As String)
 	Dim params As Map
 	params.Initialize
 	params.Put("groupId", groupId)
+	'Passa termo de busca para filtrar automaticamente
+	If edtSearch.Text.Trim.Length > 0 Then
+		params.Put("searchQuery", edtSearch.Text.Trim)
+	End If
 
 	Dim pg As PagePasswordList = B4XPages.GetPage("PagePasswordList")
 	pg.SetParams(params)
@@ -418,6 +584,9 @@ Private Sub ShowAddGroupDialog
 	'Configura dialog
 	Dim dialogW As Int = Root.Width - 40dip
 	pnlDialog.RemoveAllViews
+
+	'Se sessao ativa, usa frase da sessao (dialog simplificado)
+	Dim sessionActive As Boolean = ModSession.IsSessionActive
 
 	'Titulo
 	Dim lblTitle As Label
@@ -452,37 +621,81 @@ Private Sub ShowAddGroupDialog
 	pnlDialog.AddView(pnlName, 16dip, 65dip, dialogW - 32dip, 46dip)
 	pnlName.AddView(edtGroupName, 8dip, 0, dialogW - 32dip - 16dip, 46dip)
 
-	'Label frase
-	Dim lblPhrase As Label
-	lblPhrase.Initialize("")
-	lblPhrase.Text = ModLang.T("passphrase_hint")
-	lblPhrase.TextSize = 12
-	lblPhrase.TextColor = Colors.ARGB(180, 255, 255, 255)
-	pnlDialog.AddView(lblPhrase, 16dip, 120dip, dialogW - 32dip, 18dip)
+	Dim buttonY As Int = 125dip
+	Dim dialogH As Int = 175dip
 
-	'Campo frase com botao olho
-	Dim pnlInput As Panel
-	pnlInput.Initialize("")
-	pnlInput.Color = ModTheme.HomeBg
-	pnlDialog.AddView(pnlInput, 16dip, 140dip, dialogW - 32dip, 46dip)
+	'Apenas mostra campo de frase se sessao NAO esta ativa
+	If sessionActive = False Then
+		'Label frase
+		Dim lblPhrase As Label
+		lblPhrase.Initialize("")
+		lblPhrase.Text = ModLang.T("passphrase_hint")
+		lblPhrase.TextSize = 12
+		lblPhrase.TextColor = Colors.ARGB(180, 255, 255, 255)
+		pnlDialog.AddView(lblPhrase, 16dip, 120dip, dialogW - 32dip, 18dip)
 
-	edtPassphrase.Initialize("edtPassphrase")
-	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
-	edtPassphrase.Text = ""
-	edtPassphrase.TextColor = Colors.White
-	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
-	pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 46dip)
+		'Campo frase com botao olho
+		Dim pnlInput As Panel
+		pnlInput.Initialize("")
+		pnlInput.Color = ModTheme.HomeBg
+		pnlDialog.AddView(pnlInput, 16dip, 140dip, dialogW - 32dip, 46dip)
 
-	'Botao Ver/Ocultar
-	btnShowPass.Initialize("btnShowPass")
-	btnShowPass.Text = ModLang.T("view")
-	btnShowPass.TextSize = Starter.FONT_CAPTION
-	btnShowPass.Color = Colors.Transparent
-	btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
-	btnShowPass.Gravity = Gravity.CENTER
-	pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 3dip, 60dip, 40dip)
+		edtPassphrase.Initialize("edtPassphrase")
+		edtPassphrase.Hint = ModLang.T("passphrase_hint")
+		edtPassphrase.SingleLine = True
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		edtPassphrase.Text = ""
+		edtPassphrase.TextColor = Colors.White
+		edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
+		pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW - 32dip - 56dip, 46dip)
+
+		'Botao Ver/Ocultar
+		btnShowPass.Initialize("btnShowPass")
+		btnShowPass.Text = ModLang.T("view")
+		btnShowPass.TextSize = Starter.FONT_CAPTION
+		btnShowPass.Color = Colors.Transparent
+		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
+		btnShowPass.Gravity = Gravity.CENTER
+		pnlInput.AddView(btnShowPass, dialogW - 32dip - 65dip, 3dip, 60dip, 40dip)
+
+		'Label confirmacao
+		Dim lblConfirm As Label
+		lblConfirm.Initialize("")
+		lblConfirm.Text = ModLang.T("passphrase_confirm_new")
+		lblConfirm.TextSize = 12
+		lblConfirm.TextColor = Colors.ARGB(180, 255, 255, 255)
+		pnlDialog.AddView(lblConfirm, 16dip, 195dip, dialogW - 32dip, 18dip)
+
+		'Campo confirmacao
+		Dim pnlConfirm As Panel
+		pnlConfirm.Initialize("")
+		pnlConfirm.Color = ModTheme.HomeBg
+		pnlDialog.AddView(pnlConfirm, 16dip, 215dip, dialogW - 32dip, 46dip)
+
+		edtPassphraseConfirm.Initialize("edtPassphraseConfirm")
+		edtPassphraseConfirm.Hint = ModLang.T("passphrase_confirm_new")
+		edtPassphraseConfirm.SingleLine = True
+		edtPassphraseConfirm.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		edtPassphraseConfirm.Text = ""
+		edtPassphraseConfirm.TextColor = Colors.White
+		edtPassphraseConfirm.HintColor = Colors.ARGB(120, 255, 255, 255)
+		pnlConfirm.AddView(edtPassphraseConfirm, 8dip, 0, dialogW - 32dip - 16dip, 46dip)
+
+		buttonY = 275dip
+		dialogH = 325dip
+
+		'Aviso se modo frase unica esta ativo
+		If ModSecurity.GetUseSinglePassphrase Then
+			Dim lblWarning As Label
+			lblWarning.Initialize("")
+			lblWarning.Text = "⚠ " & ModLang.T("single_passphrase_warning")
+			lblWarning.TextSize = 10
+			lblWarning.TextColor = ModTheme.Warning
+			pnlDialog.AddView(lblWarning, 16dip, 265dip, dialogW - 32dip, 35dip)
+			buttonY = 305dip
+			dialogH = 355dip
+		End If
+	End If
 
 	'Botoes
 	Dim btnCancel As Button
@@ -491,7 +704,7 @@ Private Sub ShowAddGroupDialog
 	btnCancel.TextSize = 13
 	btnCancel.Color = Colors.Transparent
 	btnCancel.TextColor = Colors.ARGB(200, 255, 255, 255)
-	pnlDialog.AddView(btnCancel, 16dip, 200dip, 100dip, 40dip)
+	pnlDialog.AddView(btnCancel, 16dip, buttonY, 100dip, 40dip)
 
 	Dim btnOk As Button
 	btnOk.Initialize("btnDialogOk")
@@ -499,10 +712,10 @@ Private Sub ShowAddGroupDialog
 	btnOk.TextSize = 13
 	btnOk.Color = ModTheme.HomeIconBg
 	btnOk.TextColor = Colors.White
-	pnlDialog.AddView(btnOk, dialogW - 116dip, 200dip, 100dip, 40dip)
+	pnlDialog.AddView(btnOk, dialogW - 116dip, buttonY, 100dip, 40dip)
 
 	'Ajusta altura do dialog
-	pnlDialog.SetLayoutAnimated(0, 20dip, 60dip, dialogW, 250dip)
+	pnlDialog.SetLayoutAnimated(0, 20dip, 60dip, dialogW, dialogH)
 
 	'Mostra overlay
 	pnlOverlay.Visible = True
@@ -654,7 +867,7 @@ Private Sub ShowDeleteGroupDialog(groupId As String)
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -724,11 +937,11 @@ End Sub
 Private Sub btnShowPass_Click
 	IsPassVisible = Not(IsPassVisible)
 	If IsPassVisible Then
-		edtPassphrase.InputType = 1 'TEXT visivel
+		edtPassphrase.InputType = ModSecurity.GetSecureVisibleInputType 'TEXT + NO_SUGGESTIONS (visivel)
 		btnShowPass.Text = ModLang.T("hide")
 		btnShowPass.TextColor = Colors.White
 	Else
-		edtPassphrase.InputType = Bit.Or(1, 128) 'TEXT + PASSWORD
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 		btnShowPass.Text = ModLang.T("view")
 		btnShowPass.TextColor = Colors.ARGB(200, 255, 255, 255)
 	End If
@@ -764,19 +977,32 @@ End Sub
 
 Private Sub ProcessAddGroup
 	Dim groupName As String = edtGroupName.Text.Trim
-	Dim phrase As String = edtPassphrase.Text.Trim
 
-	'Valida
+	'Valida nome
 	If groupName.Length = 0 Then
 		ToastMessageShow(ModLang.T("error_empty_field"), True)
 		Return
 	End If
 
-	'Valida forca da frase (10 chars unicos sem espacos)
-	Dim phraseError As String = ModSecurity.GetPassphraseError(phrase)
-	If phraseError.Length > 0 Then
-		ToastMessageShow(phraseError, True)
-		Return
+	'Determina a frase: da sessao ativa ou do campo
+	Dim phrase As String = ""
+	If ModSession.IsSessionActive Then
+		phrase = ModSession.GetPassphrase
+	Else
+		phrase = edtPassphrase.Text.Trim
+		'Valida forca da frase (10 chars unicos sem espacos)
+		Dim phraseError As String = ModSecurity.GetPassphraseError(phrase)
+		If phraseError.Length > 0 Then
+			ToastMessageShow(phraseError, True)
+			Return
+		End If
+
+		'Valida confirmacao de frase
+		Dim phraseConfirm As String = edtPassphraseConfirm.Text.Trim
+		If phrase <> phraseConfirm Then
+			ToastMessageShow(ModLang.T("passphrase_mismatch"), True)
+			Return
+		End If
 	End If
 
 	'Cria grupo com TestValue
@@ -787,8 +1013,12 @@ Private Sub ProcessAddGroup
 	g.CreateTestValue(phrase)
 	ModPasswords.SaveGroup(g)
 
-	'Inicia sessao com a frase (categoria: passwords)
+	'Inicia/renova sessao com a frase (categoria: passwords)
 	ModSession.StartSessionWithCategory(phrase, "passwords")
+
+	'Limpa campo e clipboard por seguranca
+	ModSecurity.ClearSecureField(edtPassphrase)
+	If edtPassphraseConfirm.IsInitialized Then ModSecurity.ClearSecureField(edtPassphraseConfirm)
 
 	HideDialog
 	LoadGroups
@@ -809,6 +1039,8 @@ Private Sub ProcessUnlockGroup
 		'Frase correta - reseta tentativas e inicia sessao (categoria: passwords)
 		ModSecurity.ResetFailedAttempts(CurrentGroupId)
 		ModSession.StartSessionWithCategory(phrase, "passwords")
+		'Limpa campo e clipboard por seguranca
+		ModSecurity.ClearSecureField(edtPassphrase)
 		HideDialog
 		NavigateToGroup(CurrentGroupId)
 	Else
@@ -821,7 +1053,7 @@ Private Sub ProcessUnlockGroup
 		Else
 			ToastMessageShow(ModLang.T("wrong_passphrase"), True)
 		End If
-		edtPassphrase.Text = ""
+		ModSecurity.ClearSecureField(edtPassphrase)
 	End If
 End Sub
 
@@ -867,10 +1099,10 @@ Private Sub UpdateSessionTimer
 	If ModSession.IsSessionActive Then
 		lblSessionTimer.Text = ModSession.GetRemainingFormatted
 
-		'Muda cor quando tempo baixo (< 60s)
+		'Muda cor quando tempo baixo (< 60s) - azul gelo para visibilidade
 		Dim remaining As Int = ModSession.GetRemainingSeconds
 		If remaining < 60 Then
-			lblSessionTimer.TextColor = ModTheme.Warning
+			lblSessionTimer.TextColor = Colors.RGB(0, 220, 255)  'Azul gelo
 		Else
 			lblSessionTimer.TextColor = Colors.ARGB(200, 255, 255, 255)
 		End If
