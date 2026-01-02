@@ -18,49 +18,27 @@ End Sub
 
 'Anima entrada da pagina (slide da direita)
 'Chamar no inicio de B4XPage_Appear
+'NOTA: Desabilitado temporariamente - causa flash branco antes da transicao
+'      B4XPages mostra a pagina ANTES do nosso codigo rodar
 Public Sub SlideIn(root As B4XView)
+	'Transicao desabilitada - apenas garante posicao correta
 	If root = Null Then Return
-
-	Dim screenWidth As Int = 100%x
-	Dim offset As Int = screenWidth * SLIDE_OFFSET
-
-	'Garante alpha em 1 (visivel)
+	root.Left = 0
 	root.Alpha = 1
-
-	'Posiciona fora da tela (direita)
-	root.Left = offset
-
-	'Anima para posicao final
-	root.SetLayoutAnimated(DURATION_ENTER, 0, root.Top, root.Width, root.Height)
 End Sub
 
 'Anima entrada da pagina (slide de baixo - para dialogs/modals)
+'NOTA: Desabilitado temporariamente
 Public Sub SlideUp(root As B4XView)
 	If root = Null Then Return
-
-	Dim offset As Int = 50dip
-
-	'Garante alpha em 1 (visivel)
 	root.Alpha = 1
-
-	'Posiciona abaixo
-	root.Top = root.Top + offset
-
-	'Anima para posicao final
-	root.SetLayoutAnimated(DURATION_ENTER, root.Left, root.Top - offset, root.Width, root.Height)
 End Sub
 
-'Anima entrada suave (fade in) - usa slide suave ao inves de fade
+'Anima entrada suave (fade in)
+'NOTA: Desabilitado temporariamente
 Public Sub FadeIn(root As B4XView)
 	If root = Null Then Return
-
-	'Garante alpha em 1 (visivel)
 	root.Alpha = 1
-
-	'Pequeno slide de baixo para cima
-	Dim offset As Int = 30dip
-	root.Top = root.Top + offset
-	root.SetLayoutAnimated(DURATION_ENTER, root.Left, root.Top - offset, root.Width, root.Height)
 End Sub
 
 'Reseta posicao (sem animacao) - para uso antes de sair
