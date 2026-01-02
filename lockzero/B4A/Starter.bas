@@ -18,6 +18,11 @@ Sub Process_Globals
 	Public Const APP_VERSION As String = "0.1.0"
 	Public Const APP_TAGLINE As String = "Lock and ZERO worries"
 
+	'=== SEGURANCA ===
+	'FLAG_SECURE: Bloqueia screenshot/gravacao de tela
+	'Testes: False | Producao: True
+	Public Const ENABLE_SCREENSHOT_BLOCK As Boolean = False
+
 	'=== PADRAO DE UI - TAMANHOS DE FONTE ===
 	Public Const FONT_TITLE As Float = 22       'Titulos de pagina
 	Public Const FONT_SUBTITLE As Float = 18    'Subtitulos, headers de secao

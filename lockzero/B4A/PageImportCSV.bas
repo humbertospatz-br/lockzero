@@ -1133,7 +1133,10 @@ Private Sub DoImport
 				CSVEntries.RemoveAt(idx)
 			End If
 		Next
-		'Limpa selecao e reaplica filtro
+		'Limpa filtro e selecao para proxima importacao
+		edtSearch.Text = ""
+		CurrentFilter = ""
+		lblClearSearch.Visible = False
 		SelectedIndexes.Initialize
 		ApplyFilter
 		UpdateInfo

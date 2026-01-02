@@ -96,6 +96,15 @@ Sub Globals
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
+	'=== FLAG_SECURE - Bloqueia screenshot/gravacao de tela ===
+	'Deve ser aplicado ANTES de qualquer view ser criada
+	'Para ativar em producao: mudar ENABLE_SCREENSHOT_BLOCK para True em Starter.bas
+	If Starter.ENABLE_SCREENSHOT_BLOCK Then
+		Dim jo As JavaObject = Activity
+		Dim window As JavaObject = jo.RunMethodJO("getWindow", Null)
+		window.RunMethod("addFlags", Array(8192)) 'FLAG_SECURE = 8192
+	End If
+
 	'Define fundo escuro para evitar flash branco nas transicoes
 	Activity.Color = Colors.RGB(30, 30, 40)  'Mesma cor do tema LockZero
 
