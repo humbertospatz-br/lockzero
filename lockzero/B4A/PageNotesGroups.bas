@@ -49,6 +49,7 @@ End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
+	Root.Alpha = 0  'Inicia invisivel
 	Root.Left = 100%x  'Inicia off-screen para evitar flash
 	CreateUI
 	ApplyTheme

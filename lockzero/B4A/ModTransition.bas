@@ -24,11 +24,14 @@ End Sub
 Public Sub SlideFromRight(root As B4XView)
 	If root = Null Then Return
 
+	'Garante que esta invisivel antes de posicionar
+	root.Alpha = 0
+
 	'Move para direita (off-screen) instantaneamente
 	root.Left = 100%x
-	root.Alpha = 1
 
-	'Anima para posicao final
+	'Agora torna visivel e anima
+	root.Alpha = 1
 	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
 End Sub
 
