@@ -1,75 +1,101 @@
-﻿B4A=true
+B4A=true
 Group=Default Group
 ModulesStructureVersion=1
 Type=StaticCode
 Version=9.85
 @EndOfDesignText@
 'ModTransition.bas - Transicoes entre telas
-'LockZero - Animacoes suaves de navegacao
+'LockZero - Animacoes suaves usando tecnica de snapshot
 '
-'USO CORRETO (baseado em https://www.b4x.com/android/forum/threads/119447):
-'  1. Chamar B4XPages.ShowPage("PageX")
-'  2. IMEDIATAMENTE depois, chamar PageX.AnimateIn
-'  3. O AnimateIn move off-screen e anima para posicao final
-'
-'NAO usar em B4XPage_Appear - causa flash branco
+'TECNICA: Baseada em B4X-Transition
+'  1. Tira snapshot da pagina atual
+'  2. Mostra pagina destino (instantaneo)
+'  3. Coloca painel com snapshot na frente
+'  4. Anima painel saindo
+'  5. Remove painel
 
 Sub Process_Globals
-	'Duracao da animacao (ms) - curta e agradavel
-	Public Const DURATION As Int = 200
+	Private xui As XUI
+	Public Const DURATION As Int = 300
 End Sub
 
-'Anima entrada da pagina (slide da direita)
-'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
+'Slide para esquerda - pagina atual sai, nova entra
+'Chamar ANTES de B4XPages.ShowPage
+Public Sub SlideToLeft(CurrentRoot As B4XView, NewRoot As B4XView) As ResumableSub
+	If CurrentRoot = Null Or NewRoot = Null Then Return True
+
+	Dim RootWidth As Float = CurrentRoot.Width
+	Dim RootHeight As Float = CurrentRoot.Height
+
+	'Cria painel temporario na pagina destino
+	Dim pnl As B4XView = xui.CreatePanel("")
+	NewRoot.AddView(pnl, 0, 0, RootWidth, RootHeight)
+	pnl.As(Panel).Elevation = 10dip  'Fica na frente de tudo
+
+	'Desenha snapshot da pagina atual no painel
+	Dim cnv As B4XCanvas
+	cnv.Initialize(pnl)
+	Dim currentBmp As B4XBitmap = CurrentRoot.Snapshot
+	cnv.DrawBitmap(currentBmp, CreateRect(0, 0, RootWidth, RootHeight))
+	cnv.Invalidate
+
+	'Anima painel saindo para esquerda
+	pnl.SetLayoutAnimated(DURATION, -RootWidth, 0, RootWidth, RootHeight)
+	Sleep(DURATION)
+
+	'Remove painel
+	pnl.RemoveViewFromParent
+	Return True
+End Sub
+
+'Slide da direita - nova pagina entra da direita
+'Chamar ANTES de B4XPages.ShowPage
+Public Sub SlideFromRightNew(CurrentRoot As B4XView, NewRoot As B4XView) As ResumableSub
+	If CurrentRoot = Null Or NewRoot = Null Then Return True
+
+	Dim RootWidth As Float = CurrentRoot.Width
+	Dim RootHeight As Float = CurrentRoot.Height
+
+	'Cria painel temporario na pagina destino
+	Dim pnl As B4XView = xui.CreatePanel("")
+	NewRoot.AddView(pnl, RootWidth, 0, RootWidth, RootHeight)  'Comeca fora da tela
+	pnl.As(Panel).Elevation = 10dip
+
+	'Desenha snapshot da nova pagina no painel
+	Dim cnv As B4XCanvas
+	cnv.Initialize(pnl)
+	Dim newBmp As B4XBitmap = NewRoot.Snapshot
+	cnv.DrawBitmap(newBmp, CreateRect(0, 0, RootWidth, RootHeight))
+	cnv.Invalidate
+
+	'Anima painel entrando da direita
+	pnl.SetLayoutAnimated(DURATION, 0, 0, RootWidth, RootHeight)
+	Sleep(DURATION)
+
+	'Remove painel
+	pnl.RemoveViewFromParent
+	Return True
+End Sub
+
+Private Sub CreateRect(x As Float, y As Float, w As Float, h As Float) As B4XRect
+	Dim r As B4XRect
+	r.Initialize(x, y, x + w, y + h)
+	Return r
+End Sub
+
+'===============================================
+' METODOS ANTIGOS - mantidos para compatibilidade
+'===============================================
+
 Public Sub SlideFromRight(root As B4XView)
 	If root = Null Then Return
-
-	'Garante que esta invisivel antes de posicionar
-	root.Alpha = 0
-
-	'Move para direita (off-screen) instantaneamente
-	root.Left = 100%x
-
-	'Agora torna visivel e anima
 	root.Alpha = 1
-	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
+	root.Left = 0
 End Sub
 
-'Anima entrada da pagina (slide de baixo)
-'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
-Public Sub SlideFromBottom(root As B4XView)
-	If root = Null Then Return
-
-	'Move para baixo (off-screen) instantaneamente
-	root.Top = 100%y
-	root.Alpha = 1
-
-	'Anima para posicao final
-	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
-End Sub
-
-'Anima entrada suave (pequeno slide de baixo)
-'CHAMAR DEPOIS de B4XPages.ShowPage(), NAO no B4XPage_Appear
-Public Sub SlideFromBottomShort(root As B4XView)
-	If root = Null Then Return
-
-	'Move um pouco para baixo instantaneamente
-	root.Top = 50dip
-	root.Alpha = 1
-
-	'Anima para posicao final
-	root.SetLayoutAnimated(DURATION, 0, 0, root.Width, root.Height)
-End Sub
-
-'Versoes antigas - mantidas para compatibilidade mas nao fazem nada
 Public Sub SlideIn(root As B4XView)
 	If root = Null Then Return
 	root.Left = 0
-	root.Alpha = 1
-End Sub
-
-Public Sub SlideUp(root As B4XView)
-	If root = Null Then Return
 	root.Alpha = 1
 End Sub
 

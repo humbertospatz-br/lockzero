@@ -132,6 +132,7 @@ Sub Activity_Create(FirstTime As Boolean)
 	B4XPages.AddPageAndCreate("PageImportCSV", pgImportCSV)
 
 	B4XPages.GetManager.LogEvents = True
+	B4XPages.GetManager.TransitionAnimationDuration = 0  'Desabilita animacao padrao
 
 	If FirstTime Then
 		'Verifica se e primeiro uso

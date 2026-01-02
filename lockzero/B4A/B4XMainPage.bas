@@ -9,7 +9,7 @@ Version=9.85
 'Home com menu lateral estilo LockSeed
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public Root As B4XView  'Public para transicoes
 	Private xui As XUI
 
 	'=== MENU LATERAL ===
@@ -532,9 +532,10 @@ End Sub
 Private Sub NavigateToNotes
 	'Navega para lista de grupos de notas
 	Dim pg As PageNotesGroups = B4XPages.GetPage("PageNotesGroups")
-	CallSub(pg, "PrepareForShow")  'Esconde ANTES de mostrar
+
+	'Transicao com snapshot - slide para esquerda
+	ModTransition.SlideToLeft(Root, pg.Root)
 	B4XPages.ShowPage("PageNotesGroups")
-	CallSub(pg, "AnimateIn")
 End Sub
 
 ' ============================================

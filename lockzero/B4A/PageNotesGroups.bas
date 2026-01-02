@@ -8,7 +8,7 @@ Version=9.85
 'LockZero - Exibe grupos de notas (abertos e seguros)
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public Root As B4XView  'Public para transicoes
 	Private xui As XUI
 
 	'UI
@@ -42,23 +42,8 @@ Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
-'Prepara pagina para transicao - chamar ANTES de B4XPages.ShowPage
-Public Sub PrepareForShow
-	If Root.IsInitialized Then
-		Root.Alpha = 0
-		Root.Left = 100%x
-	End If
-End Sub
-
-'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
-Public Sub AnimateIn
-	ModTransition.SlideFromRight(Root)
-End Sub
-
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
-	Root.Alpha = 0  'Inicia invisivel
-	Root.Left = 100%x  'Inicia off-screen para evitar flash
 	CreateUI
 	ApplyTheme
 End Sub
