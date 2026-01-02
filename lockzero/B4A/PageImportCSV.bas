@@ -1124,9 +1124,11 @@ Private Sub DoImport
 		Dim toRemove As List
 		toRemove.Initialize
 		toRemove.AddAll(SelectedIndexes)
-		'Ordena em ordem decrescente
-		toRemove.SortType("", False)
-		For Each idx As Int In toRemove
+		'Ordena em ordem crescente e depois remove do fim para o inicio
+		toRemove.Sort(True)
+		'Remove do maior indice para o menor
+		For i = toRemove.Size - 1 To 0 Step -1
+			Dim idx As Int = toRemove.Get(i)
 			If idx < CSVEntries.Size Then
 				CSVEntries.RemoveAt(idx)
 			End If
