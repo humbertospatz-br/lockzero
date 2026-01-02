@@ -96,6 +96,9 @@ Sub Globals
 End Sub
 
 Sub Activity_Create(FirstTime As Boolean)
+	'Define fundo escuro para evitar flash branco nas transicoes
+	Activity.Color = Colors.RGB(30, 30, 40)  'Mesma cor do tema LockZero
+
 	Dim pm As B4XPagesManager
 	pm.Initialize(Activity)
 
