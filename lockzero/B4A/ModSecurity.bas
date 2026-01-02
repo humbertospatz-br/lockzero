@@ -625,7 +625,15 @@ Public Sub GetUseSinglePassphrase As Boolean
 End Sub
 
 ' ============================================
-'  PIN DE ACESSO (4-8 digitos)
+'  PIN DE ACESSO (4-8 digitos) - SEGURO
+' ============================================
+'
+' SEGURANCA: PIN e armazenado usando PBKDF2 + salt aleatorio
+' - Salt: 32 caracteres hex aleatorios
+' - Hash: PBKDF2WithHmacSHA256 com 100.000 iteracoes
+' - Formato do arquivo: salt:hash (ambos em hex)
+' - Impossivel reverter o PIN a partir do hash
+'
 ' ============================================
 
 'Verifica se PIN esta configurado
@@ -633,33 +641,98 @@ Public Sub HasPIN As Boolean
 	Return File.Exists(File.DirInternal, PIN_FILE)
 End Sub
 
-'Salva PIN (ofuscado em Base64)
+'Salva PIN com hash seguro (PBKDF2 + salt aleatorio)
 Public Sub SavePIN(pin As String)
 	If pin.Length < 4 Or pin.Length > 8 Then
 		Log("SavePIN: PIN deve ter 4-8 digitos")
 		Return
 	End If
-	Dim su As StringUtils
-	Dim data() As Byte = pin.GetBytes("UTF8")
-	Dim encoded As String = su.EncodeBase64(data)
-	File.WriteString(File.DirInternal, PIN_FILE, encoded)
-	Log("ModSecurity: PIN salvo")
+
+	'Gera salt aleatorio
+	Dim salt As String = GenerateRandomSalt
+
+	'Deriva hash usando PBKDF2 (100.000 iteracoes)
+	Dim hashBytes() As Byte = DeriveKeyPBKDF2(pin, salt)
+	Dim hashHex As String = BytesToHex(hashBytes)
+
+	'Salva no formato salt:hash
+	Dim data As String = salt & ":" & hashHex
+	File.WriteString(File.DirInternal, PIN_FILE, data)
+	Log("ModSecurity: PIN salvo com PBKDF2")
 End Sub
 
-'Valida PIN informado
+'Valida PIN informado usando PBKDF2
 Public Sub ValidatePIN(inputPin As String) As Boolean
 	If HasPIN = False Then Return False
 
 	Try
-		Dim encoded As String = File.ReadString(File.DirInternal, PIN_FILE)
-		Dim su As StringUtils
-		Dim data() As Byte = su.DecodeBase64(encoded)
-		Dim savedPin As String = BytesToString(data, 0, data.Length, "UTF8")
-		Return inputPin = savedPin
+		Dim data As String = File.ReadString(File.DirInternal, PIN_FILE)
+
+		'Verifica se e formato antigo (Base64) ou novo (salt:hash)
+		If data.Contains(":") = False Then
+			'Formato antigo - migrar para novo formato
+			Log("ValidatePIN: Migrando PIN do formato antigo para PBKDF2")
+			Dim oldPin As String = MigrateLegacyPIN(data)
+			If oldPin.Length > 0 And inputPin = oldPin Then
+				'PIN correto - atualiza para novo formato seguro
+				SavePIN(inputPin)
+				Return True
+			End If
+			Return False
+		End If
+
+		'Formato novo: salt:hash
+		Dim parts() As String = Regex.Split(":", data)
+		If parts.Length <> 2 Then Return False
+
+		Dim salt As String = parts(0)
+		Dim savedHash As String = parts(1)
+
+		'Deriva hash do PIN informado
+		Dim inputHashBytes() As Byte = DeriveKeyPBKDF2(inputPin, salt)
+		Dim inputHash As String = BytesToHex(inputHashBytes)
+
+		'Comparacao segura (tempo constante)
+		Return SecureCompare(inputHash, savedHash)
+
 	Catch
 		Log("ValidatePIN erro: " & LastException)
 		Return False
 	End Try
+End Sub
+
+'Migra PIN do formato antigo (Base64) para o novo
+Private Sub MigrateLegacyPIN(encoded As String) As String
+	Try
+		Dim su As StringUtils
+		Dim data() As Byte = su.DecodeBase64(encoded)
+		Return BytesToString(data, 0, data.Length, "UTF8")
+	Catch
+		Return ""
+	End Try
+End Sub
+
+'Comparacao de strings em tempo constante (evita timing attacks)
+Private Sub SecureCompare(a As String, b As String) As Boolean
+	If a.Length <> b.Length Then Return False
+
+	Dim result As Int = 0
+	For i = 0 To a.Length - 1
+		result = Bit.Or(result, Bit.Xor(Asc(a.CharAt(i)), Asc(b.CharAt(i))))
+	Next
+	Return result = 0
+End Sub
+
+'Converte array de bytes para string hexadecimal
+Private Sub BytesToHex(bytes() As Byte) As String
+	Dim sb As StringBuilder
+	sb.Initialize
+	For Each b As Byte In bytes
+		Dim hex As String = Bit.ToHexString(Bit.And(b, 0xFF))
+		If hex.Length = 1 Then sb.Append("0")
+		sb.Append(hex.ToLowerCase)
+	Next
+	Return sb.ToString
 End Sub
 
 'Remove PIN

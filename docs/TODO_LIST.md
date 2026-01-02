@@ -111,45 +111,28 @@
 
 ### CRITICO - Risco de Perda de Dados
 
-- [ ] [2026-01-02] **Salvar com transacao atomica** - Evitar corrupcao de arquivo
-  - **Problema:** `File.WriteString` sobrescreve arquivo diretamente
-  - Se app crashar durante save: arquivo corrompido/truncado
-  - **Solucao:** Escrever em arquivo temporario, depois renomear (atomico)
-  ```
-  1. Salvar em "lockzero_passwords.json.tmp"
-  2. Se sucesso: File.Rename para "lockzero_passwords.json"
-  3. Se falha: arquivo original intacto
-  ```
-  - Aplicar em: ModPasswords.SaveToDisk, ModNotes.SaveData
+- [x] [2026-01-02] **Salvar com transacao atomica** - CONCLUIDO
+  - Implementado `SaveFileAtomic()` em ModPasswords e ModNotes
+  - Escreve em .tmp, verifica, copia original para .bak, depois substitui
+  - Ver Dica 36 em C:\Basic4a\docs\DICAS_B4A.md
 
-- [ ] [2026-01-02] **Backup automatico antes de salvar** - Segunda linha de defesa
-  - Antes de sobrescrever, copiar para ".bak"
-  - Manter ultimos 3 backups automaticos
-  - Se corrupcao detectada: tentar restaurar do .bak
+- [x] [2026-01-02] **Backup automatico antes de salvar** - CONCLUIDO
+  - Implementado junto com atomic save
+  - Copia para .bak antes de sobrescrever
 
-- [ ] [2026-01-02] **Validar JSON antes de carregar** - Evitar dados vazios
-  - **Problema:** Se JSON invalido, LoadFromDisk retorna vazio silenciosamente
-  - **Solucao:** Verificar estrutura minima antes de aceitar
-  - Se invalido: tentar .bak, avisar usuario
+- [x] [2026-01-02] **Validar JSON antes de carregar** - CONCLUIDO
+  - Implementado `LoadFileWithFallback()` em ModPasswords e ModNotes
+  - Valida JSON, se invalido tenta restaurar do .bak
 
 ---
 
 ### CRITICO - Vulnerabilidades de Seguranca
 
-- [ ] [2026-01-02] **PIN criptografado em vez de Base64** - URGENTE
-  - **Problema:** PIN armazenado em Base64 (decodificavel trivialmente)
-  - `Base64.Decode("MTIzNDU2") = "123456"` (qualquer um consegue)
-  - **Solucao:** Usar PBKDF2 + salt (igual aos grupos)
-  ```
-  SavePIN(pin):
-    salt = GenerateRandomSalt()
-    hashedPIN = PBKDF2(pin, salt, 100000)
-    Salvar: {salt, hashedPIN}
-
-  ValidatePIN(inputPin):
-    hashedInput = PBKDF2(inputPin, savedSalt, 100000)
-    Return hashedInput == savedHashedPIN
-  ```
+- [x] [2026-01-02] **PIN criptografado em vez de Base64** - CONCLUIDO
+  - PIN agora usa PBKDF2 + salt aleatorio (100.000 iteracoes)
+  - Formato do arquivo: `salt:hash` (impossivel reverter)
+  - Migracao automatica do formato antigo (Base64) para novo
+  - Comparacao em tempo constante (evita timing attacks)
 
 - [ ] [2026-01-02] **IV aleatorio por operacao** - Corrigir criptografia
   - **Problema:** IV derivado de MD5(reverse(frase)) - sempre igual
