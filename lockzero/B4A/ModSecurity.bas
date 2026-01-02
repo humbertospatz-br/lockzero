@@ -278,14 +278,17 @@ Private Sub DeriveKeyPBKDF2(passPhrase As String, salt As String) As Byte()
 	Return keyBytes
 End Sub
 
-'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC + IV aleatorio)
+'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC + IV aleatorio + HMAC)
 'passPhrase: frase ou PIN do grupo
 'salt: salt aleatorio do grupo (hex string)
 'plainText: texto a criptografar
 '
-'FORMATO DE SAIDA: AES:iv_hex:base64_ciphertext
+'FORMATO DE SAIDA: AES:iv_hex:base64_ciphertext:hmac_hex
 '- iv_hex: 32 caracteres hex (16 bytes aleatorios)
 '- base64_ciphertext: ciphertext em Base64
+'- hmac_hex: 64 caracteres hex (HMAC-SHA256 de iv + ciphertext)
+'
+'SEGURANCA: Encrypt-then-MAC - HMAC calculado sobre dados criptografados
 '
 Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As String) As String
 	If passPhrase.Length < 1 Or plainText.Length < 1 Or salt.Length < 1 Then Return ""
@@ -308,10 +311,15 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 		Dim dataBytes() As Byte = plainText.GetBytes("UTF8")
 		Dim encrypted() As Byte = c.Encrypt(dataBytes, kg.Key, True)
 
-		'Formato: AES:iv_hex:base64_ciphertext
+		'Calcula HMAC-SHA256 sobre IV + ciphertext (Encrypt-then-MAC)
+		Dim hmacData() As Byte = ConcatBytes(ivBytes, encrypted)
+		Dim hmacBytes() As Byte = CalculateHMAC(keyBytes, hmacData)
+
+		'Formato: AES:iv_hex:base64_ciphertext:hmac_hex
 		Dim su As StringUtils
 		Dim ivHex As String = BytesToHex(ivBytes)
-		Return "AES:" & ivHex & ":" & su.EncodeBase64(encrypted)
+		Dim hmacHex As String = BytesToHex(hmacBytes)
+		Return "AES:" & ivHex & ":" & su.EncodeBase64(encrypted) & ":" & hmacHex
 
 	Catch
 		Log("ModSecurity.EncryptWithSalt erro: " & LastException)
@@ -320,9 +328,10 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 End Sub
 
 'Descriptografa com salt do grupo (PBKDF2 + AES-256-CBC)
-'Suporta dois formatos:
-'- NOVO: AES:iv_hex:base64_ciphertext (IV aleatorio)
-'- LEGADO: AES:base64_ciphertext (IV = MD5(salt))
+'Suporta tres formatos:
+'- v3 (HMAC): AES:iv_hex:base64_ciphertext:hmac_hex (IV aleatorio + HMAC)
+'- v2 (IV): AES:iv_hex:base64_ciphertext (IV aleatorio, sem HMAC)
+'- v1 (LEGADO): AES:base64_ciphertext (IV = MD5(salt))
 '
 Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As String) As String
 	If passPhrase.Length < 1 Or encText.Length < 1 Or salt.Length < 1 Then Return ""
@@ -333,28 +342,49 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 		'Deriva chave com PBKDF2 (100.000 iteracoes)
 		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
 
-		'Detecta formato pelo numero de ":"
+		'Detecta formato contando ":"
 		Dim afterPrefix As String = encText.SubString(4)
-		Dim colonPos As Int = afterPrefix.IndexOf(":")
+		Dim parts() As String = Regex.Split(":", afterPrefix)
 
 		Dim ivBytes() As Byte
 		Dim encrypted() As Byte
 		Dim su As StringUtils
 
-		If colonPos > 0 And colonPos = 32 Then
-			'FORMATO NOVO: AES:iv_hex:base64_ciphertext
-			Dim ivHex As String = afterPrefix.SubString2(0, 32)
-			Dim encData As String = afterPrefix.SubString(33)
+		If parts.Length = 3 And parts(0).Length = 32 And parts(2).Length = 64 Then
+			'FORMATO v3 (HMAC): AES:iv_hex:base64_ciphertext:hmac_hex
+			Dim ivHex As String = parts(0)
+			Dim encData As String = parts(1)
+			Dim hmacHex As String = parts(2)
 
 			ivBytes = HexToBytes(ivHex)
 			encrypted = su.DecodeBase64(encData)
-			'Log("DecryptWithSalt: usando IV aleatorio")
+
+			'Verifica HMAC antes de descriptografar (Encrypt-then-MAC)
+			Dim hmacData() As Byte = ConcatBytes(ivBytes, encrypted)
+			Dim expectedHmac() As Byte = CalculateHMAC(keyBytes, hmacData)
+			Dim expectedHmacHex As String = BytesToHex(expectedHmac)
+
+			If SecureCompare(hmacHex, expectedHmacHex) = False Then
+				Log("DecryptWithSalt: HMAC invalido - dados podem ter sido alterados!")
+				Return ""
+			End If
+			'Log("DecryptWithSalt: HMAC verificado OK")
+
+		Else If parts.Length = 2 And parts(0).Length = 32 Then
+			'FORMATO v2 (IV): AES:iv_hex:base64_ciphertext
+			Dim ivHex As String = parts(0)
+			Dim encData As String = parts(1)
+
+			ivBytes = HexToBytes(ivHex)
+			encrypted = su.DecodeBase64(encData)
+			'Log("DecryptWithSalt: formato v2 (sem HMAC)")
+
 		Else
-			'FORMATO LEGADO: AES:base64_ciphertext (IV = MD5(salt))
+			'FORMATO v1 (LEGADO): AES:base64_ciphertext (IV = MD5(salt))
 			Dim md As MessageDigest
 			ivBytes = md.GetMessageDigest(salt.GetBytes("UTF8"), "MD5")
 			encrypted = su.DecodeBase64(afterPrefix)
-			'Log("DecryptWithSalt: usando IV legado (MD5)")
+			'Log("DecryptWithSalt: formato v1 legado")
 		End If
 
 		Dim c As Cipher
@@ -373,6 +403,38 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 		Log("ModSecurity.DecryptWithSalt erro: " & LastException)
 		Return ""
 	End Try
+End Sub
+
+'Calcula HMAC-SHA256
+Private Sub CalculateHMAC(keyBytes() As Byte, data() As Byte) As Byte()
+	'Criar SecretKeySpec para HMAC
+	Dim keySpec As JavaObject
+	keySpec.InitializeNewInstance("javax.crypto.spec.SecretKeySpec", Array(keyBytes, "HmacSHA256"))
+
+	'Obter instancia do Mac
+	Dim mac As JavaObject
+	mac = mac.InitializeStatic("javax.crypto.Mac").RunMethod("getInstance", Array("HmacSHA256"))
+
+	'Inicializar e calcular
+	mac.RunMethod("init", Array(keySpec))
+	Dim result() As Byte = mac.RunMethod("doFinal", Array(data))
+
+	Return result
+End Sub
+
+'Concatena dois arrays de bytes
+Private Sub ConcatBytes(a() As Byte, b() As Byte) As Byte()
+	Dim result(a.Length + b.Length) As Byte
+
+	For i = 0 To a.Length - 1
+		result(i) = a(i)
+	Next
+
+	For i = 0 To b.Length - 1
+		result(a.Length + i) = b(i)
+	Next
+
+	Return result
 End Sub
 
 'Gera IV aleatorio de 16 bytes usando SecureRandom

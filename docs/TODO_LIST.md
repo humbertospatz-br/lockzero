@@ -140,19 +140,12 @@
   - Compatibilidade com dados antigos (detecta formato automaticamente)
   - Mesmo plaintext + mesma frase = ciphertexts diferentes
 
-- [ ] [2026-01-02] **Adicionar HMAC para integridade** - Detectar alteracao
-  - **Problema:** Ciphertext pode ser modificado sem deteccao
-  - **Solucao:** Encrypt-then-MAC
-  ```
-  Encrypt():
-    ciphertext = AES(plaintext)
-    mac = HMAC-SHA256(key, ciphertext)
-    Return ciphertext + mac
-
-  Decrypt():
-    Verificar MAC antes de descriptografar
-    Se MAC invalido: rejeitar
-  ```
+- [x] [2026-01-02] **Adicionar HMAC para integridade** - CONCLUIDO
+  - HMAC-SHA256 calculado sobre IV + ciphertext (Encrypt-then-MAC)
+  - Formato novo: `AES:iv_hex:base64_ciphertext:hmac_hex`
+  - Verificacao HMAC obrigatoria antes de descriptografar
+  - Comparacao em tempo constante (SecureCompare)
+  - Compatibilidade com 3 formatos: v1 (legado), v2 (IV), v3 (IV+HMAC)
 
 ---
 

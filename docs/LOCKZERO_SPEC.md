@@ -708,9 +708,9 @@ Border radius:    8-12dip
 - [x] Compatibilidade com dados antigos (IV deterministico)
 
 **HMAC para Integridade:**
-- [ ] Adicionar HMAC-SHA256 apos criptografia (Encrypt-then-MAC)
-- [ ] Formato: `AES:iv:ciphertext:hmac`
-- [ ] Rejeitar dados com HMAC invalido
+- [x] Adicionar HMAC-SHA256 apos criptografia (Encrypt-then-MAC)
+- [x] Formato: `AES:iv_hex:base64_ciphertext:hmac_hex`
+- [x] Rejeitar dados com HMAC invalido (SecureCompare tempo constante)
 
 **Limpeza de Memoria:**
 - [ ] Zerar arrays de bytes sensiveis apos uso
