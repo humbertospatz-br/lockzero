@@ -409,7 +409,7 @@ Public Sub GetDecryptedContent(passphrase) As String
 
 ## Seguranca
 
-### Criptografia
+### Criptografia de Dados
 
 | Dado | Algoritmo | Derivacao de Chave |
 |------|-----------|-------------------|
@@ -423,6 +423,60 @@ Public Sub GetDecryptedContent(passphrase) As String
 - SHA-256 simples: ~1.000.000 tentativas/segundo (vulneravel)
 - PBKDF2 100k iter: ~10 tentativas/segundo (seguro)
 - Atacante precisa 100.000x mais tempo para cada tentativa
+
+### PIN de Acesso (v0.1.1)
+
+O PIN de acesso ao app usa armazenamento seguro:
+
+| Aspecto | Implementacao |
+|---------|---------------|
+| Algoritmo | PBKDF2WithHmacSHA256 |
+| Iteracoes | 100.000 |
+| Salt | 32 caracteres hex aleatorios por PIN |
+| Formato arquivo | `salt:hash` |
+| Comparacao | Tempo constante (evita timing attacks) |
+| Migracao | Automatica do formato Base64 legado |
+
+```basic
+'Fluxo de salvamento:
+SavePIN(pin):
+  salt = GenerateRandomSalt()          '32 hex chars
+  hash = PBKDF2(pin, salt, 100000)     '256 bits
+  File.Write(salt & ":" & BytesToHex(hash))
+
+'Fluxo de validacao:
+ValidatePIN(inputPin):
+  data = File.Read()
+  salt, savedHash = Split(data, ":")
+  inputHash = PBKDF2(inputPin, salt, 100000)
+  Return SecureCompare(inputHash, savedHash)  'Tempo constante
+```
+
+### Integridade de Arquivos (v0.1.1)
+
+Protecao contra corrupcao de dados:
+
+```
+SAVE ATOMICO:
+1. Escreve em arquivo.tmp
+2. Verifica se escreveu corretamente (re-leitura)
+3. Copia original para arquivo.bak
+4. Substitui original pelo tmp (operacao atomica)
+5. Remove tmp
+
+FALLBACK:
+- Se arquivo principal invalido, tenta carregar .bak
+- Se .bak valido, restaura automaticamente
+- Log de recuperacao para debugging
+```
+
+| Cenario de Crash | Estado | Recuperacao |
+|------------------|--------|-------------|
+| Durante escrita tmp | tmp parcial | Usa original |
+| Durante verificacao | tmp OK, original OK | Usa original |
+| Durante backup | tmp OK, bak OK, original OK | Usa original |
+| Durante substituicao | Impossivel (atomico) | - |
+| Apos substituicao | tmp sobrando | Usa novo |
 
 ### Normalizacao de Frase-Senha
 
@@ -626,14 +680,57 @@ Border radius:    8-12dip
 
 ### v0.1.1 - Hardening de Seguranca (atual)
 
+**Criptografia e Derivacao de Chave:**
 - [x] PBKDF2 para derivacao de chave (100k iteracoes)
 - [x] TestValue dinamico (hash do salt)
+- [x] PIN com PBKDF2 + salt aleatorio (era Base64)
+- [x] Comparacao de hash em tempo constante (evita timing attacks)
+- [x] Migracao automatica de PINs legados
+
+**Integridade de Dados:**
+- [x] Save atomico (tmp → verificar → bak → substituir)
+- [x] Fallback automatico para .bak se arquivo corrompido
+- [x] Validacao de JSON antes de carregar
+
+**Interface:**
 - [x] Timer de sessao visivel no header e Home com bloqueio manual
 - [x] Modo frase unica/por categoria (configuravel)
 - [ ] Tela de configuracoes (PageSettings)
 - [ ] Auto-lock em background (Activity_Pause)
 - [ ] Confirmacao de exclusao com re-digitacao de frase
 - [ ] Contador de itens nos cards da Home
+
+### v0.1.2 - Hardening de Criptografia (proximo)
+
+**IV Aleatorio por Operacao:**
+- [ ] Gerar IV aleatorio de 16 bytes para cada criptografia
+- [ ] Formato: `AES:iv_hex:ciphertext_base64`
+- [ ] Compatibilidade com dados antigos (IV deterministico)
+
+**HMAC para Integridade:**
+- [ ] Adicionar HMAC-SHA256 apos criptografia (Encrypt-then-MAC)
+- [ ] Formato: `AES:iv:ciphertext:hmac`
+- [ ] Rejeitar dados com HMAC invalido
+
+**Limpeza de Memoria:**
+- [ ] Zerar arrays de bytes sensiveis apos uso
+- [ ] Chamar `keySpec.clearPassword()` sempre
+
+**Especificacao Tecnica do Novo Formato:**
+```
+FORMATO ATUAL:  AES:base64(ciphertext)
+                IV = MD5(reverse(passphrase))  ← DETERMINISTICO (vulneravel)
+
+FORMATO NOVO:   AES:hex(iv):base64(ciphertext):hex(hmac)
+                IV = SecureRandom(16 bytes)     ← ALEATORIO (seguro)
+                HMAC = HMAC-SHA256(key, iv || ciphertext)
+
+MIGRACAO:
+- Ao descriptografar: detectar formato pelo numero de ":"
+- Formato antigo (1 ":"): usar IV deterministico
+- Formato novo (3 ":"): usar IV do campo, validar HMAC
+- Ao criptografar: sempre usar formato novo
+```
 
 ### v0.2.0 - Cartoes
 
@@ -692,4 +789,4 @@ Border radius:    8-12dip
 
 ---
 
-**Ultima atualizacao:** 2025-12-28
+**Ultima atualizacao:** 2026-01-02
