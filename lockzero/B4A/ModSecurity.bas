@@ -168,10 +168,15 @@ End Sub
 Public Sub EncryptWithNormalized(normalizedPhrase As String, plainText As String) As String
 	If normalizedPhrase.Length < 10 Or plainText.Length < 1 Then Return ""
 
+	Dim keyBytes() As Byte
+	Dim ivBytes() As Byte
+	Dim dataBytes() As Byte
+	Dim result As String = ""
+
 	Try
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
-		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
+		keyBytes = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
+		ivBytes = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -181,16 +186,22 @@ Public Sub EncryptWithNormalized(normalizedPhrase As String, plainText As String
 		c.Initialize("AES/CBC/PKCS5Padding")
 		c.InitialisationVector = ivBytes
 
-		Dim dataBytes() As Byte = plainText.GetBytes("UTF8")
+		dataBytes = plainText.GetBytes("UTF8")
 		Dim encrypted() As Byte = c.Encrypt(dataBytes, kg.Key, True)
 
 		Dim su As StringUtils
-		Return "AES:" & su.EncodeBase64(encrypted)
+		result = "AES:" & su.EncodeBase64(encrypted)
 
 	Catch
 		Log("ModSecurity.Encrypt erro: " & LastException)
-		Return ""
 	End Try
+
+	'Limpar dados sensiveis
+	ZeroBytes(keyBytes)
+	ZeroBytes(ivBytes)
+	ZeroBytes(dataBytes)
+
+	Return result
 End Sub
 
 'Descriptografa texto com frase-senha (AES-256-CBC)
@@ -208,6 +219,12 @@ End Sub
 Public Sub DecryptWithNormalized(normalizedPhrase As String, encText As String) As String
 	If normalizedPhrase.Length < 10 Or encText.Length < 1 Then Return ""
 
+	Dim keyBytes() As Byte
+	Dim ivBytes() As Byte
+	Dim encrypted() As Byte
+	Dim decrypted() As Byte
+	Dim result As String = ""
+
 	Try
 		'Verifica prefixo AES
 		If encText.StartsWith("AES:") = False Then Return ""
@@ -215,11 +232,11 @@ Public Sub DecryptWithNormalized(normalizedPhrase As String, encText As String) 
 		Dim encData As String = encText.SubString(4)
 
 		Dim md As MessageDigest
-		Dim keyBytes() As Byte = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
-		Dim ivBytes() As Byte = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
+		keyBytes = md.GetMessageDigest(normalizedPhrase.GetBytes("UTF8"), "SHA-256")
+		ivBytes = md.GetMessageDigest(StrReverse(normalizedPhrase).GetBytes("UTF8"), "MD5")
 
 		Dim su As StringUtils
-		Dim encrypted() As Byte = su.DecodeBase64(encData)
+		encrypted = su.DecodeBase64(encData)
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -229,14 +246,20 @@ Public Sub DecryptWithNormalized(normalizedPhrase As String, encText As String) 
 		c.Initialize("AES/CBC/PKCS5Padding")
 		c.InitialisationVector = ivBytes
 
-		Dim decrypted() As Byte = c.Decrypt(encrypted, kg.Key, True)
-
-		Return BytesToString(decrypted, 0, decrypted.Length, "UTF8")
+		decrypted = c.Decrypt(encrypted, kg.Key, True)
+		result = BytesToString(decrypted, 0, decrypted.Length, "UTF8")
 
 	Catch
 		Log("ModSecurity.Decrypt erro: " & LastException)
-		Return ""
 	End Try
+
+	'Limpar dados sensiveis
+	ZeroBytes(keyBytes)
+	ZeroBytes(ivBytes)
+	ZeroBytes(encrypted)
+	ZeroBytes(decrypted)
+
+	Return result
 End Sub
 
 'Verifica se texto esta criptografado
@@ -251,31 +274,45 @@ End Sub
 'Deriva chave usando PBKDF2 (100.000 iteracoes)
 'Retorna array de 32 bytes (256 bits) para AES-256
 Private Sub DeriveKeyPBKDF2(passPhrase As String, salt As String) As Byte()
-	'Converter senha para char array usando JavaObject (mais seguro)
-	Dim joPass As JavaObject = passPhrase
-	Dim passChars() As Char = joPass.RunMethod("toCharArray", Null)
-
-	'Converter salt para bytes
-	Dim saltBytes() As Byte = salt.GetBytes("UTF8")
-
-	'Criar PBEKeySpec com senha, salt, iteracoes e tamanho da chave
+	Dim passChars() As Char
+	Dim saltBytes() As Byte
 	Dim keySpec As JavaObject
-	keySpec.InitializeNewInstance("javax.crypto.spec.PBEKeySpec", _
-		Array(passChars, saltBytes, PBKDF2_ITERATIONS, PBKDF2_KEY_LENGTH))
 
-	'Obter SecretKeyFactory para PBKDF2WithHmacSHA256
-	Dim factory As JavaObject
-	factory = factory.InitializeStatic("javax.crypto.SecretKeyFactory").RunMethod("getInstance", _
-		Array("PBKDF2WithHmacSHA256"))
+	Try
+		'Converter senha para char array usando JavaObject (mais seguro)
+		Dim joPass As JavaObject = passPhrase
+		passChars = joPass.RunMethod("toCharArray", Null)
 
-	'Gerar a chave
-	Dim secretKey As JavaObject = factory.RunMethod("generateSecret", Array(keySpec))
-	Dim keyBytes() As Byte = secretKey.RunMethod("getEncoded", Null)
+		'Converter salt para bytes
+		saltBytes = salt.GetBytes("UTF8")
 
-	'Limpar a spec (seguranca)
-	keySpec.RunMethod("clearPassword", Null)
+		'Criar PBEKeySpec com senha, salt, iteracoes e tamanho da chave
+		keySpec.InitializeNewInstance("javax.crypto.spec.PBEKeySpec", _
+			Array(passChars, saltBytes, PBKDF2_ITERATIONS, PBKDF2_KEY_LENGTH))
 
-	Return keyBytes
+		'Obter SecretKeyFactory para PBKDF2WithHmacSHA256
+		Dim factory As JavaObject
+		factory = factory.InitializeStatic("javax.crypto.SecretKeyFactory").RunMethod("getInstance", _
+			Array("PBKDF2WithHmacSHA256"))
+
+		'Gerar a chave
+		Dim secretKey As JavaObject = factory.RunMethod("generateSecret", Array(keySpec))
+		Dim keyBytes() As Byte = secretKey.RunMethod("getEncoded", Null)
+
+		'Limpar dados sensiveis
+		keySpec.RunMethod("clearPassword", Null)
+		ZeroChars(passChars)
+		ZeroBytes(saltBytes)
+
+		Return keyBytes
+	Catch
+		'Limpar dados sensiveis mesmo em caso de erro
+		If keySpec.IsInitialized Then keySpec.RunMethod("clearPassword", Null)
+		ZeroChars(passChars)
+		ZeroBytes(saltBytes)
+		Log("DeriveKeyPBKDF2 erro: " & LastException)
+		Return Null
+	End Try
 End Sub
 
 'Criptografa com salt aleatorio do grupo (PBKDF2 + AES-256-CBC + IV aleatorio + HMAC)
@@ -293,12 +330,21 @@ End Sub
 Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As String) As String
 	If passPhrase.Length < 1 Or plainText.Length < 1 Or salt.Length < 1 Then Return ""
 
+	Dim keyBytes() As Byte
+	Dim ivBytes() As Byte
+	Dim dataBytes() As Byte
+	Dim encrypted() As Byte
+	Dim hmacData() As Byte
+	Dim hmacBytes() As Byte
+	Dim result As String = ""
+
 	Try
 		'Deriva chave com PBKDF2 (100.000 iteracoes)
-		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
+		keyBytes = DeriveKeyPBKDF2(passPhrase, salt)
+		If keyBytes = Null Then Return ""
 
 		'Gera IV aleatorio de 16 bytes (SecureRandom)
-		Dim ivBytes() As Byte = GenerateRandomIV
+		ivBytes = GenerateRandomIV
 
 		Dim c As Cipher
 		Dim kg As KeyGenerator
@@ -308,23 +354,32 @@ Public Sub EncryptWithSalt(passPhrase As String, salt As String, plainText As St
 		c.Initialize("AES/CBC/PKCS5Padding")
 		c.InitialisationVector = ivBytes
 
-		Dim dataBytes() As Byte = plainText.GetBytes("UTF8")
-		Dim encrypted() As Byte = c.Encrypt(dataBytes, kg.Key, True)
+		dataBytes = plainText.GetBytes("UTF8")
+		encrypted = c.Encrypt(dataBytes, kg.Key, True)
 
 		'Calcula HMAC-SHA256 sobre IV + ciphertext (Encrypt-then-MAC)
-		Dim hmacData() As Byte = ConcatBytes(ivBytes, encrypted)
-		Dim hmacBytes() As Byte = CalculateHMAC(keyBytes, hmacData)
+		hmacData = ConcatBytes(ivBytes, encrypted)
+		hmacBytes = CalculateHMAC(keyBytes, hmacData)
 
 		'Formato: AES:iv_hex:base64_ciphertext:hmac_hex
 		Dim su As StringUtils
 		Dim ivHex As String = BytesToHex(ivBytes)
 		Dim hmacHex As String = BytesToHex(hmacBytes)
-		Return "AES:" & ivHex & ":" & su.EncodeBase64(encrypted) & ":" & hmacHex
+		result = "AES:" & ivHex & ":" & su.EncodeBase64(encrypted) & ":" & hmacHex
 
 	Catch
 		Log("ModSecurity.EncryptWithSalt erro: " & LastException)
-		Return ""
 	End Try
+
+	'Limpar dados sensiveis da memoria
+	ZeroBytes(keyBytes)
+	ZeroBytes(ivBytes)
+	ZeroBytes(dataBytes)
+	ZeroBytes(hmacData)
+	ZeroBytes(hmacBytes)
+	'encrypted nao e zerado pois foi codificado no resultado
+
+	Return result
 End Sub
 
 'Descriptografa com salt do grupo (PBKDF2 + AES-256-CBC)
@@ -336,18 +391,25 @@ End Sub
 Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As String) As String
 	If passPhrase.Length < 1 Or encText.Length < 1 Or salt.Length < 1 Then Return ""
 
+	Dim keyBytes() As Byte
+	Dim ivBytes() As Byte
+	Dim encrypted() As Byte
+	Dim hmacData() As Byte
+	Dim expectedHmac() As Byte
+	Dim decrypted() As Byte
+	Dim result As String = ""
+
 	Try
 		If encText.StartsWith("AES:") = False Then Return ""
 
 		'Deriva chave com PBKDF2 (100.000 iteracoes)
-		Dim keyBytes() As Byte = DeriveKeyPBKDF2(passPhrase, salt)
+		keyBytes = DeriveKeyPBKDF2(passPhrase, salt)
+		If keyBytes = Null Then Return ""
 
 		'Detecta formato contando ":"
 		Dim afterPrefix As String = encText.SubString(4)
 		Dim parts() As String = Regex.Split(":", afterPrefix)
 
-		Dim ivBytes() As Byte
-		Dim encrypted() As Byte
 		Dim su As StringUtils
 
 		If parts.Length = 3 And parts(0).Length = 32 And parts(2).Length = 64 Then
@@ -360,12 +422,18 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 			encrypted = su.DecodeBase64(encData)
 
 			'Verifica HMAC antes de descriptografar (Encrypt-then-MAC)
-			Dim hmacData() As Byte = ConcatBytes(ivBytes, encrypted)
-			Dim expectedHmac() As Byte = CalculateHMAC(keyBytes, hmacData)
+			hmacData = ConcatBytes(ivBytes, encrypted)
+			expectedHmac = CalculateHMAC(keyBytes, hmacData)
 			Dim expectedHmacHex As String = BytesToHex(expectedHmac)
 
 			If SecureCompare(hmacHex, expectedHmacHex) = False Then
 				Log("DecryptWithSalt: HMAC invalido - dados podem ter sido alterados!")
+				'Limpar e retornar
+				ZeroBytes(keyBytes)
+				ZeroBytes(ivBytes)
+				ZeroBytes(encrypted)
+				ZeroBytes(hmacData)
+				ZeroBytes(expectedHmac)
 				Return ""
 			End If
 			'Log("DecryptWithSalt: HMAC verificado OK")
@@ -395,14 +463,22 @@ Public Sub DecryptWithSalt(passPhrase As String, salt As String, encText As Stri
 		c.Initialize("AES/CBC/PKCS5Padding")
 		c.InitialisationVector = ivBytes
 
-		Dim decrypted() As Byte = c.Decrypt(encrypted, kg.Key, True)
-
-		Return BytesToString(decrypted, 0, decrypted.Length, "UTF8")
+		decrypted = c.Decrypt(encrypted, kg.Key, True)
+		result = BytesToString(decrypted, 0, decrypted.Length, "UTF8")
 
 	Catch
 		Log("ModSecurity.DecryptWithSalt erro: " & LastException)
-		Return ""
 	End Try
+
+	'Limpar dados sensiveis da memoria
+	ZeroBytes(keyBytes)
+	ZeroBytes(ivBytes)
+	ZeroBytes(encrypted)
+	ZeroBytes(hmacData)
+	ZeroBytes(expectedHmac)
+	ZeroBytes(decrypted)
+
+	Return result
 End Sub
 
 'Calcula HMAC-SHA256
@@ -760,22 +836,36 @@ Public Sub SavePIN(pin As String)
 		Return
 	End If
 
-	'Gera salt aleatorio
-	Dim salt As String = GenerateRandomSalt
+	Dim hashBytes() As Byte
 
-	'Deriva hash usando PBKDF2 (100.000 iteracoes)
-	Dim hashBytes() As Byte = DeriveKeyPBKDF2(pin, salt)
-	Dim hashHex As String = BytesToHex(hashBytes)
+	Try
+		'Gera salt aleatorio
+		Dim salt As String = GenerateRandomSalt
 
-	'Salva no formato salt:hash
-	Dim data As String = salt & ":" & hashHex
-	File.WriteString(File.DirInternal, PIN_FILE, data)
-	Log("ModSecurity: PIN salvo com PBKDF2")
+		'Deriva hash usando PBKDF2 (100.000 iteracoes)
+		hashBytes = DeriveKeyPBKDF2(pin, salt)
+		If hashBytes = Null Then Return
+
+		Dim hashHex As String = BytesToHex(hashBytes)
+
+		'Salva no formato salt:hash
+		Dim data As String = salt & ":" & hashHex
+		File.WriteString(File.DirInternal, PIN_FILE, data)
+		Log("ModSecurity: PIN salvo com PBKDF2")
+	Catch
+		Log("SavePIN erro: " & LastException)
+	End Try
+
+	'Limpar dados sensiveis
+	ZeroBytes(hashBytes)
 End Sub
 
 'Valida PIN informado usando PBKDF2
 Public Sub ValidatePIN(inputPin As String) As Boolean
 	If HasPIN = False Then Return False
+
+	Dim inputHashBytes() As Byte
+	Dim result As Boolean = False
 
 	Try
 		Dim data As String = File.ReadString(File.DirInternal, PIN_FILE)
@@ -801,16 +891,22 @@ Public Sub ValidatePIN(inputPin As String) As Boolean
 		Dim savedHash As String = parts(1)
 
 		'Deriva hash do PIN informado
-		Dim inputHashBytes() As Byte = DeriveKeyPBKDF2(inputPin, salt)
+		inputHashBytes = DeriveKeyPBKDF2(inputPin, salt)
+		If inputHashBytes = Null Then Return False
+
 		Dim inputHash As String = BytesToHex(inputHashBytes)
 
 		'Comparacao segura (tempo constante)
-		Return SecureCompare(inputHash, savedHash)
+		result = SecureCompare(inputHash, savedHash)
 
 	Catch
 		Log("ValidatePIN erro: " & LastException)
-		Return False
 	End Try
+
+	'Limpar dados sensiveis
+	ZeroBytes(inputHashBytes)
+
+	Return result
 End Sub
 
 'Migra PIN do formato antigo (Base64) para o novo
@@ -853,6 +949,27 @@ Public Sub RemovePIN
 		File.Delete(File.DirInternal, PIN_FILE)
 		Log("ModSecurity: PIN removido")
 	End If
+End Sub
+
+' ============================================
+'  LIMPEZA DE MEMORIA SENSIVEL
+' ============================================
+
+'Zera array de bytes para remover dados sensiveis da memoria
+'IMPORTANTE: Chamar apos uso de chaves, IVs, dados descriptografados
+Private Sub ZeroBytes(bytes() As Byte)
+	If bytes = Null Then Return
+	For i = 0 To bytes.Length - 1
+		bytes(i) = 0
+	Next
+End Sub
+
+'Zera array de caracteres (para senhas)
+Private Sub ZeroChars(chars() As Char)
+	If chars = Null Then Return
+	For i = 0 To chars.Length - 1
+		chars(i) = Chr(0)
+	Next
 End Sub
 
 ' ============================================

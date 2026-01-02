@@ -713,8 +713,11 @@ Border radius:    8-12dip
 - [x] Rejeitar dados com HMAC invalido (SecureCompare tempo constante)
 
 **Limpeza de Memoria:**
-- [ ] Zerar arrays de bytes sensiveis apos uso
-- [ ] Chamar `keySpec.clearPassword()` sempre
+- [x] Zerar arrays de bytes sensiveis apos uso (ZeroBytes helper)
+- [x] Zerar arrays de chars sensiveis (ZeroChars helper)
+- [x] Chamar `keySpec.clearPassword()` sempre
+- [x] Cleanup em todas funcoes de criptografia
+- [x] Cleanup em funcoes de PIN (SavePIN, ValidatePIN)
 
 **Especificacao Tecnica do Novo Formato:**
 ```

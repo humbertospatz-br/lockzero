@@ -147,6 +147,15 @@
   - Comparacao em tempo constante (SecureCompare)
   - Compatibilidade com 3 formatos: v1 (legado), v2 (IV), v3 (IV+HMAC)
 
+- [x] [2026-01-02] **Limpeza de memoria sensivel** - CONCLUIDO
+  - ZeroBytes() para limpar arrays de bytes
+  - ZeroChars() para limpar arrays de caracteres
+  - Cleanup em DeriveKeyPBKDF2 (passChars, saltBytes)
+  - Cleanup em EncryptWithSalt (keyBytes, ivBytes, dataBytes, hmacData, hmacBytes)
+  - Cleanup em DecryptWithSalt (keyBytes, ivBytes, encrypted, hmacData, expectedHmac, decrypted)
+  - Cleanup em EncryptWithNormalized/DecryptWithNormalized
+  - Cleanup em SavePIN/ValidatePIN (hashBytes)
+
 ---
 
 ### ALTO - Protecao de Sessao
