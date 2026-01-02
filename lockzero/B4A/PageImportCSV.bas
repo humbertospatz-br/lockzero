@@ -8,7 +8,7 @@ Version=9.85
 'LockZero - Permite selecionar e importar senhas de arquivo CSV
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public Root As B4XView  'Public para transicoes
 	Private xui As XUI
 
 	'Header
@@ -60,11 +60,6 @@ Public Sub Initialize
 	LastParsedFile = ""
 End Sub
 
-'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
-Public Sub AnimateIn
-	ModTransition.SlideFromRight(Root)
-End Sub
-
 'Recebe o caminho do arquivo CSV
 Public Sub SetCSVFile(folder As String, fileName As String)
 	CSVFolder = folder
@@ -73,8 +68,6 @@ End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
-	Root.Alpha = 0  'Inicia invisivel
-	Root.Left = 100%x  'Inicia off-screen
 	CreateUI
 	ApplyTheme
 End Sub

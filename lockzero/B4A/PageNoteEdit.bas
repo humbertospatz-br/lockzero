@@ -12,7 +12,7 @@ Version=9.85
 '- list: Lista de tarefas com checkboxes
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public Root As B4XView  'Public para transicoes
 	Private xui As XUI
 
 	'UI - Header
@@ -73,15 +73,8 @@ Public Sub Initialize
 	ItemPanels.Initialize
 End Sub
 
-'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
-Public Sub AnimateIn
-	ModTransition.SlideFromRight(Root)
-End Sub
-
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
-	Root.Alpha = 0  'Inicia invisivel
-	Root.Left = 100%x  'Inicia off-screen
 	CreateUI
 	ApplyTheme
 End Sub

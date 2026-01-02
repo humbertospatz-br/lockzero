@@ -205,7 +205,6 @@ Private Sub CheckIncomingIntent
 			'Configura e abre PageImportCSV
 			pgImportCSV.SetCSVFile(destFolder, fileName)
 			B4XPages.ShowPage("PageImportCSV")
-			pgImportCSV.AnimateIn
 		Else
 			'=== LOCKZERO - Backup ===
 			Log("Detectado arquivo .lockzero")
@@ -229,7 +228,6 @@ Private Sub CheckIncomingIntent
 			'Abre tela de backup
 			Dim pgBackup As PageBackup = B4XPages.GetPage("PageBackup")
 			B4XPages.ShowPage("PageBackup")
-			pgBackup.AnimateIn
 		End If
 
 	Catch

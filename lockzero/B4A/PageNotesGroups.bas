@@ -296,8 +296,8 @@ Private Sub NavigateToGroup(groupId As String)
 
 	Dim pg As PageNotesList = B4XPages.GetPage("PageNotesList")
 	pg.SetParams(params)
+	ModTransition.SlideToLeft(Root, pg.Root)
 	B4XPages.ShowPage("PageNotesList")
-	pg.AnimateIn
 End Sub
 
 ' ============================================

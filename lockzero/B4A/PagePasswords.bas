@@ -8,7 +8,7 @@ Version=9.85
 'LockZero - Exibe grupos e permite navegar para senhas
 
 Sub Class_Globals
-	Private Root As B4XView
+	Public Root As B4XView  'Public para transicoes
 	Private xui As XUI
 
 	'UI
@@ -37,15 +37,8 @@ Public Sub Initialize
 	tmrSession.Initialize("tmrSession", 1000)
 End Sub
 
-'Anima entrada da pagina - chamar DEPOIS de B4XPages.ShowPage
-Public Sub AnimateIn
-	ModTransition.SlideFromRight(Root)
-End Sub
-
 Private Sub B4XPage_Created(Root1 As B4XView)
 	Root = Root1
-	Root.Alpha = 0  'Inicia invisivel
-	Root.Left = 100%x  'Inicia off-screen para evitar flash
 	CreateUI
 	ApplyTheme
 End Sub
@@ -402,8 +395,8 @@ Private Sub NavigateToGroup(groupId As String)
 
 	Dim pg As PagePasswordList = B4XPages.GetPage("PagePasswordList")
 	pg.SetParams(params)
+	ModTransition.SlideToLeft(Root, pg.Root)
 	B4XPages.ShowPage("PagePasswordList")
-	pg.AnimateIn
 End Sub
 
 Private Sub pnlGroup_LongClick
