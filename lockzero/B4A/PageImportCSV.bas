@@ -31,9 +31,15 @@ Sub Class_Globals
 
 	'Dados
 	Private CSVEntries As List 'Lista de Maps com dados do CSV
+	Private FilteredEntries As List 'Lista filtrada pela busca
 	Private SelectedIndexes As List 'Indices selecionados
 	Private SelectedGroupId As String
 	Private SelectedGroupName As String
+
+	'Busca/Filtro
+	Private edtSearch As EditText
+	Private lblClearSearch As Label
+	Private CurrentFilter As String = ""
 
 	'Arquivo CSV
 	Private CSVFolder As String
@@ -54,10 +60,12 @@ End Sub
 
 Public Sub Initialize
 	CSVEntries.Initialize
+	FilteredEntries.Initialize
 	SelectedIndexes.Initialize
 	SelectedGroupId = ""
 	SelectedGroupName = ""
 	LastParsedFile = ""
+	CurrentFilter = ""
 End Sub
 
 'Recebe o caminho do arquivo CSV
@@ -85,10 +93,12 @@ Private Sub B4XPage_Appear
 			SelectedIndexes.Initialize
 			SelectedGroupId = ""
 			SelectedGroupName = ""
+			CurrentFilter = ""
+			If edtSearch.IsInitialized Then edtSearch.Text = ""
 			'Parseia novo arquivo
 			ParseCSV
 			LastParsedFile = fullPath
-			LoadEntries
+			ApplyFilter 'Inicializa filtro e carrega entradas
 		End If
 	End If
 
@@ -112,6 +122,7 @@ Private Sub CreateUI
 	Dim headerH As Int = 56dip
 	Dim bottomH As Int = 70dip
 	Dim infoH As Int = 80dip
+	Dim searchH As Int = 50dip
 
 	'===========================================
 	' HEADER
@@ -171,11 +182,45 @@ Private Sub CreateUI
 	pnlInfo.AddView(btnToggleAll, width - 140dip, 30dip, 125dip, 35dip)
 
 	'===========================================
+	' BARRA DE BUSCA
+	'===========================================
+	Dim pnlSearch As Panel
+	pnlSearch.Initialize("")
+	pnlSearch.Color = ModTheme.HomeBg
+	Root.AddView(pnlSearch, 0, headerH + infoH, width, searchH)
+
+	'Campo de busca
+	edtSearch.Initialize("edtSearch")
+	edtSearch.Hint = ModLang.T("search_hint")
+	edtSearch.SingleLine = True
+	edtSearch.InputType = 1 'text
+	edtSearch.Text = ""
+	edtSearch.TextColor = Colors.White
+	edtSearch.HintColor = Colors.ARGB(120, 255, 255, 255)
+
+	Dim pnlSearchField As Panel
+	pnlSearchField.Initialize("")
+	pnlSearchField.Color = ModTheme.HomeIconBg
+	Dim xvSearchField As B4XView = pnlSearchField
+	xvSearchField.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+	pnlSearch.AddView(pnlSearchField, 12dip, 6dip, width - 60dip, 42dip)
+	pnlSearchField.AddView(edtSearch, 10dip, 2dip, width - 90dip, 40dip)
+
+	'Botao limpar busca (X)
+	lblClearSearch.Initialize("lblClearSearch")
+	lblClearSearch.Text = "X"
+	lblClearSearch.TextSize = 14
+	lblClearSearch.TextColor = Colors.White
+	lblClearSearch.Gravity = Gravity.CENTER
+	lblClearSearch.Visible = False 'So aparece quando ha texto
+	pnlSearch.AddView(lblClearSearch, width - 45dip, 6dip, 35dip, 42dip)
+
+	'===========================================
 	' LISTA DE ENTRADAS
 	'===========================================
 	svEntries.Initialize(0)
 	svEntries.Color = ModTheme.HomeBg
-	Root.AddView(svEntries, 0, headerH + infoH, width, height - headerH - infoH - bottomH)
+	Root.AddView(svEntries, 0, headerH + infoH + searchH, width, height - headerH - infoH - searchH - bottomH)
 
 	pnlEntries = svEntries.Panel
 	pnlEntries.Color = ModTheme.HomeBg
@@ -250,8 +295,6 @@ Private Sub ParseCSV
 
 		'Primeira linha e o header
 		If lines.Length < 2 Then Return
-
-		Dim header As String = lines(0).ToLowerCase
 
 		'Identifica indices das colunas
 		Dim cols() As String = ParseCSVLine(lines(0))
@@ -355,10 +398,14 @@ Private Sub LoadEntries
 	Dim itemHeight As Int = 72dip
 	Dim y As Int = 10dip
 
-	If CSVEntries.Size = 0 Then
+	If FilteredEntries.Size = 0 Then
 		Dim lblEmpty As Label
 		lblEmpty.Initialize("")
-		lblEmpty.Text = ModLang.T("csv_no_entries")
+		If CSVEntries.Size = 0 Then
+			lblEmpty.Text = ModLang.T("csv_no_entries")
+		Else
+			lblEmpty.Text = ModLang.T("search_no_results")
+		End If
 		lblEmpty.TextSize = Starter.FONT_BODY
 		lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
 		lblEmpty.Gravity = Gravity.CENTER
@@ -367,12 +414,14 @@ Private Sub LoadEntries
 		Return
 	End If
 
-	For i = 0 To CSVEntries.Size - 1
-		Dim entry As Map = CSVEntries.Get(i)
+	For i = 0 To FilteredEntries.Size - 1
+		Dim filteredEntry As Map = FilteredEntries.Get(i)
+		Dim originalIndex As Int = filteredEntry.Get("index")
+		Dim entry As Map = filteredEntry.Get("data")
 
 		Dim pnlItem As Panel
 		pnlItem.Initialize("pnlEntry")
-		pnlItem.Tag = i
+		pnlItem.Tag = originalIndex 'Usa indice original para selecao
 
 		'Card
 		Dim xvItem As B4XView = pnlItem
@@ -380,10 +429,10 @@ Private Sub LoadEntries
 		pnlEntries.AddView(pnlItem, 12dip, y, width - 24dip, itemHeight)
 
 		'Checkbox (simulado com Label) - melhor contraste
-		Dim isSelected As Boolean = SelectedIndexes.IndexOf(i) >= 0
+		Dim isSelected As Boolean = SelectedIndexes.IndexOf(originalIndex) >= 0
 		Dim lblCheck As Label
 		lblCheck.Initialize("lblCheck")
-		lblCheck.Tag = i
+		lblCheck.Tag = originalIndex
 		If isSelected Then
 			lblCheck.Text = Chr(9745) 'Checked
 			lblCheck.TextColor = Colors.RGB(100, 255, 100) 'Verde claro
@@ -433,12 +482,27 @@ Private Sub LoadEntries
 End Sub
 
 Private Sub UpdateInfo
-	lblInfo.Text = CSVEntries.Size & " " & ModLang.T("csv_entries_found")
+	'Mostra total e filtrado
+	If CurrentFilter <> "" Then
+		lblInfo.Text = FilteredEntries.Size & "/" & CSVEntries.Size & " " & ModLang.T("csv_entries_found")
+	Else
+		lblInfo.Text = CSVEntries.Size & " " & ModLang.T("csv_entries_found")
+	End If
+
 	lblSelected.Text = ModLang.T("csv_selected") & ": " & SelectedIndexes.Size
 	btnImport.Text = ModLang.T("csv_import_btn") & " (" & SelectedIndexes.Size & ")"
 
-	'Alterna texto do botao toggle
-	If SelectedIndexes.Size = CSVEntries.Size And CSVEntries.Size > 0 Then
+	'Conta quantos filtrados estao selecionados para o botao toggle
+	Dim filteredSelected As Int = 0
+	For Each fe As Map In FilteredEntries
+		Dim idx As Int = fe.Get("index")
+		If SelectedIndexes.IndexOf(idx) >= 0 Then
+			filteredSelected = filteredSelected + 1
+		End If
+	Next
+
+	'Alterna texto do botao toggle baseado nos filtrados
+	If filteredSelected = FilteredEntries.Size And FilteredEntries.Size > 0 Then
 		btnToggleAll.Text = ModLang.T("csv_deselect_all")
 	Else
 		btnToggleAll.Text = ModLang.T("csv_select_all")
@@ -483,18 +547,88 @@ Private Sub ToggleSelection(idx As Int)
 End Sub
 
 Private Sub btnToggleAll_Click
-	If SelectedIndexes.Size = CSVEntries.Size Then
-		'Desmarcar todos
-		SelectedIndexes.Initialize
+	'Conta quantos filtrados estao selecionados
+	Dim filteredSelected As Int = 0
+	For Each fe As Map In FilteredEntries
+		Dim idx As Int = fe.Get("index")
+		If SelectedIndexes.IndexOf(idx) >= 0 Then
+			filteredSelected = filteredSelected + 1
+		End If
+	Next
+
+	If filteredSelected = FilteredEntries.Size And FilteredEntries.Size > 0 Then
+		'Desmarcar todos os filtrados
+		For Each fe As Map In FilteredEntries
+			Dim idx As Int = fe.Get("index")
+			Dim pos As Int = SelectedIndexes.IndexOf(idx)
+			If pos >= 0 Then
+				SelectedIndexes.RemoveAt(pos)
+			End If
+		Next
 	Else
-		'Selecionar todos
-		SelectedIndexes.Initialize
-		For i = 0 To CSVEntries.Size - 1
-			SelectedIndexes.Add(i)
+		'Selecionar todos os filtrados
+		For Each fe As Map In FilteredEntries
+			Dim idx As Int = fe.Get("index")
+			If SelectedIndexes.IndexOf(idx) < 0 Then
+				SelectedIndexes.Add(idx)
+			End If
 		Next
 	End If
 	LoadEntries
 	UpdateInfo
+End Sub
+
+' ============================================
+'  BUSCA/FILTRO
+' ============================================
+
+Private Sub edtSearch_TextChanged(Old As String, New As String)
+	CurrentFilter = New.Trim.ToLowerCase
+	lblClearSearch.Visible = (CurrentFilter.Length > 0)
+	ApplyFilter
+End Sub
+
+Private Sub lblClearSearch_Click
+	edtSearch.Text = ""
+	CurrentFilter = ""
+	lblClearSearch.Visible = False
+	ApplyFilter
+End Sub
+
+Private Sub ApplyFilter
+	FilteredEntries.Initialize
+
+	If CurrentFilter = "" Then
+		'Sem filtro - mostra todos
+		For i = 0 To CSVEntries.Size - 1
+			Dim entry As Map
+			entry.Initialize
+			entry.Put("index", i)
+			entry.Put("data", CSVEntries.Get(i))
+			FilteredEntries.Add(entry)
+		Next
+	Else
+		'Filtra por nome ou URL
+		For i = 0 To CSVEntries.Size - 1
+			Dim csvEntry As Map = CSVEntries.Get(i)
+			Dim name As String = csvEntry.Get("name")
+			Dim url As String = csvEntry.Get("url")
+			Dim username As String = csvEntry.Get("username")
+
+			If name.ToLowerCase.Contains(CurrentFilter) Or _
+				url.ToLowerCase.Contains(CurrentFilter) Or _
+				username.ToLowerCase.Contains(CurrentFilter) Then
+
+				Dim entry As Map
+				entry.Initialize
+				entry.Put("index", i)
+				entry.Put("data", csvEntry)
+				FilteredEntries.Add(entry)
+			End If
+		Next
+	End If
+
+	LoadEntries
 End Sub
 
 Private Sub btnSelectGroup_Click
@@ -515,7 +649,7 @@ Private Sub btnImport_Click
 	'Se sessao ja esta ativa, importa direto sem pedir frase
 	If ModSession.IsSessionActive Then
 		Log("Sessao ativa - importando direto")
-		DoImport(ModSession.GetPassphrase)
+		DoImport
 	Else
 		'Pede a frase-senha
 		ShowPassphraseDialog
@@ -686,7 +820,7 @@ Private Sub ShowNewGroupDialog
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -758,11 +892,14 @@ Private Sub btnCreateGroup_Click
 	'Inicia sessao
 	ModSession.StartSessionWithCategory(phrase, "passwords")
 
+	'Limpa campo e clipboard por seguranca
+	ModSecurity.ClearSecureField(edtPassphrase)
+
 	HideDialog
 	UpdateInfo
 
 	'Ja faz a importacao automaticamente
-	DoImport(phrase)
+	DoImport
 End Sub
 
 ' ============================================
@@ -799,7 +936,7 @@ Private Sub ShowPassphraseDialog
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
 	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = Bit.Or(1, 128)
+	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -868,24 +1005,27 @@ Private Sub btnUnlockGroup_Click
 
 	If g.ValidatePhrase(phrase) = False Then
 		ToastMessageShow(ModLang.T("wrong_passphrase"), True)
-		edtPassphrase.Text = ""
+		ModSecurity.ClearSecureField(edtPassphrase)
 		Return
 	End If
 
 	'Inicia sessao
 	ModSession.StartSessionWithCategory(phrase, "passwords")
 
+	'Limpa campo e clipboard por seguranca
+	ModSecurity.ClearSecureField(edtPassphrase)
+
 	HideDialog
-	DoImport(phrase)
+	DoImport
 End Sub
 
 Private Sub btnShowPass_Click
 	IsPassVisible = Not(IsPassVisible)
 	If IsPassVisible Then
-		edtPassphrase.InputType = 1
+		edtPassphrase.InputType = ModSecurity.GetSecureVisibleInputType 'TEXT + NO_SUGGESTIONS (visivel)
 		btnShowPass.Text = ModLang.T("hide")
 	Else
-		edtPassphrase.InputType = Bit.Or(1, 128)
+		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
 		btnShowPass.Text = ModLang.T("view")
 	End If
 	edtPassphrase.SelectionStart = edtPassphrase.Text.Length
@@ -907,7 +1047,7 @@ End Sub
 '  IMPORTACAO
 ' ============================================
 
-Private Sub DoImport(phrase As String)
+Private Sub DoImport
 	Dim imported As Int = 0
 	Dim updated As Int = 0
 
@@ -968,7 +1108,34 @@ Private Sub DoImport(phrase As String)
 		End If
 	Next
 
-	'Limpa tudo ANTES de fechar para evitar que tela reapareça com dados antigos
+	'Mostra resultado via Toast
+	Dim msg As String = imported & " " & ModLang.T("csv_imported")
+	If updated > 0 Then
+		msg = msg & ", " & updated & " " & ModLang.T("csv_updated")
+	End If
+	ToastMessageShow(msg, True)
+
+	'Se tinha filtro ativo, permanece na pagina para mais importacoes
+	If CurrentFilter <> "" Then
+		'Remove as entradas importadas da lista (em ordem reversa para nao baguncar indices)
+		Dim toRemove As List
+		toRemove.Initialize
+		toRemove.AddAll(SelectedIndexes)
+		'Ordena em ordem decrescente
+		toRemove.SortType("", False)
+		For Each idx As Int In toRemove
+			If idx < CSVEntries.Size Then
+				CSVEntries.RemoveAt(idx)
+			End If
+		Next
+		'Limpa selecao e reaplica filtro
+		SelectedIndexes.Initialize
+		ApplyFilter
+		UpdateInfo
+		Return
+	End If
+
+	'Sem filtro: limpa tudo e fecha a pagina
 	Main.PendingCSVFile = ""
 	Main.PendingCSVFolder = ""
 	CSVEntries.Initialize
@@ -979,15 +1146,8 @@ Private Sub DoImport(phrase As String)
 	SelectedGroupId = ""
 	SelectedGroupName = ""
 
-	'Fecha a pagina primeiro
+	'Fecha a pagina
 	B4XPages.ClosePage(Me)
-
-	'Mostra resultado via Toast (nao bloqueia)
-	Dim msg As String = imported & " " & ModLang.T("csv_imported")
-	If updated > 0 Then
-		msg = msg & ", " & updated & " " & ModLang.T("csv_updated")
-	End If
-	ToastMessageShow(msg, True)
 End Sub
 
 'Busca entrada existente pelo URL + username
