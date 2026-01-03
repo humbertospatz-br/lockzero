@@ -59,7 +59,11 @@ Public Sub ExportBackup(backupPhrase As String, destFolder As String) As String
 		'Metadados
 		backup.Put("version", BACKUP_VERSION)
 		backup.Put("appVersion", Starter.APP_VERSION)
-		backup.Put("edition", Starter.EDITION_NAME)
+		#If f
+		backup.Put("edition", "Free")
+		#Else If P
+		backup.Put("edition", "Premium")
+		#End If
 		backup.Put("createdAt", DateTime.Now)
 		backup.Put("deviceModel", GetDeviceInfo)
 

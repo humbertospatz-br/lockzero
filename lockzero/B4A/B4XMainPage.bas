@@ -254,7 +254,11 @@ Private Sub CreateHeader
 	ivLogo.Gravity = Gravity.FILL
 	pnlHeader.AddView(ivLogo, 16dip, 8dip, 40dip, 40dip)
 	Try
-		ivLogo.Bitmap = LoadBitmap(File.DirAssets, "ic_lockzero.png")
+		#If f
+			ivLogo.Bitmap = LoadBitmap(File.DirAssets, "ic_lockzero.png")
+		#Else If P
+			ivLogo.Bitmap = LoadBitmap(File.DirAssets, "ic_lockzero_premium.png")
+		#End If
 	Catch
 		Log("Erro ao carregar ic_lockzero.png: " & LastException.Message)
 	End Try
@@ -300,7 +304,11 @@ Private Sub CreateFooter
 	'Versao/Status
 	Dim lblVersion As Label
 	lblVersion.Initialize("")
-	lblVersion.Text = ModLang.T("free_version") & " - v" & Starter.APP_VERSION
+	#If P
+		lblVersion.Text = ModLang.T("premium_version") & " - v" & Starter.APP_VERSION
+	#Else If f
+		lblVersion.Text = ModLang.T("free_version") & " - v" & Starter.APP_VERSION
+	#End If
 	lblVersion.TextSize = 12
 	lblVersion.TextColor = Colors.ARGB(140, 255, 255, 255) '~55% alpha
 	lblVersion.Gravity = Gravity.CENTER_HORIZONTAL

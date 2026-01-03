@@ -285,7 +285,16 @@ Private Sub pnlGroup_Click
 	End If
 
 	'Sessao inativa - verifica se frase ja foi configurada
-	If g.Salt = "" Or g.TestValue = "" Then
+	'Se frase unica ativa: verifica frase GLOBAL
+	'Se frase multipla: verifica frase do GRUPO
+	Dim hasPassphrase As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		hasPassphrase = ModSecurity.HasGlobalPassphrase
+	Else
+		hasPassphrase = (g.Salt <> "" And g.TestValue <> "")
+	End If
+
+	If hasPassphrase = False Then
 		'Frase NAO configurada - mostra dialog para CRIAR
 		ShowSetupPassphraseDialog(groupId)
 	Else
@@ -1048,6 +1057,13 @@ Private Sub ProcessAddGroup
 	g.IsSecure = isSecure
 
 	'Se seguro, configura seguranca
+	'Se frase unica ativa, salva como frase GLOBAL
+	If isSecure And ModSecurity.GetUseSinglePassphrase Then
+		If ModSecurity.HasGlobalPassphrase = False Then
+			ModSecurity.SetupGlobalPassphrase(phrase)
+		End If
+	End If
+
 	If isSecure Then
 		g.SetupSecurity(phrase)
 		'Inicia ou renova sessao com a frase (categoria: notes)
@@ -1095,6 +1111,11 @@ Private Sub ProcessSetupGroup
 		Return
 	End If
 
+	'Se frase unica ativa, salva como frase GLOBAL
+	If ModSecurity.GetUseSinglePassphrase Then
+		ModSecurity.SetupGlobalPassphrase(phrase)
+	End If
+
 	'Configura seguranca do grupo (Salt + TestValue)
 	g.SetupSecurity(phrase)
 
@@ -1119,8 +1140,15 @@ Private Sub ProcessUnlockGroup
 		Return
 	End If
 
-	'Valida frase
-	If g.ValidatePhrase(phrase) Then
+	'Valida frase (global ou por grupo)
+	Dim isValid As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		isValid = ModSecurity.ValidateGlobalPassphrase(phrase)
+	Else
+		isValid = g.ValidatePhrase(phrase)
+	End If
+
+	If isValid Then
 		ModSecurity.ResetFailedAttempts(CurrentGroupId)
 		ModSession.StartSessionWithCategory(phrase, "notes")
 		'Limpa campo e clipboard por seguranca
@@ -1170,8 +1198,15 @@ Private Sub ProcessDeleteGroup
 		Return
 	End If
 
-	'Valida frase
-	If g.ValidatePhrase(phrase) Then
+	'Valida frase (global ou por grupo)
+	Dim isValid As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		isValid = ModSecurity.ValidateGlobalPassphrase(phrase)
+	Else
+		isValid = g.ValidatePhrase(phrase)
+	End If
+
+	If isValid Then
 		ModNotes.DeleteNoteGroup(CurrentGroupId)
 		HideDialog
 		LoadGroups

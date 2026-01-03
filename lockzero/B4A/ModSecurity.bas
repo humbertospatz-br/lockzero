@@ -986,6 +986,64 @@ Public Sub GetUseSinglePassphrase As Boolean
 End Sub
 
 ' ============================================
+'  FRASE GLOBAL (quando frase unica esta ativa)
+' ============================================
+'Quando UseSinglePassphrase = True, Salt e TestValue sao armazenados
+'globalmente e usados para todos os grupos seguros (Notas + Senhas)
+
+'Verifica se frase global ja foi configurada
+Public Sub HasGlobalPassphrase As Boolean
+	Dim salt As String = GetSetting("globalSalt", "")
+	Dim test As String = GetSetting("globalTestValue", "")
+	Return salt <> "" And test <> ""
+End Sub
+
+'Configura frase global (cria Salt + TestValue)
+Public Sub SetupGlobalPassphrase(phrase As String)
+	If phrase.Length = 0 Then Return
+
+	'Gera salt aleatorio
+	Dim salt As String = GenerateRandomSalt
+
+	'Cria test value usando PBKDF2 (igual ao PIN)
+	Dim normalizedPhrase As String = NormalizePassphrase(phrase)
+	Dim hashBytes() As Byte = DeriveKeyPBKDF2(normalizedPhrase, salt)
+	If hashBytes = Null Then Return
+
+	Dim testValue As String = BytesToHex(hashBytes)
+	ZeroBytes(hashBytes)
+
+	SetSetting("globalSalt", salt)
+	SetSetting("globalTestValue", testValue)
+End Sub
+
+'Valida frase global
+Public Sub ValidateGlobalPassphrase(phrase As String) As Boolean
+	Dim salt As String = GetSetting("globalSalt", "")
+	Dim testValue As String = GetSetting("globalTestValue", "")
+
+	If salt = "" Or testValue = "" Then Return False
+
+	Dim normalizedPhrase As String = NormalizePassphrase(phrase)
+	Dim hashBytes() As Byte = DeriveKeyPBKDF2(normalizedPhrase, salt)
+	If hashBytes = Null Then Return False
+
+	Dim check As String = BytesToHex(hashBytes)
+	ZeroBytes(hashBytes)
+
+	Return SecureCompare(check, testValue)
+End Sub
+
+'Retorna salt global (para criptografia)
+Public Sub GetGlobalSalt As String
+	Return GetSetting("globalSalt", "")
+End Sub
+
+'Retorna test value global (para validacao)
+Public Sub GetGlobalTestValue As String
+	Return GetSetting("globalTestValue", "")
+End Sub
+' ============================================
 '  PIN DE ACESSO (4-8 digitos) - SEGURO
 ' ============================================
 '

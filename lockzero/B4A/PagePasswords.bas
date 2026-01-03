@@ -441,8 +441,24 @@ Private Sub pnlGroup_Click
 		Return
 	End If
 
-	'Sessao inativa - SEMPRE pede frase
-	Log("Sessao inativa - mostrando dialog")
+	'Sessao inativa - verifica se frase foi configurada
+	'Se frase unica ativa: verifica frase GLOBAL
+	'Se frase multipla: verifica frase do GRUPO
+	Dim hasPassphrase As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		hasPassphrase = ModSecurity.HasGlobalPassphrase
+	Else
+		hasPassphrase = (g.Salt <> "" And g.TestValue <> "")
+	End If
+
+	If hasPassphrase = False Then
+		'Frase NAO configurada - mostra dialog para CRIAR (adicionar grupo)
+		Log("Frase nao configurada - mostrando dialog de criar")
+		ShowAddGroupDialog
+		Return
+	End If
+
+	'Frase configurada - pede para desbloquear
 	ShowUnlockGroupDialog(groupId)
 End Sub
 
@@ -912,8 +928,15 @@ Private Sub ProcessDeleteGroup
 		Return
 	End If
 
-	'Valida frase com TestValue do grupo
-	If g.ValidatePhrase(phrase) Then
+	'Valida frase (global ou por grupo)
+	Dim isValid As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		isValid = ModSecurity.ValidateGlobalPassphrase(phrase)
+	Else
+		isValid = g.ValidatePhrase(phrase)
+	End If
+
+	If isValid Then
 		'Frase correta - apaga grupo
 		ModPasswords.DeleteGroup(CurrentGroupId)
 		HideDialog
@@ -1001,6 +1024,13 @@ Private Sub ProcessAddGroup
 		End If
 	End If
 
+	'Se frase unica ativa, salva como frase GLOBAL
+	If ModSecurity.GetUseSinglePassphrase Then
+		If ModSecurity.HasGlobalPassphrase = False Then
+			ModSecurity.SetupGlobalPassphrase(phrase)
+		End If
+	End If
+
 	'Cria grupo com TestValue
 	Dim g As clsPasswordGroup
 	g.Initialize
@@ -1030,8 +1060,15 @@ Private Sub ProcessUnlockGroup
 		Return
 	End If
 
-	'Valida frase com TestValue do grupo
-	If g.ValidatePhrase(phrase) Then
+	'Valida frase (global ou por grupo)
+	Dim isValid As Boolean
+	If ModSecurity.GetUseSinglePassphrase Then
+		isValid = ModSecurity.ValidateGlobalPassphrase(phrase)
+	Else
+		isValid = g.ValidatePhrase(phrase)
+	End If
+
+	If isValid Then
 		'Frase correta - reseta tentativas e inicia sessao (categoria: passwords)
 		ModSecurity.ResetFailedAttempts(CurrentGroupId)
 		ModSession.StartSessionWithCategory(phrase, "passwords")

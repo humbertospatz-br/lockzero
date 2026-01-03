@@ -84,7 +84,7 @@ Public Sub Warning As Int
 End Sub
 
 Public Sub Danger As Int
-	Return Colors.RGB(140, 45, 50) '#8C2D32 Vermelho escuro
+	Return Colors.RGB(255, 120, 100) '#FF7864 Coral claro - visivel no fundo azul
 End Sub
 
 Public Sub Info As Int

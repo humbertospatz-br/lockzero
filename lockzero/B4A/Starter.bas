@@ -19,13 +19,13 @@ Sub Process_Globals
 	Public Const APP_TAGLINE As String = "Lock and ZERO worries"
 
 	'=== VERSAO FREE/PREMIUM ===
-	'Para compilar versao PREMIUM: mudar IS_PREMIUM para True
-	Public Const IS_PREMIUM As Boolean = False   'FREE = False, PREMIUM = True
-	Public Const EDITION_NAME As String = "Free" 'Mudar para "Premium" se IS_PREMIUM = True
+	'Versao controlada pelo Build Configuration do B4A:
+	'  free -> #If f | premium -> #If P
+	'Use build.bat para trocar o icone antes de compilar
 
 	'=== LIMITES POR VERSAO ===
 	'FREE: limites reduzidos | PREMIUM: praticamente ilimitado
-	'NOTA: Alterar manualmente ao mudar IS_PREMIUM
+	
 
 	'--- Limites versao FREE ---
 	Public Const MAX_PASSWORDS As Int = 15           'Total de senhas
