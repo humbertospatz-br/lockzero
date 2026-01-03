@@ -365,14 +365,14 @@ Private Sub ShowLanguageDialog
 	lblTitle.Gravity = Gravity.CENTER_HORIZONTAL
 	pnlDialog.AddView(lblTitle, 0, 16dip, dialogW, 30dip)
 
-	'Opcoes
+	'Opcoes - 4 idiomas
 	Dim btnPT As Button
 	btnPT.Initialize("btnLangPT")
-	btnPT.Text = "Portugues"
+	btnPT.Text = "Português"
 	btnPT.TextSize = 14
 	btnPT.Color = ModTheme.HomeIconBg
 	btnPT.TextColor = Colors.White
-	pnlDialog.AddView(btnPT, 20dip, 60dip, dialogW - 40dip, 48dip)
+	pnlDialog.AddView(btnPT, 20dip, 60dip, dialogW - 40dip, 44dip)
 
 	Dim btnEN As Button
 	btnEN.Initialize("btnLangEN")
@@ -380,7 +380,23 @@ Private Sub ShowLanguageDialog
 	btnEN.TextSize = 14
 	btnEN.Color = ModTheme.HomeIconBg
 	btnEN.TextColor = Colors.White
-	pnlDialog.AddView(btnEN, 20dip, 118dip, dialogW - 40dip, 48dip)
+	pnlDialog.AddView(btnEN, 20dip, 112dip, dialogW - 40dip, 44dip)
+
+	Dim btnES As Button
+	btnES.Initialize("btnLangES")
+	btnES.Text = "Español"
+	btnES.TextSize = 14
+	btnES.Color = ModTheme.HomeIconBg
+	btnES.TextColor = Colors.White
+	pnlDialog.AddView(btnES, 20dip, 164dip, dialogW - 40dip, 44dip)
+
+	Dim btnHE As Button
+	btnHE.Initialize("btnLangHE")
+	btnHE.Text = "עברית"
+	btnHE.TextSize = 14
+	btnHE.Color = ModTheme.HomeIconBg
+	btnHE.TextColor = Colors.White
+	pnlDialog.AddView(btnHE, 20dip, 216dip, dialogW - 40dip, 44dip)
 
 	'Cancelar
 	Dim btnCancel As Button
@@ -389,9 +405,9 @@ Private Sub ShowLanguageDialog
 	btnCancel.TextSize = 13
 	btnCancel.Color = Colors.Transparent
 	btnCancel.TextColor = Colors.ARGB(180, 255, 255, 255)
-	pnlDialog.AddView(btnCancel, 20dip, 180dip, dialogW - 40dip, 40dip)
+	pnlDialog.AddView(btnCancel, 20dip, 275dip, dialogW - 40dip, 40dip)
 
-	pnlDialog.SetLayoutAnimated(0, 20dip, 100dip, dialogW, 230dip)
+	pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dialogW, 330dip)
 	pnlOverlay.Visible = True
 	pnlOverlay.BringToFront
 End Sub
@@ -407,6 +423,22 @@ End Sub
 Private Sub btnLangEN_Click
 	ModLang.SetLanguage("en")
 	ModSecurity.SaveLanguage("en")
+	HideDialog
+	RefreshUI
+	ToastMessageShow(ModLang.T("success"), False)
+End Sub
+
+Private Sub btnLangES_Click
+	ModLang.SetLanguage("es")
+	ModSecurity.SaveLanguage("es")
+	HideDialog
+	RefreshUI
+	ToastMessageShow(ModLang.T("success"), False)
+End Sub
+
+Private Sub btnLangHE_Click
+	ModLang.SetLanguage("he")
+	ModSecurity.SaveLanguage("he")
 	HideDialog
 	RefreshUI
 	ToastMessageShow(ModLang.T("success"), False)

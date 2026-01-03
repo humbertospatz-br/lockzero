@@ -545,11 +545,11 @@ _mimetype = BA.ObjectToString(_jo.RunMethod("getType",(Object[])(anywheresoftwar
 if (_mimetype== null) { 
 _mimetype = "";};
  //BA.debugLineNum = 127;BA.debugLine="Log(\"=== Arquivo recebido via Intent ===\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196629","=== Arquivo recebido via Intent ===",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196629","=== Arquivo recebido via Intent ===",0);
  //BA.debugLineNum = 128;BA.debugLine="Log(\"URI: \" & uriStr)";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196630","URI: "+_uristr,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196630","URI: "+_uristr,0);
  //BA.debugLineNum = 129;BA.debugLine="Log(\"MimeType: \" & mimeType)";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196631","MimeType: "+_mimetype,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196631","MimeType: "+_mimetype,0);
  //BA.debugLineNum = 132;BA.debugLine="Dim isCSV As Boolean = False";
 _iscsv = anywheresoftware.b4a.keywords.Common.False;
  //BA.debugLineNum = 133;BA.debugLine="If mimeType <> \"\" Then";
@@ -570,7 +570,7 @@ _destfolder = mostCurrent._starter._provider /*com.lockzero.fileprovider*/ ._sha
  //BA.debugLineNum = 144;BA.debugLine="If isCSV Then";
 if (_iscsv) { 
  //BA.debugLineNum = 146;BA.debugLine="Log(\"Detectado arquivo CSV\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196648","Detectado arquivo CSV",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196648","Detectado arquivo CSV",0);
  //BA.debugLineNum = 147;BA.debugLine="Dim fileName As String = \"import_\" & DateTime.N";
 _filename = "import_"+BA.NumberToString(anywheresoftware.b4a.keywords.Common.DateTime.getNow())+".csv";
  //BA.debugLineNum = 149;BA.debugLine="Dim In As InputStream = ContentResolver_OpenInp";
@@ -586,7 +586,7 @@ _in.Close();
  //BA.debugLineNum = 153;BA.debugLine="Out.Close";
 _out.Close();
  //BA.debugLineNum = 155;BA.debugLine="Log(\"CSV copiado para: \" & destFolder & \"/\" & f";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196657","CSV copiado para: "+_destfolder+"/"+_filename,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196657","CSV copiado para: "+_destfolder+"/"+_filename,0);
  //BA.debugLineNum = 158;BA.debugLine="PendingCSVFile = fileName";
 _pendingcsvfile = _filename;
  //BA.debugLineNum = 159;BA.debugLine="PendingCSVFolder = destFolder";
@@ -597,7 +597,7 @@ mostCurrent._pgimportcsv._setcsvfile /*String*/ (_destfolder,_filename);
 mostCurrent._b4xpages._showpage /*String*/ (mostCurrent.activityBA,"PageImportCSV");
  }else {
  //BA.debugLineNum = 166;BA.debugLine="Log(\"Detectado arquivo .lockzero\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196668","Detectado arquivo .lockzero",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196668","Detectado arquivo .lockzero",0);
  //BA.debugLineNum = 167;BA.debugLine="Dim fileName As String = \"imported_\" & DateTime";
 _filename = "imported_"+BA.NumberToString(anywheresoftware.b4a.keywords.Common.DateTime.getNow())+".lockzero";
  //BA.debugLineNum = 169;BA.debugLine="Dim In As InputStream = ContentResolver_OpenInp";
@@ -613,11 +613,11 @@ _in.Close();
  //BA.debugLineNum = 173;BA.debugLine="Out.Close";
 _out.Close();
  //BA.debugLineNum = 175;BA.debugLine="Log(\"Arquivo copiado para: \" & destFolder & \"/\"";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196677","Arquivo copiado para: "+_destfolder+"/"+_filename,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196677","Arquivo copiado para: "+_destfolder+"/"+_filename,0);
  //BA.debugLineNum = 178;BA.debugLine="Dim fileSize As Long = File.Size(destFolder, fi";
 _filesize = anywheresoftware.b4a.keywords.Common.File.Size(_destfolder,_filename);
  //BA.debugLineNum = 179;BA.debugLine="Log(\"Tamanho do arquivo: \" & fileSize & \" bytes";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196681","Tamanho do arquivo: "+BA.NumberToString(_filesize)+" bytes",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196681","Tamanho do arquivo: "+BA.NumberToString(_filesize)+" bytes",0);
  //BA.debugLineNum = 182;BA.debugLine="PendingBackupFile = fileName";
 _pendingbackupfile = _filename;
  //BA.debugLineNum = 185;BA.debugLine="Dim pgBackup As PageBackup = B4XPages.GetPage(\"";
@@ -628,7 +628,7 @@ mostCurrent._b4xpages._showpage /*String*/ (mostCurrent.activityBA,"PageBackup")
  } 
        catch (Exception e55) {
 			processBA.setLastException(e55); //BA.debugLineNum = 190;BA.debugLine="Log(\"CheckIncomingIntent erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("8196692","CheckIncomingIntent erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(mostCurrent.activityBA)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("6196692","CheckIncomingIntent erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(mostCurrent.activityBA)),0);
  };
  //BA.debugLineNum = 192;BA.debugLine="End Sub";
 return "";

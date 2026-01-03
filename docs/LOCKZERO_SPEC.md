@@ -1,7 +1,7 @@
 # LOCKZERO - Especificacao Tecnica
 
-> **Versao:** 0.1.0
-> **Data:** Dezembro 2025
+> **Versao:** 2.0
+> **Data:** Janeiro 2026
 > **Stack:** B4A / B4xPages (Android)
 > **Conceito:** "Lock and ZERO worries - Guarde suas informacoes e ZERO preocupacao"
 
@@ -27,11 +27,11 @@
 ### O que e o LockZero?
 
 Cofre digital **100% offline** para armazenamento seguro de:
-- Senhas de sites e aplicativos
-- Cartoes de credito/debito (futuro)
-- Documentos pessoais (futuro)
-- Notas seguras
-- Credenciais Wi-Fi (futuro)
+- **Senhas** de sites e aplicativos (com importacao CSV)
+- **Notas seguras** (texto livre, listas com checkbox, anexos de arquivos)
+
+> **Filosofia simplificada:** O LockZero foca em fazer duas coisas muito bem - Senhas e Notas.
+> Cartoes de credito podem ser armazenados como notas de lista com template pre-definido.
 
 ### Principios Fundamentais
 
@@ -45,10 +45,13 @@ Cofre digital **100% offline** para armazenamento seguro de:
 ### Diferenciais
 
 - 100% Offline - dados nunca saem do dispositivo
-- Frase-senha pessoal para criptografia
+- Frase-senha pessoal para criptografia (AES-256)
+- PIN + Biometria para acesso ao app
 - Protecao contra brute force progressiva
-- Backup criptografado .lockzero
-- Multi-idioma (PT/EN)
+- Backup criptografado .lockzero (inclui anexos)
+- Multi-idioma (PT/EN/ES/HE - 4 idiomas)
+- Anexos de arquivos em notas (imagens, videos, documentos)
+- Anexos criptografados e compactados em area interna do app
 
 ---
 
@@ -103,31 +106,46 @@ lockzero/B4A/
 +-- Main.bas              # Activity B4xPages
 +-- B4XMainPage.bas       # Home + Dashboard
 |
-+-- # PAGINAS
-+-- PagePasswords.bas     # Lista de grupos
++-- # PAGINAS PRINCIPAIS
++-- PageOnboarding.bas    # Primeiro uso (4 idiomas)
++-- PageSettings.bas      # Configuracoes (PIN, biometria, idioma)
++-- PageGenerator.bas     # Gerador de senhas
+|
++-- # SENHAS
++-- PagePasswords.bas     # Lista de grupos de senhas
 +-- PagePasswordList.bas  # Senhas do grupo
-+-- PagePasswordEdit.bas  # Criar/editar senha
-+-- PageNotesList.bas     # Lista de notas
-+-- PageNoteEdit.bas      # Criar/editar nota
-+-- PageBackup.bas        # Export/Import .lockzero
-+-- PageOnboarding.bas    # Primeiro uso
++-- PagePasswordEdit.bas  # Criar/editar senha (com indicador de forca)
++-- PageImportCSV.bas     # Importar senhas de CSV
+|
++-- # NOTAS
++-- PageNotesGroups.bas   # Lista de grupos de notas
++-- PageNotesList.bas     # Notas do grupo
++-- PageNoteEdit.bas      # Criar/editar nota (texto/lista/anexos)
+|
++-- # BACKUP
++-- PageBackupExport.bas  # Exportar backup
++-- PageBackupImport.bas  # Importar backup
 |
 +-- # MODULOS
-+-- ModSecurity.bas       # AES-256, brute force, settings
++-- ModSecurity.bas       # AES-256, PIN, biometria, brute force
 +-- ModSession.bas        # Gerenciador de sessao
 +-- ModPasswords.bas      # CRUD senhas e grupos
-+-- ModNotes.bas          # CRUD notas
-+-- ModBackup.bas         # Backup .lockzero
++-- ModNotes.bas          # CRUD notas e grupos
++-- ModAttachments.bas    # Gestao de anexos (copia, criptografa, compacta)
++-- ModBackup.bas         # Backup .lockzero (inclui anexos)
 +-- ModTheme.bas          # Cores e tema
-+-- ModLang.bas           # Multi-idioma PT/EN
++-- ModLang.bas           # Multi-idioma PT/EN/ES/HE
++-- ModGenerator.bas      # Gerador de senhas
++-- ModTransition.bas     # Transicoes de tela
 |
 +-- # CLASSES
-+-- clsPasswordGroup.bas  # Modelo de grupo
++-- clsPasswordGroup.bas  # Modelo de grupo de senhas
 +-- clsPasswordEntry.bas  # Modelo de senha
-+-- clsNoteEntry.bas      # Modelo de nota
++-- clsNoteGroup.bas      # Modelo de grupo de notas
++-- clsNoteEntry.bas      # Modelo de nota (texto/lista/anexos)
 |
-+-- Files/                # Assets
-    +-- ic_*.png          # Icones (futuro)
++-- Files/                # Assets (icones, fontes)
++-- Attachments/          # Pasta interna para anexos criptografados
 ```
 
 ---
@@ -266,17 +284,25 @@ CategoryNote:      RGB(45, 55, 70)   Cinza ardosia
 
 ### ModLang.bas
 
-Internacionalizacao PT/EN.
+Internacionalizacao em 4 idiomas: PT, EN, ES, HE (Hebraico).
 
 ```basic
 Public Sub T(key) As String  'Retorna texto traduzido
-Public Sub SetLanguage(lang)  '"pt" ou "en"
+Public Sub SetLanguage(lang)  '"pt", "en", "es" ou "he"
 Public Sub GetLanguage() As String
+Public Sub GetLanguageName() As String  '"Português", "English", "Español", "עברית"
 
-'Chaves principais:
+'Funcoes de carregamento:
+Private Sub LoadPortuguese()
+Private Sub LoadEnglish()
+Private Sub LoadSpanish()
+Private Sub LoadHebrew()
+
+'~200 strings por idioma incluindo:
 passwords, cards, documents, notes, backup
 save, cancel, delete, edit, confirm
 session_expired, wrong_passphrase, success, error
+attachments, add_attachment, open_file, delete_attachment
 ```
 
 ---
@@ -330,19 +356,202 @@ Public Sub FromMap(m As Map)
 ```basic
 Public Id As String
 Public GroupId As String
-Public TitleEnc As String      'Criptografado
-Public ContentEnc As String    'Criptografado
+Public Title As String         'Titulo (criptografado se grupo seguro)
+Public Content As String       'Conteudo texto livre (criptografado se grupo seguro)
+Public NoteType As String      '"text" ou "list"
+Public Items As String         'JSON array de itens para lista: [{text, checked}, ...]
+Public Attachments As String   'JSON array de anexos: [{dir, name}, ...]
+Public SortOrder As Int        'Ordem manual
 Public IsFavorite As Boolean
 Public CreatedAt As Long
 Public UpdatedAt As Long
 
-'Metodos:
-Public Sub Initialize()
+'Metodos de criptografia:
 Public Sub EncryptTitle(passphrase, title)
 Public Sub EncryptContent(passphrase, content)
+Public Sub EncryptItems(passphrase, plainItems)
+Public Sub EncryptAttachments(passphrase, plainAttachments)
 Public Sub GetDecryptedTitle(passphrase) As String
 Public Sub GetDecryptedContent(passphrase) As String
+Public Sub GetDecryptedItems(passphrase) As String
+Public Sub GetDecryptedAttachments(passphrase) As String
+
+'Metodos de lista (checkbox):
+Public Sub GetItemsList() As List
+Public Sub SetItemsList(itemsList As List)
+Public Sub AddItem(text As String)
+Public Sub ToggleItem(index As Int)
+Public Sub RemoveItem(index As Int)
+Public Sub GetItemsCount() As Int
+Public Sub GetCheckedCount() As Int
+
+'Metodos de anexos:
+Public Sub GetAttachmentsList() As List
+Public Sub SetAttachmentsList(attachList As List)
+Public Sub AddAttachment(filePath As String)
+Public Sub RemoveAttachment(index As Int)
+Public Sub GetAttachmentsCount() As Int
 ```
+
+---
+
+## Sistema de Anexos (Attachments)
+
+> **Objetivo:** Permitir anexar imagens, videos e documentos a notas de forma segura.
+
+### Fluxo de Armazenamento
+
+```
+USUARIO SELECIONA ARQUIVO:
+1. ContentChooser abre seletor de arquivos do sistema
+2. Usuario seleciona imagem, video ou documento
+3. LockZero valida tamanho (max 25MB por arquivo)
+4. Arquivo e COPIADO para pasta interna do app
+
+PROCESSAMENTO:
+5. Arquivo original e lido em bytes
+6. Bytes sao criptografados com AES-256 (frase-senha do grupo)
+7. Resultado e compactado (ZIP) para economizar espaco
+8. Arquivo .lza (LockZero Attachment) e salvo em File.DirInternal/Attachments/
+
+ESTRUTURA DO ARQUIVO .lza:
+{
+  "version": 1,
+  "noteId": "uuid-da-nota",
+  "originalName": "foto.jpg",
+  "originalSize": 1234567,
+  "mimeType": "image/jpeg",
+  "encryptedData": "base64...",
+  "checksum": "sha256..."
+}
+```
+
+### Limites de Tamanho
+
+| Tipo | Limite por Arquivo | Justificativa |
+|------|-------------------|---------------|
+| Imagem | 25 MB | Fotos de alta resolucao (RAW, HEIC) |
+| Video | 25 MB | Clips curtos (1-2 min em 720p) |
+| Documento | 25 MB | PDFs grandes, apresentacoes |
+| **Total por Nota** | 100 MB | Evitar notas muito pesadas |
+| **Total no App** | 500 MB | Espaco razoavel para dispositivo |
+
+> **Nota:** Limites podem ser configurados em versao PREMIUM futura.
+
+### Estrutura de Armazenamento
+
+```
+File.DirInternal/
+├── lockzero_passwords.json      # Senhas (criptografadas)
+├── lockzero_notes.json          # Notas (criptografadas)
+├── lockzero_settings.dat        # Configuracoes
+├── Attachments/                 # Pasta de anexos
+│   ├── {noteId}/               # Subpasta por nota
+│   │   ├── {uuid1}.lza         # Anexo criptografado
+│   │   ├── {uuid2}.lza         # Anexo criptografado
+│   │   └── ...
+│   └── ...
+└── Temp/                        # Arquivos temporarios (limpos ao sair)
+```
+
+### Backup de Anexos
+
+**Anexos sao incluidos no backup .lockzero:**
+
+```
+ESTRUTURA DO BACKUP v2.0:
+{
+  "version": 2,
+  "appVersion": "0.2.0",
+  "createdAt": 1704000000000,
+  "checksum": "sha256...",
+  "data": {
+    "passwords": [...],
+    "notes": [...],
+    "attachments": {
+      "note-uuid-1": [
+        {
+          "id": "attach-uuid",
+          "originalName": "foto.jpg",
+          "mimeType": "image/jpeg",
+          "size": 1234567,
+          "data": "base64_criptografado..."
+        }
+      ]
+    }
+  }
+}
+```
+
+**Observacoes:**
+- Backup fica maior com anexos (considerar isso no compartilhamento)
+- Anexos ja estao criptografados, nao precisam criptografar de novo
+- Restaurar backup recria pasta Attachments/
+- Se espaco insuficiente, backup falha com mensagem clara
+
+### ModAttachments.bas (a implementar)
+
+```basic
+'Constantes:
+Public Const MAX_FILE_SIZE As Long = 26214400      '25 MB
+Public Const MAX_TOTAL_NOTE As Long = 104857600    '100 MB
+Public Const MAX_TOTAL_APP As Long = 524288000     '500 MB
+Public Const ATTACHMENTS_FOLDER As String = "Attachments"
+
+'Funcoes principais:
+Public Sub AddAttachment(noteId, filePath, passphrase) As Map  'Retorna info do anexo
+Public Sub GetAttachment(noteId, attachId, passphrase) As Byte()  'Retorna bytes originais
+Public Sub DeleteAttachment(noteId, attachId)
+Public Sub DeleteAllAttachments(noteId)  'Ao deletar nota
+Public Sub GetAttachmentInfo(noteId, attachId) As Map
+Public Sub ListAttachments(noteId) As List
+
+'Funcoes de validacao:
+Public Sub ValidateFileSize(filePath) As Boolean
+Public Sub GetTotalNoteSize(noteId) As Long
+Public Sub GetTotalAppSize() As Long
+Public Sub CanAddAttachment(noteId, fileSize) As Boolean
+
+'Funcoes de backup:
+Public Sub ExportAttachmentsForBackup(noteId) As List  'Lista de Maps
+Public Sub ImportAttachmentsFromBackup(noteId, attachmentsList, passphrase)
+
+'Funcoes auxiliares:
+Public Sub GetMimeType(fileName) As String
+Public Sub GetTempFilePath(attachId) As String
+Public Sub CleanupTempFiles()
+```
+
+### Tipos de Arquivo Suportados
+
+| Categoria | Extensoes | MIME Types |
+|-----------|-----------|------------|
+| Imagens | jpg, jpeg, png, gif, webp, heic | image/* |
+| Videos | mp4, mov, avi, mkv, webm | video/* |
+| Documentos | pdf, doc, docx, xls, xlsx, ppt, pptx | application/* |
+| Texto | txt, csv, json, xml | text/* |
+
+> **Arquivos nao suportados:** Executaveis (.exe, .apk), scripts (.sh, .bat)
+
+### Interface de Usuario
+
+**PageNoteEdit.bas - Secao de Anexos:**
+```
+┌─────────────────────────────────────┐
+│ Anexos (3)                    [+ ]  │
+├─────────────────────────────────────┤
+│ 📷 foto_documento.jpg    1.2 MB  🗑 │
+│ 📄 contrato.pdf          450 KB  🗑 │
+│ 🎬 video_curto.mp4       15 MB   🗑 │
+├─────────────────────────────────────┤
+│ Espaco usado: 16.6 MB / 100 MB      │
+└─────────────────────────────────────┘
+```
+
+**Acoes:**
+- Toque no anexo: Abre com app externo (descriptografa para Temp/)
+- Toque na lixeira: Confirma e remove anexo
+- Toque no +: Abre ContentChooser para selecionar arquivo
 
 ---
 
@@ -350,7 +559,7 @@ Public Sub GetDecryptedContent(passphrase) As String
 
 ### B4XMainPage.bas - Home
 
-- Lista vertical de categorias (Senhas, Cartoes, Documentos, Notas)
+- Lista vertical de categorias (Senhas, Notas)
 - Cada item com avatar, titulo, subtitulo e chevron
 - Menu lateral com opcoes adicionais
 - Rodape com versao FREE/Premium
@@ -384,10 +593,26 @@ Public Sub GetDecryptedContent(passphrase) As String
 - Checkbox favorito
 - Scroll automatico quando teclado abre
 
-### PageNotesList.bas / PageNoteEdit.bas
+### PageNotesGroups.bas / PageNotesList.bas / PageNoteEdit.bas
 
-- Mesma estrutura das senhas
-- Campos: Titulo, Conteudo, Favorito
+**PageNotesGroups.bas:**
+- Lista de grupos de notas (seguros e nao-seguros)
+- Click: abre lista de notas do grupo
+- Long click: editar/deletar grupo
+
+**PageNotesList.bas:**
+- Lista de notas do grupo
+- Icone indica tipo (texto ou lista)
+- Preview do conteudo ou "X de Y itens"
+- Busca com icone lupa no header
+
+**PageNoteEdit.bas:**
+- Selecao de tipo: texto ou lista
+- Nota de texto: Titulo + Conteudo livre
+- Nota de lista: Titulo + Items com checkbox
+- Secao de anexos (arquivos)
+- ContentChooser para selecionar arquivos
+- Abrir anexo com app externo
 
 ### PageBackup.bas
 
@@ -399,11 +624,14 @@ Public Sub GetDecryptedContent(passphrase) As String
 
 ### PageOnboarding.bas
 
-- 3 telas simples:
+- 4 telas simples:
+  0. Language - selecao de idioma (PT/EN/ES/HE)
   1. Welcome - apresentacao
   2. Warning - aviso zero recuperacao
   3. Complete - pronto para usar
+- RadioButtons para selecao de idioma
 - Checkbox obrigatorio "Entendi os riscos"
+- Textos traduzidos conforme idioma selecionado
 
 ---
 
@@ -701,22 +929,21 @@ Border radius:    8-12dip
 | Recurso | Limite |
 |---------|--------|
 | Senhas | 15 |
-| Cartoes | 3 |
-| Notas | 5 |
-| Documentos | 2 |
-| Wi-Fi | 3 |
+| Notas | 10 |
+| Anexos por nota | 3 |
+| Tamanho total anexos | 100 MB |
 | Backup .lockzero | Sim |
 | Gerador senhas | Basico |
-| OCR Scanner | Nao |
 | Import CSV | Sim (Chrome, Edge, Firefox) |
-| Export CSV | Nao |
 
 ### PREMIUM (futuro)
 
 | Recurso | Descricao |
 |---------|-----------|
-| Itens ilimitados | Todas categorias sem limite |
-| OCR Scanner | Cartoes, documentos |
+| Senhas ilimitadas | Sem limite de senhas |
+| Notas ilimitadas | Sem limite de notas |
+| Anexos ilimitados | Sem limite por nota |
+| Tamanho total anexos | 2 GB |
 | Export CSV | Exportar para outros gerenciadores |
 | Gerador avancado | Memoravel, passphrase, PIN |
 | Detector senhas fracas | Lista senhas com forca baixa |
@@ -845,52 +1072,29 @@ MIGRACAO:
 | 2 | Forte | Verde | 12-15 chars + 3 tipos OU 16+ chars + 2 tipos |
 | 3 | Muito forte | Verde brilhante | 16+ chars + 4 tipos OU 20+ chars + 3 tipos |
 
-### v0.2.0 - Cartoes
+### v0.2.0 - Sistema de Anexos
 
-- [ ] clsCardEntry + ModCards
-- [ ] PageCards, PageCardEdit
-- [ ] Deteccao de bandeira (Visa, Master, etc)
-- [ ] Mascara de exibicao (**** 1234)
+- [ ] ModAttachments.bas - gestao de anexos
+- [ ] Copia arquivo para area interna
+- [ ] Criptografia AES-256 do arquivo
+- [ ] Compactacao ZIP
+- [ ] Limites de tamanho (25MB/arquivo, 100MB/nota, 500MB/app)
+- [ ] Interface de anexos em PageNoteEdit
+- [ ] Inclusao de anexos no backup .lockzero
 
-### v0.3.0 - Documentos
-
-- [ ] clsDocumentEntry + ModDocuments
-- [ ] PageDocuments, PageDocumentEdit
-- [ ] Galeria criptografada
-- [ ] Camera para captura
-
-### v0.4.0 - Wi-Fi + Gerador
-
-- [ ] clsWifiEntry + ModWifi
-- [ ] PageWifi, PageWifiEdit
-- [ ] Gerador de senhas completo
-- [ ] Medidor de forca
-
-### v0.5.0 - Scanner OCR
-
-- [ ] ML Kit offline
-- [ ] Scanner de cartoes
-- [ ] Scanner de documentos
-- [ ] QR Code Wi-Fi
-
-### v0.6.0 - Import/Export
-
-- [ ] Export CSV (Chrome, Edge, Firefox)
-- [ ] Import CSV
-- [ ] Export JSON
-
-### v0.7.0 - Configuracoes
+### v0.3.0 - Polimento e Configuracoes
 
 - [ ] PageSettings completo
-- [ ] PIN de acesso
-- [ ] Biometria
-- [ ] FLAG_SECURE
+- [ ] FLAG_SECURE (anti-screenshot)
+- [ ] Limpeza automatica de clipboard
+- [ ] Animacoes de transicao entre telas
 
 ### v1.0.0 - Publicacao
 
 - [ ] Testes de seguranca
 - [ ] Google Play Store
 - [ ] Documentacao usuario
+- [ ] Termos de uso e privacidade
 
 ### Funcionalidades Futuras (pos-v1.0)
 
@@ -946,7 +1150,7 @@ MIGRACAO:
 
 ---
 
-**Ultima atualizacao:** 2026-01-02
+**Ultima atualizacao:** 2026-01-03
 
 ---
 
@@ -954,14 +1158,14 @@ MIGRACAO:
 
 | Categoria | Status | Observacao |
 |-----------|--------|------------|
-| Senhas | ✅ 100% | CRUD completo, busca, favoritos |
-| Notas | ✅ 99% | Texto e lista, falta drag&drop |
-| Cartoes | ⏳ 0% | Pendente |
-| Documentos | ⏳ 0% | Pendente |
-| Wi-Fi | ⏳ 0% | Pendente |
-| Backup | ✅ 100% | Export/Import .lockzero |
+| Senhas | ✅ 100% | CRUD completo, busca, favoritos, import CSV |
+| Notas | ✅ 100% | Texto, lista (checkbox) |
+| Anexos em Notas | ⏳ 0% | Copia, criptografa e compacta arquivos |
+| Backup | ✅ 100% | Export/Import .lockzero criptografado |
+| Backup c/ Anexos | ⏳ 0% | Inclui anexos no backup |
 | Import CSV | ✅ 100% | Chrome, Edge, Firefox, Safari |
-| Multi-idioma | ✅ 100% | PT/EN |
-| PIN/Biometria | ✅ 90% | Funcional, falta PageSettings completo |
+| Multi-idioma | ✅ 100% | PT, EN, ES, HE (4 idiomas) |
+| PIN/Biometria | ✅ 100% | Funcional em PageSettings |
 | Indicador Forca | ✅ 100% | Em PagePasswordEdit |
 | Busca | ✅ 100% | Por categoria (senhas, notas) |
+| Onboarding | ✅ 100% | 4 idiomas, avisos de seguranca |

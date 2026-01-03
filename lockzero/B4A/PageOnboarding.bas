@@ -21,8 +21,10 @@ Sub Class_Globals
 	'UI - Language
 	Private optLangPT As RadioButton
 	Private optLangEN As RadioButton
+	Private optLangES As RadioButton
+	Private optLangHE As RadioButton
 	Private btnLangNext As Button
-	Private SelectedLangIndex As Int = 0
+	Private SelectedLang As String = "pt"
 
 	'UI - Welcome
 	Private lblWelcomeTitle As Label
@@ -92,15 +94,15 @@ Private Sub CreateUI
 	lblLangTitle.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
 	pnlLanguage.AddView(lblLangTitle, margin, 100dip, contentWidth, 70dip)
 
-	'RadioButtons para idiomas
-	Dim rbTop As Int = 200dip
-	Dim rbH As Int = 50dip
+	'RadioButtons para idiomas (4 opcoes)
+	Dim rbTop As Int = 180dip
+	Dim rbH As Int = 48dip
 
 	optLangPT.Initialize("optLangPT")
-	optLangPT.Text = "Português (Brasil)"
+	optLangPT.Text = "Português"
 	optLangPT.TextSize = Starter.FONT_BODY
 	optLangPT.Checked = True
-	SelectedLangIndex = 0
+	SelectedLang = "pt"
 	pnlLanguage.AddView(optLangPT, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
 	rbTop = rbTop + rbH
 
@@ -108,6 +110,18 @@ Private Sub CreateUI
 	optLangEN.Text = "English"
 	optLangEN.TextSize = Starter.FONT_BODY
 	pnlLanguage.AddView(optLangEN, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
+	rbTop = rbTop + rbH
+
+	optLangES.Initialize("optLangES")
+	optLangES.Text = "Español"
+	optLangES.TextSize = Starter.FONT_BODY
+	pnlLanguage.AddView(optLangES, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
+	rbTop = rbTop + rbH
+
+	optLangHE.Initialize("optLangHE")
+	optLangHE.Text = "עברית"
+	optLangHE.TextSize = Starter.FONT_BODY
+	pnlLanguage.AddView(optLangHE, margin + 20dip, rbTop, contentWidth - 40dip, rbH)
 
 	'Botao continuar
 	btnLangNext.Initialize("btnLangNext")
@@ -209,13 +223,8 @@ End Sub
 'Botao continuar na tela de idioma
 Private Sub btnLangNext_Click
 	'Aplica idioma selecionado
-	If SelectedLangIndex = 0 Then
-		ModLang.SetLanguage("pt")
-		ModSecurity.SaveLanguage("pt")
-	Else
-		ModLang.SetLanguage("en")
-		ModSecurity.SaveLanguage("en")
-	End If
+	ModLang.SetLanguage(SelectedLang)
+	ModSecurity.SaveLanguage(SelectedLang)
 
 	'Marca que idioma foi escolhido
 	ModSecurity.SetLanguageChosen
@@ -227,18 +236,40 @@ Private Sub btnLangNext_Click
 	ShowStep(1)
 End Sub
 
-'Eventos dos RadioButtons
+'Eventos dos RadioButtons - desmarca os outros quando um e selecionado
 Private Sub optLangPT_CheckedChange(Checked As Boolean)
 	If Checked Then
-		SelectedLangIndex = 0
+		SelectedLang = "pt"
 		optLangEN.Checked = False
+		optLangES.Checked = False
+		optLangHE.Checked = False
 	End If
 End Sub
 
 Private Sub optLangEN_CheckedChange(Checked As Boolean)
 	If Checked Then
-		SelectedLangIndex = 1
+		SelectedLang = "en"
 		optLangPT.Checked = False
+		optLangES.Checked = False
+		optLangHE.Checked = False
+	End If
+End Sub
+
+Private Sub optLangES_CheckedChange(Checked As Boolean)
+	If Checked Then
+		SelectedLang = "es"
+		optLangPT.Checked = False
+		optLangEN.Checked = False
+		optLangHE.Checked = False
+	End If
+End Sub
+
+Private Sub optLangHE_CheckedChange(Checked As Boolean)
+	If Checked Then
+		SelectedLang = "he"
+		optLangPT.Checked = False
+		optLangEN.Checked = False
+		optLangES.Checked = False
 	End If
 End Sub
 
@@ -303,6 +334,8 @@ Private Sub ApplyTheme
 	pnlLanguage.Color = ModTheme.HomeBg
 	optLangPT.TextColor = Colors.White
 	optLangEN.TextColor = Colors.White
+	optLangES.TextColor = Colors.White
+	optLangHE.TextColor = Colors.White
 	btnLangNext.Color = ModTheme.HomeIconBg
 	btnLangNext.TextColor = Colors.White
 

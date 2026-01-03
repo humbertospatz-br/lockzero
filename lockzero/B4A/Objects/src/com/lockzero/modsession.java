@@ -68,7 +68,7 @@ _isunlocked = anywheresoftware.b4a.keywords.Common.False;
  //BA.debugLineNum = 123;BA.debugLine="SessionCategory = \"\"";
 _sessioncategory = "";
  //BA.debugLineNum = 124;BA.debugLine="Log(\"ModSession: Sessao encerrada\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("821102600","ModSession: Sessao encerrada",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("626279944","ModSession: Sessao encerrada",0);
  //BA.debugLineNum = 125;BA.debugLine="End Sub";
 return "";
 }
@@ -227,7 +227,7 @@ _elapsed = (long) ((anywheresoftware.b4a.keywords.Common.DateTime.getNow()-_last
  //BA.debugLineNum = 83;BA.debugLine="If elapsed > timeoutSeconds Then";
 if (_elapsed>_timeoutseconds) { 
  //BA.debugLineNum = 84;BA.debugLine="Log(\"ModSession: Timeout (\" & elapsed & \"s > \" &";
-anywheresoftware.b4a.keywords.Common.LogImpl("820840457","ModSession: Timeout ("+BA.NumberToString(_elapsed)+"s > "+BA.NumberToString(_timeoutseconds)+"s)",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("626017801","ModSession: Timeout ("+BA.NumberToString(_elapsed)+"s > "+BA.NumberToString(_timeoutseconds)+"s)",0);
  //BA.debugLineNum = 85;BA.debugLine="EndSession";
 _endsession(_ba);
  //BA.debugLineNum = 86;BA.debugLine="Return False";
@@ -356,10 +356,10 @@ _sessioncategory = _category;
  //BA.debugLineNum = 53;BA.debugLine="If category <> \"\" Then";
 if ((_category).equals("") == false) { 
  //BA.debugLineNum = 54;BA.debugLine="Log(\"ModSession: Sessao iniciada para categoria:";
-anywheresoftware.b4a.keywords.Common.LogImpl("820709392","ModSession: Sessao iniciada para categoria: "+_category,0);
+anywheresoftware.b4a.keywords.Common.LogImpl("625886736","ModSession: Sessao iniciada para categoria: "+_category,0);
  }else {
  //BA.debugLineNum = 56;BA.debugLine="Log(\"ModSession: Sessao iniciada (global)\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("820709394","ModSession: Sessao iniciada (global)",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("625886738","ModSession: Sessao iniciada (global)",0);
  };
  //BA.debugLineNum = 58;BA.debugLine="End Sub";
 return "";

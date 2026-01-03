@@ -350,10 +350,18 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 		passphrase = ModSession.GetPassphrase
 	End If
 
-	'Icone do tipo de nota (text/list)
+	'Verifica se e grupo de cartoes
+	Dim isCardGroup As Boolean = False
+	If CurrentGroup <> Null And CurrentGroup.TemplateType = "card" Then
+		isCardGroup = True
+	End If
+
+	'Icone do tipo de nota (text/list/card)
 	Dim lblTypeIcon As Label
 	lblTypeIcon.Initialize("")
-	If note.IsListNote Then
+	If isCardGroup Then
+		lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCB3)  'Cartao 💳 (surrogate pair)
+	Else If note.IsListNote Then
 		lblTypeIcon.Text = Chr(0x2611)  'Checkbox marcado ☑
 	Else
 		lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCDD)  'Nota 📝 (surrogate pair)
@@ -364,7 +372,10 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 
 	'Titulo
 	Dim title As String
-	If needsDecrypt Then
+	If isCardGroup And note.IsListNote Then
+		'Grupo de cartoes: usa primeiro item (Nome) como titulo
+		title = GetCardNameFromNote(note, passphrase, needsDecrypt)
+	Else If needsDecrypt Then
 		title = note.GetDecryptedTitle(passphrase)
 	Else
 		title = note.Title  'Texto claro para grupos abertos
@@ -510,16 +521,22 @@ Private Sub lblAdd_Click
 		ModSession.Touch
 	End If
 
-	'Dialog para escolher tipo de nota
-	Wait For (xui.Msgbox2Async(ModLang.T("note_type_choose"), ModLang.T("new_note"), ModLang.T("note_type_text"), ModLang.T("cancel"), ModLang.T("note_type_list"), Null)) Msgbox_Result(Result As Int)
-
 	Dim noteType As String = ""
-	If Result = xui.DialogResponse_Positive Then
-		noteType = "text"
-	Else If Result = xui.DialogResponse_Negative Then
+
+	'Grupo de cartoes: vai direto para lista (template de cartao)
+	If CurrentGroup <> Null And CurrentGroup.TemplateType = "card" Then
 		noteType = "list"
 	Else
-		Return  'Cancelou
+		'Dialog para escolher tipo de nota
+		Wait For (xui.Msgbox2Async(ModLang.T("note_type_choose"), ModLang.T("new_note"), ModLang.T("note_type_text"), ModLang.T("cancel"), ModLang.T("note_type_list"), Null)) Msgbox_Result(Result As Int)
+
+		If Result = xui.DialogResponse_Positive Then
+			noteType = "text"
+		Else If Result = xui.DialogResponse_Negative Then
+			noteType = "list"
+		Else
+			Return  'Cancelou
+		End If
 	End If
 
 	IsNavigating = True
@@ -554,4 +571,45 @@ Private Sub ApplyTheme
 	btnBack.TextColor = Colors.White
 
 	lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 255)
+End Sub
+
+' ============================================
+'  CARTOES - Funcoes auxiliares
+' ============================================
+
+'Extrai o nome do cartao (primeiro item) da nota
+'Formato do item: "Nome: Cartao da esposa"
+'Retorna apenas o valor apos ":"
+Private Sub GetCardNameFromNote(note As clsNoteEntry, passphrase As String, needsDecrypt As Boolean) As String
+	Try
+		Dim itemsJson As String
+		If needsDecrypt And passphrase <> "" Then
+			itemsJson = note.GetDecryptedItems(passphrase)
+		Else
+			itemsJson = note.Items
+		End If
+
+		If itemsJson = "" Or itemsJson = "[]" Then Return ModLang.T("new_card")
+
+		Dim parser As JSONParser
+		parser.Initialize(itemsJson)
+		Dim items As List = parser.NextArray
+
+		If items.Size > 0 Then
+			Dim firstItem As Map = items.Get(0)
+			Dim text As String = firstItem.GetDefault("text", "")
+			'Remove o prefixo "Nome: " se existir
+			If text.Contains(":") Then
+				Dim parts() As String = Regex.Split(":", text)
+				If parts.Length > 1 Then
+					text = parts(1).Trim
+				End If
+			End If
+			If text.Length > 0 Then Return text
+		End If
+	Catch
+		Log("GetCardNameFromNote error: " & LastException.Message)
+	End Try
+
+	Return ModLang.T("new_card")
 End Sub

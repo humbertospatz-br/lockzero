@@ -582,12 +582,47 @@ Private Sub ShowGroupOptions(groupId As String)
 	Dim g As clsNoteGroup = ModNotes.GetNoteGroupById(groupId)
 	If g.IsInitialized = False Then Return
 
-	Wait For (xui.Msgbox2Async(g.Name, "", ModLang.T("edit"), ModLang.T("cancel"), ModLang.T("delete"), Null)) Msgbox_Result(Result As Int)
+	'Grupos de sistema: mostrar "Limpar" em vez de "Excluir"
+	Dim deleteText As String
+	If g.IsSystem Then
+		deleteText = ModLang.T("clear_cards")
+	Else
+		deleteText = ModLang.T("delete")
+	End If
+
+	Wait For (xui.Msgbox2Async(g.Name, "", ModLang.T("edit"), ModLang.T("cancel"), deleteText, Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
 		ShowEditGroupDialog(groupId)
 	Else If Result = xui.DialogResponse_Negative Then
-		ConfirmDeleteGroup(groupId)
+		If g.IsSystem Then
+			'Grupo sistema: limpa notas sem deletar grupo
+			ConfirmClearSystemGroup(groupId)
+		Else
+			ConfirmDeleteGroup(groupId)
+		End If
+	End If
+End Sub
+
+'Confirma limpeza de grupo de sistema (cartoes)
+Private Sub ConfirmClearSystemGroup(groupId As String)
+	Dim g As clsNoteGroup = ModNotes.GetNoteGroupById(groupId)
+	If g.IsInitialized = False Then Return
+
+	Dim count As Int = ModNotes.CountByGroup(groupId)
+	If count = 0 Then
+		ToastMessageShow(ModLang.T("empty"), False)
+		Return
+	End If
+
+	Dim msg As String = ModLang.T("clear_cards_confirm") & CRLF & CRLF & count & " " & ModLang.T("items")
+
+	Wait For (xui.Msgbox2Async(msg, g.Name, ModLang.T("delete"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		ModNotes.ClearSystemGroup(groupId)
+		LoadGroups
+		ToastMessageShow(ModLang.T("success"), False)
 	End If
 End Sub
 

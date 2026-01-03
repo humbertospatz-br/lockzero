@@ -117,7 +117,7 @@ _loadfromdisk(_ba);
  //BA.debugLineNum = 24;BA.debugLine="IsLoaded = True";
 _isloaded = anywheresoftware.b4a.keywords.Common.True;
  //BA.debugLineNum = 26;BA.debugLine="Log(\"ModPasswords: \" & Groups.Size & \" grupos, \"";
-anywheresoftware.b4a.keywords.Common.LogImpl("87798790","ModPasswords: "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("67995398","ModPasswords: "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
  //BA.debugLineNum = 27;BA.debugLine="End Sub";
 return "";
 }
@@ -369,17 +369,17 @@ _content = anywheresoftware.b4a.keywords.Common.File.ReadString(_folder,_filenam
  //BA.debugLineNum = 83;BA.debugLine="If content.Length > 0 And (content.StartsWith(\"";
 if (_content.length()>0 && (_content.startsWith("{") || _content.startsWith("["))) { 
  //BA.debugLineNum = 84;BA.debugLine="Log(\"LoadFileWithFallback: arquivo principal O";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929865","LoadFileWithFallback: arquivo principal OK",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126473","LoadFileWithFallback: arquivo principal OK",0);
  //BA.debugLineNum = 85;BA.debugLine="Return content";
 if (true) return _content;
  }else {
  //BA.debugLineNum = 87;BA.debugLine="Log(\"LoadFileWithFallback: arquivo principal i";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929868","LoadFileWithFallback: arquivo principal invalido",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126476","LoadFileWithFallback: arquivo principal invalido",0);
  };
  } 
        catch (Exception e12) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e12); //BA.debugLineNum = 90;BA.debugLine="Log(\"LoadFileWithFallback: erro ao ler principa";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929871","LoadFileWithFallback: erro ao ler principal - "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126479","LoadFileWithFallback: erro ao ler principal - "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
  };
  };
  //BA.debugLineNum = 95;BA.debugLine="If File.Exists(folder, backupFile) Then";
@@ -390,7 +390,7 @@ _backup = anywheresoftware.b4a.keywords.Common.File.ReadString(_folder,_backupfi
  //BA.debugLineNum = 98;BA.debugLine="If backup.Length > 0 And (backup.StartsWith(\"{\"";
 if (_backup.length()>0 && (_backup.startsWith("{") || _backup.startsWith("["))) { 
  //BA.debugLineNum = 99;BA.debugLine="Log(\"LoadFileWithFallback: USANDO BACKUP! Arqu";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929880","LoadFileWithFallback: USANDO BACKUP! Arquivo principal estava corrompido.",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126488","LoadFileWithFallback: USANDO BACKUP! Arquivo principal estava corrompido.",0);
  //BA.debugLineNum = 101;BA.debugLine="File.Copy(folder, backupFile, folder, fileName";
 anywheresoftware.b4a.keywords.Common.File.Copy(_folder,_backupfile,_folder,_filename);
  //BA.debugLineNum = 102;BA.debugLine="Return backup";
@@ -399,11 +399,11 @@ if (true) return _backup;
  } 
        catch (Exception e24) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e24); //BA.debugLineNum = 105;BA.debugLine="Log(\"LoadFileWithFallback: backup tambem corrom";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929886","LoadFileWithFallback: backup tambem corrompido!",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126494","LoadFileWithFallback: backup tambem corrompido!",0);
  };
  };
  //BA.debugLineNum = 110;BA.debugLine="Log(\"LoadFileWithFallback: nenhum arquivo valido";
-anywheresoftware.b4a.keywords.Common.LogImpl("87929891","LoadFileWithFallback: nenhum arquivo valido encontrado",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68126499","LoadFileWithFallback: nenhum arquivo valido encontrado",0);
  //BA.debugLineNum = 111;BA.debugLine="Return \"\"";
 if (true) return "";
  //BA.debugLineNum = 112;BA.debugLine="End Sub";
@@ -424,7 +424,7 @@ _json = _loadfilewithfallback(_ba,anywheresoftware.b4a.keywords.Common.File.getD
  //BA.debugLineNum = 37;BA.debugLine="If json.Length = 0 Then";
 if (_json.length()==0) { 
  //BA.debugLineNum = 38;BA.debugLine="Log(\"ModPasswords: nenhum arquivo disponivel, in";
-anywheresoftware.b4a.keywords.Common.LogImpl("87864325","ModPasswords: nenhum arquivo disponivel, iniciando vazio",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68060933","ModPasswords: nenhum arquivo disponivel, iniciando vazio",0);
  //BA.debugLineNum = 39;BA.debugLine="Return";
 if (true) return "";
  };
@@ -489,7 +489,7 @@ _entries.Put((Object)(_e._id /*String*/ ),(Object)(_e));
  } 
        catch (Exception e29) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e29); //BA.debugLineNum = 70;BA.debugLine="Log(\"ModPasswords.LoadFromDisk erro ao parsear:";
-anywheresoftware.b4a.keywords.Common.LogImpl("87864357","ModPasswords.LoadFromDisk erro ao parsear: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68060965","ModPasswords.LoadFromDisk erro ao parsear: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 72;BA.debugLine="End Sub";
 return "";
@@ -544,7 +544,7 @@ _verify = anywheresoftware.b4a.keywords.Common.File.ReadString(_folder,_tempfile
  //BA.debugLineNum = 168;BA.debugLine="If verify <> content Then";
 if ((_verify).equals(_content) == false) { 
  //BA.debugLineNum = 169;BA.debugLine="Log(\"SaveFileAtomic: verificacao falhou\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("88060939","SaveFileAtomic: verificacao falhou",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68257547","SaveFileAtomic: verificacao falhou",0);
  //BA.debugLineNum = 170;BA.debugLine="File.Delete(folder, tempFile)";
 anywheresoftware.b4a.keywords.Common.File.Delete(_folder,_tempfile);
  //BA.debugLineNum = 171;BA.debugLine="Return False";
@@ -571,7 +571,7 @@ if (true) return anywheresoftware.b4a.keywords.Common.True;
  } 
        catch (Exception e22) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e22); //BA.debugLineNum = 192;BA.debugLine="Log(\"SaveFileAtomic ERRO: \" & LastException.Mess";
-anywheresoftware.b4a.keywords.Common.LogImpl("88060962","SaveFileAtomic ERRO: "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68257570","SaveFileAtomic ERRO: "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
  //BA.debugLineNum = 194;BA.debugLine="If File.Exists(folder, tempFile) Then";
 if (anywheresoftware.b4a.keywords.Common.File.Exists(_folder,_tempfile)) { 
  //BA.debugLineNum = 195;BA.debugLine="File.Delete(folder, tempFile)";
@@ -665,10 +665,10 @@ _gen.Initialize(_root);
  //BA.debugLineNum = 145;BA.debugLine="If SaveFileAtomic(File.DirInternal, FILE_NAME, ge";
 if (_savefileatomic(_ba,anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_file_name,_gen.ToString())) { 
  //BA.debugLineNum = 146;BA.debugLine="Log(\"ModPasswords: salvo \" & Groups.Size & \" gru";
-anywheresoftware.b4a.keywords.Common.LogImpl("87995420","ModPasswords: salvo "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68192028","ModPasswords: salvo "+BA.NumberToString(_groups.getSize())+" grupos, "+BA.NumberToString(_entries.getSize())+" senhas",0);
  }else {
  //BA.debugLineNum = 148;BA.debugLine="Log(\"ModPasswords: ERRO ao salvar!\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("87995422","ModPasswords: ERRO ao salvar!",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("68192030","ModPasswords: ERRO ao salvar!",0);
  };
  //BA.debugLineNum = 150;BA.debugLine="End Sub";
 return "";
@@ -775,7 +775,7 @@ _found = anywheresoftware.b4a.keywords.Common.True;
  } 
        catch (Exception e26) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e26); //BA.debugLineNum = 422;BA.debugLine="Log(\"SearchAllGroups decrypt error: \" & LastEx";
-anywheresoftware.b4a.keywords.Common.LogImpl("877332516","SearchAllGroups decrypt error: "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("69306148","SearchAllGroups decrypt error: "+anywheresoftware.b4a.keywords.Common.LastException(_ba).getMessage(),0);
  };
  };
  //BA.debugLineNum = 426;BA.debugLine="If found Then lst.Add(e)";

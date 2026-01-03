@@ -148,14 +148,8 @@ Public Sub RebuildMenuItems
 	Dim btnH As Int = 48dip
 	Dim gap As Int = 4dip
 
-	'Menu items
+	'Menu items (apenas Senhas e Notas)
 	AddMenuButton(ModLang.T("passwords"), "mnuPasswords", top, btnW, btnH)
-	top = top + btnH + gap
-
-	AddMenuButton(ModLang.T("cards"), "mnuCards", top, btnW, btnH)
-	top = top + btnH + gap
-
-	AddMenuButton(ModLang.T("documents"), "mnuDocuments", top, btnW, btnH)
 	top = top + btnH + gap
 
 	AddMenuButton(ModLang.T("notes"), "mnuNotes", top, btnW, btnH)
@@ -341,18 +335,13 @@ Private Sub ShowHome
 	Dim availableWidth As Int = width - (GRID_MARGIN * 2) - GRID_GAP
 	Dim cardSize As Int = availableWidth / 2
 
-	'Calcula posicao vertical para centralizar o grid
-	Dim gridHeight As Int = (cardSize * 2) + GRID_GAP
+	'Calcula posicao vertical para centralizar o grid (apenas 1 linha agora)
+	Dim gridHeight As Int = cardSize
 	Dim startY As Int = (contentHeight - gridHeight) / 2
 
-	'Linha 1: Senhas | Cartoes
+	'Linha unica: Senhas | Notas
 	CreateHomeCard("pnlPasswords", ModLang.T("passwords"), "ic_senha.png", GRID_MARGIN, startY, cardSize)
-	CreateHomeCard("pnlCards", ModLang.T("cards"), "ic_cartao.png", GRID_MARGIN + cardSize + GRID_GAP, startY, cardSize)
-
-	'Linha 2: Documentos | Notas
-	Dim row2Y As Int = startY + cardSize + GRID_GAP
-	CreateHomeCard("pnlDocuments", ModLang.T("documents"), "ic_doc.png", GRID_MARGIN, row2Y, cardSize)
-	CreateHomeCard("pnlNotes", ModLang.T("notes"), "ic_notas.png", GRID_MARGIN + cardSize + GRID_GAP, row2Y, cardSize)
+	CreateHomeCard("pnlNotes", ModLang.T("notes"), "ic_notas.png", GRID_MARGIN + cardSize + GRID_GAP, startY, cardSize)
 End Sub
 
 ' ============================================
@@ -427,16 +416,6 @@ Private Sub mnuPasswords_Click
 	Dim pg As PagePasswords = B4XPages.GetPage("PagePasswords")
 	ModTransition.SlideToLeft(Root, pg.Root)
 	B4XPages.ShowPage("PagePasswords")
-End Sub
-
-Private Sub mnuCards_Click
-	HideMenu
-	ToastMessageShow(ModLang.T("cards") & " - " & ModLang.T("loading"), False)
-End Sub
-
-Private Sub mnuDocuments_Click
-	HideMenu
-	ToastMessageShow(ModLang.T("documents") & " - " & ModLang.T("loading"), False)
 End Sub
 
 Private Sub mnuNotes_Click
@@ -555,20 +534,6 @@ End Sub
 Private Sub pnlPasswords_Click
 	HideMenu
 	AnimatePulseAndNavigate(Sender, "PagePasswords")
-End Sub
-
-Private Sub pnlCards_Click
-	HideMenu
-	AnimatePulse(Sender)
-	Sleep(250)
-	ToastMessageShow(ModLang.T("cards") & " - " & ModLang.T("loading"), False)
-End Sub
-
-Private Sub pnlDocuments_Click
-	HideMenu
-	AnimatePulse(Sender)
-	Sleep(250)
-	ToastMessageShow(ModLang.T("documents") & " - " & ModLang.T("loading"), False)
 End Sub
 
 Private Sub pnlNotes_Click

@@ -458,7 +458,9 @@ Public Sub ShareBackupFile(fileName As String)
 		shareIntent.PutExtra("android.intent.extra.STREAM", uri)
 		shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
 		Log("ShareBackupFile: iniciando share...")
-		StartActivity(shareIntent)
+		Dim jo As JavaObject
+		jo.InitializeStatic("android.content.Intent")
+		StartActivity(jo.RunMethod("createChooser", Array(shareIntent, ModLang.T("share"))))
 	Catch
 		Log("ShareBackupFile ERRO: " & LastException)
 	End Try

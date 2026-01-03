@@ -487,7 +487,9 @@ Private Sub ShareBackupAsFile(fileName As String)
 		shareIntent.PutExtra("android.intent.extra.SUBJECT", "LockZero Backup")
 		shareIntent.PutExtra("android.intent.extra.STREAM", uri)
 		shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMISSION
-		StartActivity(shareIntent)
+		Dim jo As JavaObject
+		jo.InitializeStatic("android.content.Intent")
+		StartActivity(jo.RunMethod("createChooser", Array(shareIntent, ModLang.T("share"))))
 	Catch
 		Log("ShareBackupAsFile erro: " & LastException)
 		ToastMessageShow(ModLang.T("share_error"), True)

@@ -832,224 +832,200 @@ Danger:      RGB(140, 45, 50)   #8C2D32  Vermelho escuro
 
 ---
 
-## FASE 3: COFRE DE CARTOES (PENDENTE)
+## FASE 3: SISTEMA DE ANEXOS (PENDENTE)
 
-### Estrutura de Dados
-- [ ] [2025-12-25] Criar clsCardEntry.bas (modelo de cartao)
-- [ ] [2025-12-25] Criar ModCards.bas (CRUD cartoes)
+> **Origem:** Especificacao de anexos em notas
+> **Status:** PENDENTE
+> **Prioridade:** ALTA - Proxima grande feature
 
-### Estrutura clsCardEntry.bas
-```
-id: String
-nickname: String          ' Ex: "Nubank Pessoal"
-cardholderName: String    ' Nome impresso no cartao
-cardNumber: String        ' Numero completo (criptografado)
-expiryMonth: String       ' MM
-expiryYear: String        ' YY ou YYYY
-cvv: String               ' CVV (criptografado)
-brand: String             ' visa, mastercard, elo, etc
-type: String              ' credit, debit, both
-color: String             ' Cor visual do cartao
-bankName: String          ' Banco/instituicao
-lastFourDigits: String    ' Para exibicao segura
-createdAt: Long
-updatedAt: Long
-expiryAlert: Boolean      ' Alertar vencimento
-```
+### Conceito
 
-### Tabela BIN - Deteccao de Bandeira
-| Prefixo | Bandeira |
-|---------|----------|
-| 4 | Visa |
-| 51-55, 2221-2720 | Mastercard |
-| 34, 37 | American Express |
-| 636368, 438935, 504175, 451416, 636297 | Elo |
-| 606282, 3841 | Hipercard |
-| 36, 38, 39 | Diners Club |
-| 6011, 644-649, 65 | Discover |
-| 35 | JCB |
+Anexos de arquivos (imagens, videos, documentos) em notas serao:
+1. **Copiados** para pasta interna do app (nao referencia externa)
+2. **Criptografados** com AES-256 usando frase-senha do grupo
+3. **Compactados** em formato ZIP para economizar espaco
+4. **Incluidos no backup** .lockzero
 
-### Telas B4xPages
-- [ ] [2025-12-25] PageCards.bas - Lista de cartoes
-- [ ] [2025-12-25] PageCardDetail.bas - Detalhes do cartao
-- [ ] [2025-12-25] PageAddCard.bas - Adicionar/editar cartao
+### Limites Definidos
 
-### Funcionalidades
-- [ ] [2025-12-25] CRUD completo de cartoes
-- [ ] [2025-12-25] Deteccao automatica de bandeira (Visa, Master, etc.)
-- [ ] [2025-12-25] Exibicao segura (**** **** **** 1234)
-- [ ] [2025-12-25] Alerta de vencimento
-- [ ] [2025-12-25] Cor do cartao (visual, escolher ao criar)
-- [ ] [2025-12-25] Campo banco/instituicao
+| Tipo | Limite | Justificativa |
+|------|--------|---------------|
+| Por arquivo | 25 MB | Fotos RAW, videos curtos, PDFs grandes |
+| Por nota | 100 MB | Evitar notas muito pesadas |
+| Total no app | 500 MB | Espaco razoavel para dispositivo |
+
+### Tarefas - Modulo ModAttachments.bas
+
+- [ ] [2026-01-03] Criar ModAttachments.bas
+- [ ] [2026-01-03] Constantes MAX_FILE_SIZE, MAX_TOTAL_NOTE, MAX_TOTAL_APP
+- [ ] [2026-01-03] AddAttachment(noteId, filePath, passphrase) - copia, criptografa, compacta
+- [ ] [2026-01-03] GetAttachment(noteId, attachId, passphrase) - descriptografa para Temp/
+- [ ] [2026-01-03] DeleteAttachment(noteId, attachId) - remove arquivo .lza
+- [ ] [2026-01-03] DeleteAllAttachments(noteId) - ao deletar nota
+- [ ] [2026-01-03] ValidateFileSize(filePath) - verifica limite
+- [ ] [2026-01-03] CanAddAttachment(noteId, fileSize) - verifica espaco disponivel
+- [ ] [2026-01-03] GetTotalAppSize() - soma de todos anexos
+- [ ] [2026-01-03] CleanupTempFiles() - limpar arquivos temporarios ao sair
+
+### Tarefas - Estrutura de Arquivos
+
+- [ ] [2026-01-03] Criar pasta Attachments/ em File.DirInternal
+- [ ] [2026-01-03] Subpastas por nota: Attachments/{noteId}/
+- [ ] [2026-01-03] Arquivos .lza (LockZero Attachment) com JSON + dados criptografados
+- [ ] [2026-01-03] Pasta Temp/ para arquivos descriptografados temporariamente
+
+### Tarefas - Interface PageNoteEdit.bas
+
+- [ ] [2026-01-03] Secao "Anexos" com contador (X arquivos)
+- [ ] [2026-01-03] Botao + para adicionar anexo (ContentChooser)
+- [ ] [2026-01-03] Lista de anexos: icone + nome + tamanho + lixeira
+- [ ] [2026-01-03] Barra de espaco usado (X MB / 100 MB)
+- [ ] [2026-01-03] Toque no anexo: abre com app externo
+- [ ] [2026-01-03] Toque na lixeira: confirma e remove
+
+### Tarefas - Backup com Anexos
+
+- [ ] [2026-01-03] Atualizar ModBackup.ExportBackup para incluir anexos
+- [ ] [2026-01-03] Estrutura backup v2.0 com campo "attachments"
+- [ ] [2026-01-03] Atualizar ModBackup.ImportBackup para restaurar anexos
+- [ ] [2026-01-03] Aviso de tamanho do backup antes de exportar
+- [ ] [2026-01-03] Verificar espaco disponivel antes de importar
+
+### Tipos de Arquivo Suportados
+
+| Categoria | Extensoes |
+|-----------|-----------|
+| Imagens | jpg, jpeg, png, gif, webp, heic |
+| Videos | mp4, mov, avi, mkv, webm |
+| Documentos | pdf, doc, docx, xls, xlsx, ppt, pptx |
+| Texto | txt, csv, json, xml |
+
+**Nao suportados:** .exe, .apk, .sh, .bat (executaveis)
 
 ---
 
-## FASE 4: COFRE DE DOCUMENTOS (PENDENTE)
-
-### Estrutura de Dados
-- [ ] [2025-12-25] Criar clsDocumentEntry.bas (modelo de documento)
-- [ ] [2025-12-25] Criar ModDocuments.bas (CRUD documentos)
-
-### Telas B4xPages
-- [ ] [2025-12-25] PageDocuments.bas - Lista de documentos
-- [ ] [2025-12-25] PageDocumentDetail.bas - Visualizar documento
-- [ ] [2025-12-25] PageAddDocument.bas - Adicionar documento (camera)
-
-### Tipos de Documentos
-- [ ] [2025-12-25] CPF
-- [ ] [2025-12-25] RG
-- [ ] [2025-12-25] CNH
-- [ ] [2025-12-25] Passaporte
-- [ ] [2025-12-25] Titulo de eleitor
-- [ ] [2025-12-25] Outros
-
----
-
-## FASE 5: NOTAS SEGURAS + WIFI (PARCIAL)
+## FASE 4: NOTAS SEGURAS (CONCLUIDO)
 
 ### Notas Seguras (CONCLUIDO)
 - [x] [2025-12-25] Criar clsNoteEntry.bas (modelo de nota)
 - [x] [2025-12-25] Criar ModNotes.bas (CRUD notas)
 - [x] [2025-12-25] PageNotesList.bas - Lista de notas
 - [x] [2025-12-25] PageNoteEdit.bas - Adicionar/editar nota
-- [ ] [2025-12-25] Suporte a codigos 2FA/recuperacao
-- [ ] [2025-12-25] Licencas de software
-- [ ] [2025-12-25] PINs e PUKs
-
-### Credenciais Wi-Fi (PENDENTE)
-- [ ] [2025-12-25] Criar clsWifiEntry.bas (modelo wifi)
-- [ ] [2025-12-25] Criar ModWifi.bas (CRUD wifi)
-- [ ] [2025-12-25] PageWifi.bas - Lista de redes
-- [ ] [2025-12-25] PageAddWifi.bas - Adicionar rede
-- [ ] [2025-12-25] Leitura de QR Code Wi-Fi
-
-### Estrutura clsWifiEntry.bas
-```
-id: String
-ssid: String              ' Nome da rede
-password: String          ' Senha (criptografada)
-security: String          ' WPA, WPA2, WPA3, WEP, Open
-location: String          ' Ex: "Casa", "Escritorio"
-notes: String
-createdAt: Long
-updatedAt: Long
-```
+- [x] [2025-12-30] Notas tipo texto (titulo + conteudo)
+- [x] [2025-12-30] Notas tipo lista (checkboxes)
 
 ---
 
-## FASE 6: OCR E SCANNER (PENDENTE)
+## FASE 5: IMPORT/EXPORT (PARCIAL)
 
-### Integracao OCR
-- [ ] [2025-12-25] Integrar ML Kit (offline) ou Tesseract
-- [ ] [2025-12-25] Criar ModOCR.bas (processamento OCR)
-
-### Scanners
-- [ ] [2025-12-25] Scanner de cartoes de credito
-- [ ] [2025-12-25] Scanner de documentos (CNH, RG, etc.)
-- [ ] [2025-12-25] Scanner de URL (tela de login)
-- [ ] [2025-12-25] Scanner de QR Code (wifi, generico)
-- [ ] [2025-12-25] PageScanner.bas - Scanner universal
-
----
-
-## FASE 7: GERADOR DE SENHAS (PENDENTE)
-
-### Funcionalidades Basicas
-- [ ] [2025-12-25] Criar ModGenerator.bas
-- [ ] [2025-12-25] PageGenerator.bas - Tela do gerador
-- [ ] [2025-12-25] Configuracoes: tamanho (8-128)
-- [ ] [2025-12-25] Opcoes: maiusculas, minusculas, numeros, simbolos
-- [ ] [2025-12-25] Excluir caracteres ambiguos (0, O, l, 1, I)
-- [ ] [2025-12-25] Medidor de forca da senha
-- [ ] [2025-12-25] Tempo estimado para quebrar
-- [ ] [2025-12-25] Gerar -> Copiar ou Salvar direto
-
-### Modos Avancados
-- [ ] [2025-12-25] Modo "memoravel" (palavras pronunciaveis)
-- [ ] [2025-12-25] Modo "PIN" (apenas numeros, 4-8 digitos)
-- [ ] [2025-12-25] Modo "passphrase" (3-5 palavras separadas)
-- [ ] [2025-12-25] Historico de senhas geradas (ultimas 10)
-
----
-
-## FASE 8: IMPORT/EXPORT (PARCIAL)
-
-### Exportar
-- [ ] [2025-12-25] Exportar para CSV (Chrome, Edge, Safari)
-- [ ] [2025-12-25] Exportar para JSON
+### Concluido
 - [x] [2025-12-25] Backup criptografado .lockzero
-
-### Importar
 - [x] [2025-12-29] Importar de CSV (Chrome, Edge, Safari, Firefox)
-- [ ] [2025-12-25] Importar de JSON
 - [x] [2025-12-25] Restaurar backup .lockzero
-
-### Telas
 - [x] [2025-12-25] PageBackup.bas (export/import .lockzero)
 - [x] [2025-12-29] PageImportCSV.bas (importar CSV de navegadores)
-- [ ] [2025-12-25] PageExport.bas (CSV/JSON)
 
-### Formato CSV (Compatibilidade Navegadores)
-
-**Header obrigatorio:**
-```csv
-name,url,username,password
-```
-
-**Exemplo:**
-```csv
-name,url,username,password
-Google,https://google.com,email@gmail.com,minhasenha123
-Facebook,https://facebook.com,usuario,senha456
-```
-
-**Navegadores compativeis:**
-- Chrome: Configuracoes > Senhas > Importar/Exportar
-- Edge: Configuracoes > Senhas > Importar/Exportar
-- Safari: Preferencias > Senhas > Importar/Exportar
-- Firefox: Configuracoes > Senhas > Importar/Exportar
-- Opera/Brave: Mesmo processo (baseados em Chromium)
+### Pendente (PREMIUM)
+- [ ] [futuro] Exportar para CSV (Chrome, Edge, Safari)
+- [ ] [futuro] Exportar para JSON
 
 ---
 
-## FASE 9: CONFIGURACOES (EM PROGRESSO)
+## FASE 6: CONFIGURACOES (CONCLUIDO)
 
-### Tela de Configuracoes
-- [x] [2025-12-28] PageSettings.bas - CRIADO com todas opcoes
-- [x] [2025-12-28] Selecao de idioma (PT/EN)
-- [ ] [2025-12-25] Selecao de tema (claro/escuro) - aguardando implementacao tema claro
+### Tela de Configuracoes - PageSettings.bas
+- [x] [2025-12-28] Selecao de idioma (PT/EN/ES/HE)
 - [x] [2025-12-28] Tempo de sessao (1, 2, 3 minutos)
-- [ ] [2025-12-25] Tempo de limpeza clipboard (15s, 30s, 1min, nunca)
-- [ ] [2025-12-25] Bloqueio ao minimizar app (sim/nao)
 - [x] [2025-12-28] PIN de acesso (checkbox + dialogs create/remove)
 - [x] [2025-12-28] Biometria (checkbox on/off)
 - [x] [2025-12-28] Modo frase-senha (unica ou por categoria)
 
-### Seguranca Adicional
-- [x] [2025-12-25] Delay progressivo por tentativas falhas
-- [x] [2025-12-25] Contador de tentativas por grupo
-- [ ] [2025-12-25] Prevenir screenshots (FLAG_SECURE)
-- [ ] [2025-12-25] Detectar root/jailbreak
-- [ ] [2025-12-25] Timeout biometrico (requer frase apos X horas)
+### Seguranca Adicional - Pendente
+- [ ] [2026-01-03] Prevenir screenshots (FLAG_SECURE)
+- [ ] [2026-01-03] Limpeza automatica de clipboard (30s)
 
 ---
 
-## FASE 10: POLIMENTO E PUBLICACAO (PARCIAL)
+## FASE 7: POLIMENTO E PUBLICACAO (PENDENTE)
 
 ### UX/UI
-- [x] [2025-12-25] PageOnboarding.bas (primeiro uso + backup obrigatorio)
-- [ ] [2025-12-25] Animacoes e transicoes
-- [ ] [2025-12-25] Icones e assets finais
-- [ ] [2025-12-25] Ajustes de usabilidade
+- [x] [2025-12-25] PageOnboarding.bas (primeiro uso)
+- [ ] [2026-01-03] Animacoes de transicao entre telas
+- [ ] [2026-01-03] Ajustes de usabilidade
 
 ### Testes
-- [ ] [2025-12-25] Testes de seguranca
-- [ ] [2025-12-25] Testes de performance
-- [ ] [2025-12-25] Testes em multiplos dispositivos
+- [ ] [2026-01-03] Testes de seguranca
+- [ ] [2026-01-03] Testes em multiplos dispositivos
 
 ### Publicacao
-- [ ] [2025-12-25] Google Play Store (Android)
-- [ ] [2025-12-25] Apple App Store (iOS - B4i)
+- [ ] [futuro] Google Play Store (Android)
+
+---
+
+## SIMPLIFICACAO - Apenas Senhas e Notas (2026-01-03)
+
+> **Origem:** Decisao de simplificar o app
+> **Status:** CONCLUIDO
+> **Data:** 2026-01-03
+
+### Conceito Final
+
+- LockZero tem apenas **2 categorias**: **Senhas** e **Notas**
+- Cartoes de credito podem ser armazenados como notas de lista
+- Grupo "Cartoes" e um grupo de sistema em Notas com template pre-definido
+- **Anexos em Notas:** imagens, videos e documentos criptografados
+- Nao existe mais: Documentos, Wi-Fi, OCR Scanner como categorias separadas
+
+### Template do Cartao (9 campos)
+
+```
+1. Nome       ← Aparece como titulo na lista (ex: "Cartao da esposa")
+2. Bandeira   ← Visa, Mastercard, Elo, etc
+3. Numero     ← Numero do cartao
+4. Validade   ← MM/AA
+5. CVV        ← Codigo de seguranca
+6. Senha      ← Senha do cartao (4-6 digitos)
+7. Titular    ← Nome impresso no cartao
+8. Limite     ← Limite de credito
+9. Notas      ← Observacoes livres
+```
+
+### Tarefas - CONCLUIDO
+
+**Classe clsNoteGroup.bas:**
+- [x] [2026-01-02] Adicionar campo `IsSystem As Boolean`
+- [x] [2026-01-02] Adicionar campo `TemplateType As String` ("", "card")
+- [x] [2026-01-02] Atualizar `Initialize` com novos campos
+- [x] [2026-01-02] Atualizar `ToMap` para incluir novos campos
+- [x] [2026-01-02] Atualizar `FromMap` para ler novos campos
+- [x] [2026-01-02] Atualizar `Clone` para copiar novos campos
+
+**Modulo ModNotes.bas:**
+- [x] [2026-01-02] Criar `EnsureSystemGroups()` - cria grupo Cartoes se nao existir
+- [x] [2026-01-02] Chamar `EnsureSystemGroups()` no `Init`
+- [x] [2026-01-02] Criar `ClearSystemGroup(groupId)` - limpa notas sem deletar grupo
+- [x] [2026-01-02] Criar `GetCardTemplate()` - retorna lista de itens do template
+- [x] [2026-01-02] Criar `IsSystemGroup(groupId)` - verifica se e grupo sistema
+
+**Pagina PageNotesGroups.bas:**
+- [x] [2026-01-02] Nao mostrar opcao "Excluir" para grupos sistema
+- [x] [2026-01-02] Mostrar opcao "Limpar cartoes" em vez de "Excluir"
+- [x] [2026-01-02] Criar `ConfirmClearSystemGroup()` para limpar cartoes
+
+**Pagina PageNoteEdit.bas:**
+- [x] [2026-01-02] Detectar se grupo tem `TemplateType = "card"`
+- [x] [2026-01-02] Preencher itens com template ao criar nova nota
+- [x] [2026-01-02] Breadcrumb "Novo Cartao" para grupo de cartoes
+
+**Pagina PageNotesList.bas:**
+- [x] [2026-01-02] Para grupo Cartoes: mostrar primeiro item como titulo
+- [x] [2026-01-02] Icone 💳 para notas de cartao
+- [x] [2026-01-02] Criar `GetCardNameFromNote()` para extrair nome
+
+**Modulo ModLang.bas:**
+- [x] [2026-01-02] Adicionar strings PT: card_name, card_brand, card_number, etc
+- [x] [2026-01-02] Adicionar strings EN: card_name, card_brand, card_number, etc
+- [x] [2026-01-02] Adicionar strings: clear_cards, clear_cards_confirm, new_card
 
 ---
 
@@ -1057,45 +1033,35 @@ Facebook,https://facebook.com,usuario,senha456
 
 > **Funcionalidades para versoes futuras (apos v1.0)**
 
-### Alta Prioridade (impacto na conversao)
-- [ ] Onboarding tutorial interativo (3-4 telas)
+### Alta Prioridade
 - [x] Indicador visual de forca da frase-senha - IMPLEMENTADO v0.1.3
+- [x] Busca por categoria - IMPLEMENTADO v0.1.3
 - [ ] Widget home (acesso rapido, mostra qtd itens)
 - [ ] **Autofill Android** - Integrar com sistema de preenchimento automatico
   - AutofillService API (Android 8+)
   - Usuario seleciona LockZero para preencher senhas em outros apps
-  - Referencia: https://developer.android.com/guide/topics/text/autofill
 
-### Media Prioridade (melhora experiencia)
-- [ ] Icones personalizados por grupo/entrada
-- [ ] Limpeza automatica de clipboard configuravel
+### Media Prioridade
 - [ ] Ordenacao manual (arrastar itens)
-- [x] Busca por categoria - IMPLEMENTADO v0.1.3
 - [ ] **Detector de senhas duplicadas** - Avisar quando mesma senha em multiplos sites
 - [ ] **Detector de senhas fracas** - Listar todas senhas com forca < 2
 - [ ] **Historico de senhas** - Guardar ultimas 3-5 versoes ao editar
 - [ ] **Expiracao de senha** - Alertar senhas antigas (>6 meses sem alterar)
 - [ ] **Atalhos de app** - Long press no icone mostra favoritos (Android 7.1+)
 
-### Baixa Prioridade (diferenciacao)
+### Baixa Prioridade
 - [ ] PIN de panico (mostra cofre vazio sob coacao)
 - [ ] Modo disfarce (icone de calculadora/relogio)
 - [ ] Compartilhamento seguro via QR temporario
-- [ ] Tema personalizado (cores do usuario)
+- [ ] Tema claro (atualmente so dark)
 - [ ] **Passkeys (futuro)** - Suporte a autenticacao sem senha (WebAuthn/FIDO2)
-  - Padrao emergente, substituira senhas tradicionais
-  - Google, Apple, Microsoft ja suportam
-  - Implementar quando API Android estiver madura
 
-### Backup e Seguranca Avancada
-- [ ] **Backup automatico periodico** - Criar backup a cada X dias (configuravel)
+### Backup Avancado
+- [ ] **Backup automatico periodico** - Criar backup a cada X dias
 - [ ] **Multiplos backups** - Manter ultimos N arquivos .lockzero
 - [ ] **Verificacao de vazamentos** - Comparar hashes com base HIBP offline
-  - Have I Been Pwned oferece base de dados para download
-  - Comparacao 100% offline (k-anonymity)
-- [ ] **Notificacao de seguranca** - Alertar senhas potencialmente vazadas
 
-### NAO RECOMENDADO (quebra filosofia)
+### NAO FAZER (quebra filosofia)
 - ~~Backup em nuvem~~ - quebra filosofia 100% offline
 - ~~Sincronizacao entre dispositivos~~ - adiciona complexidade e riscos
 - ~~Senhas salvas em servidor~~ - contra principio Zero Conhecimento
@@ -1111,30 +1077,34 @@ Facebook,https://facebook.com,usuario,senha456
 | Main.bas | OK | Activity principal B4XPages |
 | B4XMainPage.bas | OK | Dashboard + Unlock |
 | ModSecurity.bas | OK | AES-256, salt, brute force |
-| ModTheme.bas | OK | Tema claro/escuro |
-| ModLang.bas | OK | Multi-lingua PT/EN |
+| ModTheme.bas | OK | Tema escuro |
+| ModLang.bas | OK | Multi-lingua PT/EN/ES/HE |
 | ModSession.bas | OK | Gerenciador de sessao |
 | ModBackup.bas | OK | Export/Import .lockzero |
 | ModPasswords.bas | OK | CRUD senhas/grupos |
 | ModNotes.bas | OK | CRUD notas |
+| ModAttachments.bas | PENDENTE | Gestao de anexos (copia, criptografa, compacta) |
 
 ### Classes:
 | Arquivo | Status | Descricao |
 |---------|--------|-----------|
 | clsPasswordGroup.bas | OK | Modelo grupo (+ ProtectionType, Salt) |
 | clsPasswordEntry.bas | OK | Modelo senha |
-| clsNoteEntry.bas | OK | Modelo nota |
+| clsNoteGroup.bas | OK | Modelo grupo de notas |
+| clsNoteEntry.bas | OK | Modelo nota (texto/lista) |
 
 ### Paginas B4XPages:
 | Arquivo | Status | Descricao |
 |---------|--------|-----------|
-| PagePasswords.bas | OK | Lista de grupos |
+| PagePasswords.bas | OK | Lista de grupos de senhas |
 | PagePasswordList.bas | OK | Senhas do grupo |
 | PagePasswordEdit.bas | OK | Criar/editar senha |
-| PageBackup.bas | OK | Backup .lockzero |
-| PageOnboarding.bas | OK | Primeiro uso |
-| PageNotesList.bas | OK | Lista de notas |
+| PageNotesGroups.bas | OK | Lista de grupos de notas |
+| PageNotesList.bas | OK | Notas do grupo |
 | PageNoteEdit.bas | OK | Criar/editar nota |
+| PageBackup.bas | OK | Backup .lockzero |
+| PageImportCSV.bas | OK | Importar senhas de CSV |
+| PageOnboarding.bas | OK | Primeiro uso |
 | PageSettings.bas | OK | Configuracoes do app |
 
 ### Documentacao:
@@ -1142,8 +1112,9 @@ Facebook,https://facebook.com,usuario,senha456
 |---------|--------|-----------|
 | CLAUDE.md | OK | Documento de sessao |
 | LOCKZERO_SPEC.md | OK | Especificacao tecnica |
-| DECISOES_ARQUITETURA.md | OK | Decisoes de seguranca |
-| DICAS_B4A.md | OK | Dicas de desenvolvimento |
+| TODO_LIST.md | OK | Tarefas pendentes |
+| HISTORICO.md | OK | Historico de desenvolvimento |
+| UI_PATTERNS.md | OK | Padroes de interface |
 
 ---
 
@@ -1159,14 +1130,14 @@ Facebook,https://facebook.com,usuario,senha456
 
 ## MODELO DE DADOS (Resumo)
 
-### Categorias do Cofre
+### Categorias do Cofre (SIMPLIFICADO)
 | Categoria | Classe | Modulo | Status |
 |-----------|--------|--------|--------|
 | Senhas | clsPasswordEntry | ModPasswords | OK |
-| Cartoes | clsCardEntry | ModCards | Pendente |
-| Documentos | clsDocumentEntry | ModDocuments | Pendente |
 | Notas | clsNoteEntry | ModNotes | OK |
-| Wi-Fi | clsWifiEntry | ModWifi | Pendente |
+| Anexos | - | ModAttachments | PENDENTE |
+
+> **Nota:** Cartoes de credito sao armazenados como notas de lista com template.
 
 ---
 
@@ -1184,4 +1155,4 @@ Facebook,https://facebook.com,usuario,senha456
 - [x] Concluido
 - [-] Cancelado
 
-**Ultima atualizacao:** 2026-01-02
+**Ultima atualizacao:** 2026-01-03

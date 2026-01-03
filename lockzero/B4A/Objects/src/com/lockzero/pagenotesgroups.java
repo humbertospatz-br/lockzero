@@ -64,10 +64,10 @@ public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
 public String  _applytheme() throws Exception{
- //BA.debugLineNum = 980;BA.debugLine="Private Sub ApplyTheme";
- //BA.debugLineNum = 981;BA.debugLine="Root.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 1015;BA.debugLine="Private Sub ApplyTheme";
+ //BA.debugLineNum = 1016;BA.debugLine="Root.Color = ModTheme.HomeBg";
 _root.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 982;BA.debugLine="End Sub";
+ //BA.debugLineNum = 1017;BA.debugLine="End Sub";
 return "";
 }
 public String  _b4xpage_appear() throws Exception{
@@ -106,27 +106,27 @@ _tmrsession.setEnabled(__c.False);
 return "";
 }
 public String  _biometric_complete(boolean _success,String _errormessage) throws Exception{
- //BA.debugLineNum = 962;BA.debugLine="Private Sub Biometric_Complete(Success As Boolean,";
- //BA.debugLineNum = 963;BA.debugLine="If Success And PendingDeleteGroupId <> \"\" Then";
+ //BA.debugLineNum = 997;BA.debugLine="Private Sub Biometric_Complete(Success As Boolean,";
+ //BA.debugLineNum = 998;BA.debugLine="If Success And PendingDeleteGroupId <> \"\" Then";
 if (_success && (_pendingdeletegroupid).equals("") == false) { 
- //BA.debugLineNum = 964;BA.debugLine="ModNotes.DeleteNoteGroup(PendingDeleteGroupId)";
+ //BA.debugLineNum = 999;BA.debugLine="ModNotes.DeleteNoteGroup(PendingDeleteGroupId)";
 _modnotes._deletenotegroup /*String*/ (ba,_pendingdeletegroupid);
- //BA.debugLineNum = 965;BA.debugLine="PendingDeleteGroupId = \"\"";
+ //BA.debugLineNum = 1000;BA.debugLine="PendingDeleteGroupId = \"\"";
 _pendingdeletegroupid = "";
- //BA.debugLineNum = 966;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 1001;BA.debugLine="LoadGroups";
 _loadgroups();
- //BA.debugLineNum = 967;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+ //BA.debugLineNum = 1002;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"success")),__c.False);
  }else {
- //BA.debugLineNum = 969;BA.debugLine="PendingDeleteGroupId = \"\"";
+ //BA.debugLineNum = 1004;BA.debugLine="PendingDeleteGroupId = \"\"";
 _pendingdeletegroupid = "";
- //BA.debugLineNum = 970;BA.debugLine="If Success = False And ErrorMessage <> \"\" Then";
+ //BA.debugLineNum = 1005;BA.debugLine="If Success = False And ErrorMessage <> \"\" Then";
 if (_success==__c.False && (_errormessage).equals("") == false) { 
- //BA.debugLineNum = 971;BA.debugLine="ToastMessageShow(ModLang.T(\"biometric_failed\"),";
+ //BA.debugLineNum = 1006;BA.debugLine="ToastMessageShow(ModLang.T(\"biometric_failed\"),";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"biometric_failed")),__c.True);
  };
  };
- //BA.debugLineNum = 974;BA.debugLine="End Sub";
+ //BA.debugLineNum = 1009;BA.debugLine="End Sub";
 return "";
 }
 public String  _btnadd_click() throws Exception{
@@ -146,60 +146,60 @@ _b4xpages._closepage /*String*/ (ba,this);
 return "";
 }
 public String  _btndialogcancel_click() throws Exception{
- //BA.debugLineNum = 792;BA.debugLine="Private Sub btnDialogCancel_Click";
- //BA.debugLineNum = 793;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 827;BA.debugLine="Private Sub btnDialogCancel_Click";
+ //BA.debugLineNum = 828;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 794;BA.debugLine="End Sub";
+ //BA.debugLineNum = 829;BA.debugLine="End Sub";
 return "";
 }
 public String  _btndialogok_click() throws Exception{
- //BA.debugLineNum = 796;BA.debugLine="Private Sub btnDialogOk_Click";
- //BA.debugLineNum = 797;BA.debugLine="Select CurrentDialogMode";
+ //BA.debugLineNum = 831;BA.debugLine="Private Sub btnDialogOk_Click";
+ //BA.debugLineNum = 832;BA.debugLine="Select CurrentDialogMode";
 switch (BA.switchObjectToInt(_currentdialogmode,"add_group","unlock_group","edit_group","delete_group")) {
 case 0: {
- //BA.debugLineNum = 799;BA.debugLine="ProcessAddGroup";
+ //BA.debugLineNum = 834;BA.debugLine="ProcessAddGroup";
 _processaddgroup();
  break; }
 case 1: {
- //BA.debugLineNum = 801;BA.debugLine="ProcessUnlockGroup";
+ //BA.debugLineNum = 836;BA.debugLine="ProcessUnlockGroup";
 _processunlockgroup();
  break; }
 case 2: {
- //BA.debugLineNum = 803;BA.debugLine="ProcessEditGroup";
+ //BA.debugLineNum = 838;BA.debugLine="ProcessEditGroup";
 _processeditgroup();
  break; }
 case 3: {
- //BA.debugLineNum = 805;BA.debugLine="ProcessDeleteGroup";
+ //BA.debugLineNum = 840;BA.debugLine="ProcessDeleteGroup";
 _processdeletegroup();
  break; }
 }
 ;
- //BA.debugLineNum = 807;BA.debugLine="End Sub";
+ //BA.debugLineNum = 842;BA.debugLine="End Sub";
 return "";
 }
 public String  _btnshowpass_click() throws Exception{
- //BA.debugLineNum = 778;BA.debugLine="Private Sub btnShowPass_Click";
- //BA.debugLineNum = 779;BA.debugLine="IsPassVisible = Not(IsPassVisible)";
+ //BA.debugLineNum = 813;BA.debugLine="Private Sub btnShowPass_Click";
+ //BA.debugLineNum = 814;BA.debugLine="IsPassVisible = Not(IsPassVisible)";
 _ispassvisible = __c.Not(_ispassvisible);
- //BA.debugLineNum = 780;BA.debugLine="If IsPassVisible Then";
+ //BA.debugLineNum = 815;BA.debugLine="If IsPassVisible Then";
 if (_ispassvisible) { 
- //BA.debugLineNum = 781;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecureV";
+ //BA.debugLineNum = 816;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecureV";
 _edtpassphrase.setInputType(_modsecurity._getsecurevisibleinputtype /*int*/ (ba));
- //BA.debugLineNum = 782;BA.debugLine="btnShowPass.Text = ModLang.T(\"hide\")";
+ //BA.debugLineNum = 817;BA.debugLine="btnShowPass.Text = ModLang.T(\"hide\")";
 _btnshowpass.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"hide")));
- //BA.debugLineNum = 783;BA.debugLine="btnShowPass.TextColor = Colors.White";
+ //BA.debugLineNum = 818;BA.debugLine="btnShowPass.TextColor = Colors.White";
 _btnshowpass.setTextColor(__c.Colors.White);
  }else {
- //BA.debugLineNum = 785;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecureP";
+ //BA.debugLineNum = 820;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecureP";
 _edtpassphrase.setInputType(_modsecurity._getsecurepassphraseinputtype /*int*/ (ba));
- //BA.debugLineNum = 786;BA.debugLine="btnShowPass.Text = ModLang.T(\"view\")";
+ //BA.debugLineNum = 821;BA.debugLine="btnShowPass.Text = ModLang.T(\"view\")";
 _btnshowpass.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"view")));
- //BA.debugLineNum = 787;BA.debugLine="btnShowPass.TextColor = Colors.ARGB(200, 255, 25";
+ //BA.debugLineNum = 822;BA.debugLine="btnShowPass.TextColor = Colors.ARGB(200, 255, 25";
 _btnshowpass.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
  };
- //BA.debugLineNum = 789;BA.debugLine="edtPassphrase.SelectionStart = edtPassphrase.Text";
+ //BA.debugLineNum = 824;BA.debugLine="edtPassphrase.SelectionStart = edtPassphrase.Text";
 _edtpassphrase.setSelectionStart(_edtpassphrase.getText().length());
- //BA.debugLineNum = 790;BA.debugLine="End Sub";
+ //BA.debugLineNum = 825;BA.debugLine="End Sub";
 return "";
 }
 public String  _chksecure_checkedchange(boolean _checked) throws Exception{
@@ -274,6 +274,125 @@ _pendingdeletegroupid = "";
  //BA.debugLineNum = 40;BA.debugLine="End Sub";
 return "";
 }
+public void  _confirmclearsystemgroup(String _groupid) throws Exception{
+ResumableSub_ConfirmClearSystemGroup rsub = new ResumableSub_ConfirmClearSystemGroup(this,_groupid);
+rsub.resume(ba, null);
+}
+public static class ResumableSub_ConfirmClearSystemGroup extends BA.ResumableSub {
+public ResumableSub_ConfirmClearSystemGroup(com.lockzero.pagenotesgroups parent,String _groupid) {
+this.parent = parent;
+this._groupid = _groupid;
+}
+com.lockzero.pagenotesgroups parent;
+String _groupid;
+com.lockzero.clsnotegroup _g = null;
+int _count = 0;
+String _msg = "";
+int _result = 0;
+
+@Override
+public void resume(BA ba, Object[] result) throws Exception{
+
+    while (true) {
+        switch (state) {
+            case -1:
+return;
+
+case 0:
+//C
+this.state = 1;
+ //BA.debugLineNum = 603;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+_g = parent._modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_groupid);
+ //BA.debugLineNum = 604;BA.debugLine="If g.IsInitialized = False Then Return";
+if (true) break;
+
+case 1:
+//if
+this.state = 6;
+if (_g._isinitialized /*boolean*/ ()==parent.__c.False) { 
+this.state = 3;
+;}if (true) break;
+
+case 3:
+//C
+this.state = 6;
+if (true) return ;
+if (true) break;
+
+case 6:
+//C
+this.state = 7;
+;
+ //BA.debugLineNum = 606;BA.debugLine="Dim count As Int = ModNotes.CountByGroup(groupId)";
+_count = parent._modnotes._countbygroup /*int*/ (ba,_groupid);
+ //BA.debugLineNum = 607;BA.debugLine="If count = 0 Then";
+if (true) break;
+
+case 7:
+//if
+this.state = 10;
+if (_count==0) { 
+this.state = 9;
+}if (true) break;
+
+case 9:
+//C
+this.state = 10;
+ //BA.debugLineNum = 608;BA.debugLine="ToastMessageShow(ModLang.T(\"empty\"), False)";
+parent.__c.ToastMessageShow(BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"empty")),parent.__c.False);
+ //BA.debugLineNum = 609;BA.debugLine="Return";
+if (true) return ;
+ if (true) break;
+
+case 10:
+//C
+this.state = 11;
+;
+ //BA.debugLineNum = 612;BA.debugLine="Dim msg As String = ModLang.T(\"clear_cards_confir";
+_msg = parent._modlang._t /*String*/ (ba,"clear_cards_confirm")+parent.__c.CRLF+parent.__c.CRLF+BA.NumberToString(_count)+" "+parent._modlang._t /*String*/ (ba,"items");
+ //BA.debugLineNum = 614;BA.debugLine="Wait For (xui.Msgbox2Async(msg, g.Name, ModLang.T";
+parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(_msg),BA.ObjectToCharSequence(_g._name /*String*/ ),parent._modlang._t /*String*/ (ba,"delete"),"",parent._modlang._t /*String*/ (ba,"cancel"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
+this.state = 15;
+return;
+case 15:
+//C
+this.state = 11;
+_result = (Integer) result[0];
+;
+ //BA.debugLineNum = 616;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+if (true) break;
+
+case 11:
+//if
+this.state = 14;
+if (_result==parent._xui.DialogResponse_Positive) { 
+this.state = 13;
+}if (true) break;
+
+case 13:
+//C
+this.state = 14;
+ //BA.debugLineNum = 617;BA.debugLine="ModNotes.ClearSystemGroup(groupId)";
+parent._modnotes._clearsystemgroup /*String*/ (ba,_groupid);
+ //BA.debugLineNum = 618;BA.debugLine="LoadGroups";
+parent._loadgroups();
+ //BA.debugLineNum = 619;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+parent.__c.ToastMessageShow(BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"success")),parent.__c.False);
+ if (true) break;
+
+case 14:
+//C
+this.state = -1;
+;
+ //BA.debugLineNum = 621;BA.debugLine="End Sub";
+if (true) break;
+
+            }
+        }
+    }
+}
+public void  _msgbox_result(int _result) throws Exception{
+}
 public void  _confirmdeletegroup(String _groupid) throws Exception{
 ResumableSub_ConfirmDeleteGroup rsub = new ResumableSub_ConfirmDeleteGroup(this,_groupid);
 rsub.resume(ba, null);
@@ -301,9 +420,9 @@ return;
 case 0:
 //C
 this.state = 1;
- //BA.debugLineNum = 659;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 694;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = parent._modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_groupid);
- //BA.debugLineNum = 660;BA.debugLine="If g.IsInitialized = False Then Return";
+ //BA.debugLineNum = 695;BA.debugLine="If g.IsInitialized = False Then Return";
 if (true) break;
 
 case 1:
@@ -323,11 +442,11 @@ case 6:
 //C
 this.state = 7;
 ;
- //BA.debugLineNum = 662;BA.debugLine="Dim count As Int = ModNotes.CountByGroup(groupId)";
+ //BA.debugLineNum = 697;BA.debugLine="Dim count As Int = ModNotes.CountByGroup(groupId)";
 _count = parent._modnotes._countbygroup /*int*/ (ba,_groupid);
- //BA.debugLineNum = 663;BA.debugLine="Dim msg As String = ModLang.T(\"note_group_delete_";
+ //BA.debugLineNum = 698;BA.debugLine="Dim msg As String = ModLang.T(\"note_group_delete_";
 _msg = parent._modlang._t /*String*/ (ba,"note_group_delete_confirm");
- //BA.debugLineNum = 664;BA.debugLine="If count > 0 Then";
+ //BA.debugLineNum = 699;BA.debugLine="If count > 0 Then";
 if (true) break;
 
 case 7:
@@ -340,7 +459,7 @@ this.state = 9;
 case 9:
 //C
 this.state = 10;
- //BA.debugLineNum = 665;BA.debugLine="msg = msg & CRLF & CRLF & count & \" \" & ModLang.";
+ //BA.debugLineNum = 700;BA.debugLine="msg = msg & CRLF & CRLF & count & \" \" & ModLang.";
 _msg = _msg+parent.__c.CRLF+parent.__c.CRLF+BA.NumberToString(_count)+" "+parent._modlang._t /*String*/ (ba,"notes")+"!";
  if (true) break;
 
@@ -348,7 +467,7 @@ case 10:
 //C
 this.state = 11;
 ;
- //BA.debugLineNum = 668;BA.debugLine="Wait For (xui.Msgbox2Async(msg, ModLang.T(\"note_g";
+ //BA.debugLineNum = 703;BA.debugLine="Wait For (xui.Msgbox2Async(msg, ModLang.T(\"note_g";
 parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(_msg),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"note_group_delete")),parent._modlang._t /*String*/ (ba,"delete"),"",parent._modlang._t /*String*/ (ba,"cancel"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
 this.state = 33;
 return;
@@ -357,7 +476,7 @@ case 33:
 this.state = 11;
 _result = (Integer) result[0];
 ;
- //BA.debugLineNum = 670;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+ //BA.debugLineNum = 705;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
 if (true) break;
 
 case 11:
@@ -370,7 +489,7 @@ this.state = 13;
 case 13:
 //C
 this.state = 14;
- //BA.debugLineNum = 672;BA.debugLine="If g.IsSecure Then";
+ //BA.debugLineNum = 707;BA.debugLine="If g.IsSecure Then";
 if (true) break;
 
 case 14:
@@ -385,7 +504,7 @@ this.state = 30;
 case 16:
 //C
 this.state = 17;
- //BA.debugLineNum = 673;BA.debugLine="If ModSession.IsSessionActive Then";
+ //BA.debugLineNum = 708;BA.debugLine="If ModSession.IsSessionActive Then";
 if (true) break;
 
 case 17:
@@ -400,7 +519,7 @@ this.state = 27;
 case 19:
 //C
 this.state = 20;
- //BA.debugLineNum = 675;BA.debugLine="If ModSecurity.GetUseBiometric And Biometric.C";
+ //BA.debugLineNum = 710;BA.debugLine="If ModSecurity.GetUseBiometric And Biometric.C";
 if (true) break;
 
 case 20:
@@ -415,20 +534,20 @@ this.state = 24;
 case 22:
 //C
 this.state = 25;
- //BA.debugLineNum = 676;BA.debugLine="PendingDeleteGroupId = groupId";
+ //BA.debugLineNum = 711;BA.debugLine="PendingDeleteGroupId = groupId";
 parent._pendingdeletegroupid = _groupid;
- //BA.debugLineNum = 677;BA.debugLine="Biometric.Show(ModLang.T(\"biometric_prompt\"))";
+ //BA.debugLineNum = 712;BA.debugLine="Biometric.Show(ModLang.T(\"biometric_prompt\"))";
 parent._biometric._show /*String*/ (parent._modlang._t /*String*/ (ba,"biometric_prompt"));
  if (true) break;
 
 case 24:
 //C
 this.state = 25;
- //BA.debugLineNum = 680;BA.debugLine="ModNotes.DeleteNoteGroup(groupId)";
+ //BA.debugLineNum = 715;BA.debugLine="ModNotes.DeleteNoteGroup(groupId)";
 parent._modnotes._deletenotegroup /*String*/ (ba,_groupid);
- //BA.debugLineNum = 681;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 716;BA.debugLine="LoadGroups";
 parent._loadgroups();
- //BA.debugLineNum = 682;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+ //BA.debugLineNum = 717;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
 parent.__c.ToastMessageShow(BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"success")),parent.__c.False);
  if (true) break;
 
@@ -441,7 +560,7 @@ this.state = 28;
 case 27:
 //C
 this.state = 28;
- //BA.debugLineNum = 686;BA.debugLine="ShowDeleteGroupDialog(groupId)";
+ //BA.debugLineNum = 721;BA.debugLine="ShowDeleteGroupDialog(groupId)";
 parent._showdeletegroupdialog(_groupid);
  if (true) break;
 
@@ -454,11 +573,11 @@ this.state = 31;
 case 30:
 //C
 this.state = 31;
- //BA.debugLineNum = 690;BA.debugLine="ModNotes.DeleteNoteGroup(groupId)";
+ //BA.debugLineNum = 725;BA.debugLine="ModNotes.DeleteNoteGroup(groupId)";
 parent._modnotes._deletenotegroup /*String*/ (ba,_groupid);
- //BA.debugLineNum = 691;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 726;BA.debugLine="LoadGroups";
 parent._loadgroups();
- //BA.debugLineNum = 692;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+ //BA.debugLineNum = 727;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
 parent.__c.ToastMessageShow(BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"success")),parent.__c.False);
  if (true) break;
 
@@ -472,14 +591,12 @@ case 32:
 //C
 this.state = -1;
 ;
- //BA.debugLineNum = 695;BA.debugLine="End Sub";
+ //BA.debugLineNum = 730;BA.debugLine="End Sub";
 if (true) break;
 
             }
         }
     }
-}
-public void  _msgbox_result(int _result) throws Exception{
 }
 public String  _createdialogoverlay() throws Exception{
 int _width = 0;
@@ -630,18 +747,18 @@ return "";
 }
 public String  _hidedialog() throws Exception{
 anywheresoftware.b4a.objects.IME _ime = null;
- //BA.debugLineNum = 809;BA.debugLine="Private Sub HideDialog";
- //BA.debugLineNum = 810;BA.debugLine="pnlOverlay.Visible = False";
+ //BA.debugLineNum = 844;BA.debugLine="Private Sub HideDialog";
+ //BA.debugLineNum = 845;BA.debugLine="pnlOverlay.Visible = False";
 _pnloverlay.setVisible(__c.False);
- //BA.debugLineNum = 811;BA.debugLine="CurrentDialogMode = \"\"";
+ //BA.debugLineNum = 846;BA.debugLine="CurrentDialogMode = \"\"";
 _currentdialogmode = "";
- //BA.debugLineNum = 812;BA.debugLine="Dim ime As IME";
+ //BA.debugLineNum = 847;BA.debugLine="Dim ime As IME";
 _ime = new anywheresoftware.b4a.objects.IME();
- //BA.debugLineNum = 813;BA.debugLine="ime.Initialize(\"\")";
+ //BA.debugLineNum = 848;BA.debugLine="ime.Initialize(\"\")";
 _ime.Initialize("");
- //BA.debugLineNum = 814;BA.debugLine="ime.HideKeyboard";
+ //BA.debugLineNum = 849;BA.debugLine="ime.HideKeyboard";
 _ime.HideKeyboard(ba);
- //BA.debugLineNum = 815;BA.debugLine="End Sub";
+ //BA.debugLineNum = 850;BA.debugLine="End Sub";
 return "";
 }
 public String  _initialize(anywheresoftware.b4a.BA _ba) throws Exception{
@@ -676,7 +793,7 @@ return;
 case 0:
 //C
 this.state = 1;
- //BA.debugLineNum = 1010;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"lock_confir";
+ //BA.debugLineNum = 1045;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"lock_confir";
 parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"lock_confirm_msg")),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"lock")),parent._modlang._t /*String*/ (ba,"yes"),"",parent._modlang._t /*String*/ (ba,"cancel"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
 this.state = 5;
 return;
@@ -685,7 +802,7 @@ case 5:
 this.state = 1;
 _result = (Integer) result[0];
 ;
- //BA.debugLineNum = 1012;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+ //BA.debugLineNum = 1047;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
 if (true) break;
 
 case 1:
@@ -698,11 +815,11 @@ this.state = 3;
 case 3:
 //C
 this.state = 4;
- //BA.debugLineNum = 1013;BA.debugLine="tmrSession.Enabled = False";
+ //BA.debugLineNum = 1048;BA.debugLine="tmrSession.Enabled = False";
 parent._tmrsession.setEnabled(parent.__c.False);
- //BA.debugLineNum = 1014;BA.debugLine="ModSession.EndSession";
+ //BA.debugLineNum = 1049;BA.debugLine="ModSession.EndSession";
 parent._modsession._endsession /*String*/ (ba);
- //BA.debugLineNum = 1015;BA.debugLine="B4XPages.ClosePage(Me)";
+ //BA.debugLineNum = 1050;BA.debugLine="B4XPages.ClosePage(Me)";
 parent._b4xpages._closepage /*String*/ (ba,parent);
  if (true) break;
 
@@ -710,7 +827,7 @@ case 4:
 //C
 this.state = -1;
 ;
- //BA.debugLineNum = 1017;BA.debugLine="End Sub";
+ //BA.debugLineNum = 1052;BA.debugLine="End Sub";
 if (true) break;
 
             }
@@ -934,158 +1051,158 @@ String _phrase = "";
 String _phraseerror = "";
 String _phraseconfirm = "";
 com.lockzero.clsnotegroup _g = null;
- //BA.debugLineNum = 817;BA.debugLine="Private Sub ProcessAddGroup";
- //BA.debugLineNum = 818;BA.debugLine="Dim groupName As String = edtGroupName.Text.Trim";
+ //BA.debugLineNum = 852;BA.debugLine="Private Sub ProcessAddGroup";
+ //BA.debugLineNum = 853;BA.debugLine="Dim groupName As String = edtGroupName.Text.Trim";
 _groupname = _edtgroupname.getText().trim();
- //BA.debugLineNum = 819;BA.debugLine="Dim isSecure As Boolean = chkSecure.Checked";
+ //BA.debugLineNum = 854;BA.debugLine="Dim isSecure As Boolean = chkSecure.Checked";
 _issecure = _chksecure.getChecked();
- //BA.debugLineNum = 821;BA.debugLine="Dim groupIcon As String";
+ //BA.debugLineNum = 856;BA.debugLine="Dim groupIcon As String";
 _groupicon = "";
- //BA.debugLineNum = 822;BA.debugLine="If isSecure Then";
+ //BA.debugLineNum = 857;BA.debugLine="If isSecure Then";
 if (_issecure) { 
- //BA.debugLineNum = 823;BA.debugLine="groupIcon = Chr(0xD83D) & Chr(0xDD12)  '🔒 cadea";
+ //BA.debugLineNum = 858;BA.debugLine="groupIcon = Chr(0xD83D) & Chr(0xDD12)  '🔒 cadea";
 _groupicon = BA.ObjectToString(__c.Chr(((int)0xd83d)))+BA.ObjectToString(__c.Chr(((int)0xdd12)));
  }else {
- //BA.debugLineNum = 825;BA.debugLine="groupIcon = Chr(0xD83D) & Chr(0xDCDD)  '📝 nota";
+ //BA.debugLineNum = 860;BA.debugLine="groupIcon = Chr(0xD83D) & Chr(0xDCDD)  '📝 nota";
 _groupicon = BA.ObjectToString(__c.Chr(((int)0xd83d)))+BA.ObjectToString(__c.Chr(((int)0xdcdd)));
  };
- //BA.debugLineNum = 829;BA.debugLine="If groupName.Length = 0 Then";
+ //BA.debugLineNum = 864;BA.debugLine="If groupName.Length = 0 Then";
 if (_groupname.length()==0) { 
- //BA.debugLineNum = 830;BA.debugLine="ToastMessageShow(ModLang.T(\"error_empty_field\"),";
+ //BA.debugLineNum = 865;BA.debugLine="ToastMessageShow(ModLang.T(\"error_empty_field\"),";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"error_empty_field")),__c.True);
- //BA.debugLineNum = 831;BA.debugLine="Return";
+ //BA.debugLineNum = 866;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 835;BA.debugLine="Dim phrase As String = \"\"";
+ //BA.debugLineNum = 870;BA.debugLine="Dim phrase As String = \"\"";
 _phrase = "";
- //BA.debugLineNum = 836;BA.debugLine="If ModSession.IsSessionActive Then";
+ //BA.debugLineNum = 871;BA.debugLine="If ModSession.IsSessionActive Then";
 if (_modsession._issessionactive /*boolean*/ (ba)) { 
- //BA.debugLineNum = 838;BA.debugLine="phrase = ModSession.GetPassphrase";
+ //BA.debugLineNum = 873;BA.debugLine="phrase = ModSession.GetPassphrase";
 _phrase = _modsession._getpassphrase /*String*/ (ba);
  }else {
- //BA.debugLineNum = 841;BA.debugLine="phrase = edtPassphrase.Text.Trim";
+ //BA.debugLineNum = 876;BA.debugLine="phrase = edtPassphrase.Text.Trim";
 _phrase = _edtpassphrase.getText().trim();
- //BA.debugLineNum = 844;BA.debugLine="If isSecure Then";
+ //BA.debugLineNum = 879;BA.debugLine="If isSecure Then";
 if (_issecure) { 
- //BA.debugLineNum = 845;BA.debugLine="Dim phraseError As String = ModSecurity.GetPass";
+ //BA.debugLineNum = 880;BA.debugLine="Dim phraseError As String = ModSecurity.GetPass";
 _phraseerror = _modsecurity._getpassphraseerror /*String*/ (ba,_phrase);
- //BA.debugLineNum = 846;BA.debugLine="If phraseError.Length > 0 Then";
+ //BA.debugLineNum = 881;BA.debugLine="If phraseError.Length > 0 Then";
 if (_phraseerror.length()>0) { 
- //BA.debugLineNum = 847;BA.debugLine="ToastMessageShow(phraseError, True)";
+ //BA.debugLineNum = 882;BA.debugLine="ToastMessageShow(phraseError, True)";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_phraseerror),__c.True);
- //BA.debugLineNum = 848;BA.debugLine="Return";
+ //BA.debugLineNum = 883;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 852;BA.debugLine="Dim phraseConfirm As String = edtPassphraseConf";
+ //BA.debugLineNum = 887;BA.debugLine="Dim phraseConfirm As String = edtPassphraseConf";
 _phraseconfirm = _edtpassphraseconfirm.getText().trim();
- //BA.debugLineNum = 853;BA.debugLine="If phrase <> phraseConfirm Then";
+ //BA.debugLineNum = 888;BA.debugLine="If phrase <> phraseConfirm Then";
 if ((_phrase).equals(_phraseconfirm) == false) { 
- //BA.debugLineNum = 854;BA.debugLine="ToastMessageShow(ModLang.T(\"passphrase_mismatc";
+ //BA.debugLineNum = 889;BA.debugLine="ToastMessageShow(ModLang.T(\"passphrase_mismatc";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"passphrase_mismatch")),__c.True);
- //BA.debugLineNum = 855;BA.debugLine="Return";
+ //BA.debugLineNum = 890;BA.debugLine="Return";
 if (true) return "";
  };
  };
  };
- //BA.debugLineNum = 861;BA.debugLine="Dim g As clsNoteGroup";
+ //BA.debugLineNum = 896;BA.debugLine="Dim g As clsNoteGroup";
 _g = new com.lockzero.clsnotegroup();
- //BA.debugLineNum = 862;BA.debugLine="g.Initialize";
+ //BA.debugLineNum = 897;BA.debugLine="g.Initialize";
 _g._initialize /*String*/ (ba);
- //BA.debugLineNum = 863;BA.debugLine="g.Name = groupName";
+ //BA.debugLineNum = 898;BA.debugLine="g.Name = groupName";
 _g._name /*String*/  = _groupname;
- //BA.debugLineNum = 864;BA.debugLine="g.Icon = groupIcon";
+ //BA.debugLineNum = 899;BA.debugLine="g.Icon = groupIcon";
 _g._icon /*String*/  = _groupicon;
- //BA.debugLineNum = 865;BA.debugLine="g.IsSecure = isSecure";
+ //BA.debugLineNum = 900;BA.debugLine="g.IsSecure = isSecure";
 _g._issecure /*boolean*/  = _issecure;
- //BA.debugLineNum = 868;BA.debugLine="If isSecure Then";
+ //BA.debugLineNum = 903;BA.debugLine="If isSecure Then";
 if (_issecure) { 
- //BA.debugLineNum = 869;BA.debugLine="g.SetupSecurity(phrase)";
+ //BA.debugLineNum = 904;BA.debugLine="g.SetupSecurity(phrase)";
 _g._setupsecurity /*String*/ (_phrase);
- //BA.debugLineNum = 871;BA.debugLine="ModSession.StartSessionWithCategory(phrase, \"not";
+ //BA.debugLineNum = 906;BA.debugLine="ModSession.StartSessionWithCategory(phrase, \"not";
 _modsession._startsessionwithcategory /*String*/ (ba,_phrase,"notes");
- //BA.debugLineNum = 873;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
+ //BA.debugLineNum = 908;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
 _modsecurity._clearsecurefield /*String*/ (ba,_edtpassphrase);
- //BA.debugLineNum = 874;BA.debugLine="If edtPassphraseConfirm.IsInitialized Then ModSe";
+ //BA.debugLineNum = 909;BA.debugLine="If edtPassphraseConfirm.IsInitialized Then ModSe";
 if (_edtpassphraseconfirm.IsInitialized()) { 
 _modsecurity._clearsecurefield /*String*/ (ba,_edtpassphraseconfirm);};
  };
- //BA.debugLineNum = 877;BA.debugLine="ModNotes.SaveNoteGroup(g)";
+ //BA.debugLineNum = 912;BA.debugLine="ModNotes.SaveNoteGroup(g)";
 _modnotes._savenotegroup /*String*/ (ba,_g);
- //BA.debugLineNum = 879;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 914;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 880;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 915;BA.debugLine="LoadGroups";
 _loadgroups();
- //BA.debugLineNum = 883;BA.debugLine="NavigateToGroup(g.Id)";
+ //BA.debugLineNum = 918;BA.debugLine="NavigateToGroup(g.Id)";
 _navigatetogroup(_g._id /*String*/ );
- //BA.debugLineNum = 884;BA.debugLine="End Sub";
+ //BA.debugLineNum = 919;BA.debugLine="End Sub";
 return "";
 }
 public String  _processdeletegroup() throws Exception{
 String _phrase = "";
 com.lockzero.clsnotegroup _g = null;
- //BA.debugLineNum = 937;BA.debugLine="Private Sub ProcessDeleteGroup";
- //BA.debugLineNum = 938;BA.debugLine="Dim phrase As String = edtPassphrase.Text.Trim";
+ //BA.debugLineNum = 972;BA.debugLine="Private Sub ProcessDeleteGroup";
+ //BA.debugLineNum = 973;BA.debugLine="Dim phrase As String = edtPassphrase.Text.Trim";
 _phrase = _edtpassphrase.getText().trim();
- //BA.debugLineNum = 939;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 974;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = _modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_currentgroupid);
- //BA.debugLineNum = 941;BA.debugLine="If g.IsInitialized = False Then";
+ //BA.debugLineNum = 976;BA.debugLine="If g.IsInitialized = False Then";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
- //BA.debugLineNum = 942;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 977;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 943;BA.debugLine="Return";
+ //BA.debugLineNum = 978;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 947;BA.debugLine="If g.ValidatePhrase(phrase) Then";
+ //BA.debugLineNum = 982;BA.debugLine="If g.ValidatePhrase(phrase) Then";
 if (_g._validatephrase /*boolean*/ (_phrase)) { 
- //BA.debugLineNum = 948;BA.debugLine="ModNotes.DeleteNoteGroup(CurrentGroupId)";
+ //BA.debugLineNum = 983;BA.debugLine="ModNotes.DeleteNoteGroup(CurrentGroupId)";
 _modnotes._deletenotegroup /*String*/ (ba,_currentgroupid);
- //BA.debugLineNum = 949;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 984;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 950;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 985;BA.debugLine="LoadGroups";
 _loadgroups();
- //BA.debugLineNum = 951;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+ //BA.debugLineNum = 986;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"success")),__c.False);
  }else {
- //BA.debugLineNum = 953;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\"),";
+ //BA.debugLineNum = 988;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\"),";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"wrong_passphrase")),__c.True);
- //BA.debugLineNum = 954;BA.debugLine="edtPassphrase.Text = \"\"";
+ //BA.debugLineNum = 989;BA.debugLine="edtPassphrase.Text = \"\"";
 _edtpassphrase.setText(BA.ObjectToCharSequence(""));
  };
- //BA.debugLineNum = 956;BA.debugLine="End Sub";
+ //BA.debugLineNum = 991;BA.debugLine="End Sub";
 return "";
 }
 public String  _processeditgroup() throws Exception{
 String _groupname = "";
 com.lockzero.clsnotegroup _g = null;
- //BA.debugLineNum = 916;BA.debugLine="Private Sub ProcessEditGroup";
- //BA.debugLineNum = 917;BA.debugLine="Dim groupName As String = edtGroupName.Text.Trim";
+ //BA.debugLineNum = 951;BA.debugLine="Private Sub ProcessEditGroup";
+ //BA.debugLineNum = 952;BA.debugLine="Dim groupName As String = edtGroupName.Text.Trim";
 _groupname = _edtgroupname.getText().trim();
- //BA.debugLineNum = 918;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 953;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = _modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_currentgroupid);
- //BA.debugLineNum = 920;BA.debugLine="If g.IsInitialized = False Then";
+ //BA.debugLineNum = 955;BA.debugLine="If g.IsInitialized = False Then";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
- //BA.debugLineNum = 921;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 956;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 922;BA.debugLine="Return";
+ //BA.debugLineNum = 957;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 925;BA.debugLine="If groupName.Length > 0 Then";
+ //BA.debugLineNum = 960;BA.debugLine="If groupName.Length > 0 Then";
 if (_groupname.length()>0) { 
- //BA.debugLineNum = 926;BA.debugLine="g.Name = groupName";
+ //BA.debugLineNum = 961;BA.debugLine="g.Name = groupName";
 _g._name /*String*/  = _groupname;
- //BA.debugLineNum = 928;BA.debugLine="ModNotes.SaveNoteGroup(g)";
+ //BA.debugLineNum = 963;BA.debugLine="ModNotes.SaveNoteGroup(g)";
 _modnotes._savenotegroup /*String*/ (ba,_g);
- //BA.debugLineNum = 929;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 964;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 930;BA.debugLine="LoadGroups";
+ //BA.debugLineNum = 965;BA.debugLine="LoadGroups";
 _loadgroups();
- //BA.debugLineNum = 931;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
+ //BA.debugLineNum = 966;BA.debugLine="ToastMessageShow(ModLang.T(\"success\"), False)";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"success")),__c.False);
  }else {
- //BA.debugLineNum = 933;BA.debugLine="ToastMessageShow(ModLang.T(\"error_empty_field\"),";
+ //BA.debugLineNum = 968;BA.debugLine="ToastMessageShow(ModLang.T(\"error_empty_field\"),";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"error_empty_field")),__c.True);
  };
- //BA.debugLineNum = 935;BA.debugLine="End Sub";
+ //BA.debugLineNum = 970;BA.debugLine="End Sub";
 return "";
 }
 public String  _processunlockgroup() throws Exception{
@@ -1093,49 +1210,49 @@ String _phrase = "";
 com.lockzero.clsnotegroup _g = null;
 int _delay = 0;
 String _timestr = "";
- //BA.debugLineNum = 886;BA.debugLine="Private Sub ProcessUnlockGroup";
- //BA.debugLineNum = 887;BA.debugLine="Dim phrase As String = edtPassphrase.Text.Trim";
+ //BA.debugLineNum = 921;BA.debugLine="Private Sub ProcessUnlockGroup";
+ //BA.debugLineNum = 922;BA.debugLine="Dim phrase As String = edtPassphrase.Text.Trim";
 _phrase = _edtpassphrase.getText().trim();
- //BA.debugLineNum = 888;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 923;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = _modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_currentgroupid);
- //BA.debugLineNum = 890;BA.debugLine="If g.IsInitialized = False Then";
+ //BA.debugLineNum = 925;BA.debugLine="If g.IsInitialized = False Then";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
- //BA.debugLineNum = 891;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 926;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 892;BA.debugLine="Return";
+ //BA.debugLineNum = 927;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 896;BA.debugLine="If g.ValidatePhrase(phrase) Then";
+ //BA.debugLineNum = 931;BA.debugLine="If g.ValidatePhrase(phrase) Then";
 if (_g._validatephrase /*boolean*/ (_phrase)) { 
- //BA.debugLineNum = 897;BA.debugLine="ModSecurity.ResetFailedAttempts(CurrentGroupId)";
+ //BA.debugLineNum = 932;BA.debugLine="ModSecurity.ResetFailedAttempts(CurrentGroupId)";
 _modsecurity._resetfailedattempts /*String*/ (ba,_currentgroupid);
- //BA.debugLineNum = 898;BA.debugLine="ModSession.StartSessionWithCategory(phrase, \"not";
+ //BA.debugLineNum = 933;BA.debugLine="ModSession.StartSessionWithCategory(phrase, \"not";
 _modsession._startsessionwithcategory /*String*/ (ba,_phrase,"notes");
- //BA.debugLineNum = 900;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
+ //BA.debugLineNum = 935;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
 _modsecurity._clearsecurefield /*String*/ (ba,_edtpassphrase);
- //BA.debugLineNum = 901;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 936;BA.debugLine="HideDialog";
 _hidedialog();
- //BA.debugLineNum = 902;BA.debugLine="NavigateToGroup(CurrentGroupId)";
+ //BA.debugLineNum = 937;BA.debugLine="NavigateToGroup(CurrentGroupId)";
 _navigatetogroup(_currentgroupid);
  }else {
- //BA.debugLineNum = 904;BA.debugLine="Dim delay As Int = ModSecurity.RegisterFailedAtt";
+ //BA.debugLineNum = 939;BA.debugLine="Dim delay As Int = ModSecurity.RegisterFailedAtt";
 _delay = _modsecurity._registerfailedattempt /*int*/ (ba,_currentgroupid);
- //BA.debugLineNum = 905;BA.debugLine="If delay > 0 Then";
+ //BA.debugLineNum = 940;BA.debugLine="If delay > 0 Then";
 if (_delay>0) { 
- //BA.debugLineNum = 906;BA.debugLine="Dim timeStr As String = ModSecurity.FormatDelay";
+ //BA.debugLineNum = 941;BA.debugLine="Dim timeStr As String = ModSecurity.FormatDelay";
 _timestr = _modsecurity._formatdelay /*String*/ (ba,_delay);
- //BA.debugLineNum = 907;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\")";
+ //BA.debugLineNum = 942;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\")";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"wrong_passphrase")+" - "+_modlang._t /*String*/ (ba,"wait_timeout")+" "+_timestr),__c.True);
- //BA.debugLineNum = 908;BA.debugLine="HideDialog";
+ //BA.debugLineNum = 943;BA.debugLine="HideDialog";
 _hidedialog();
  }else {
- //BA.debugLineNum = 910;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\"),";
+ //BA.debugLineNum = 945;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\"),";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"wrong_passphrase")),__c.True);
  };
- //BA.debugLineNum = 912;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
+ //BA.debugLineNum = 947;BA.debugLine="ModSecurity.ClearSecureField(edtPassphrase)";
 _modsecurity._clearsecurefield /*String*/ (ba,_edtpassphrase);
  };
- //BA.debugLineNum = 914;BA.debugLine="End Sub";
+ //BA.debugLineNum = 949;BA.debugLine="End Sub";
 return "";
 }
 public String  _showaddgroupdialog() throws Exception{
@@ -1406,127 +1523,127 @@ anywheresoftware.b4a.objects.LabelWrapper _lblsub = null;
 anywheresoftware.b4a.objects.PanelWrapper _pnlinput = null;
 anywheresoftware.b4a.objects.ButtonWrapper _btncancel = null;
 anywheresoftware.b4a.objects.ButtonWrapper _btnok = null;
- //BA.debugLineNum = 697;BA.debugLine="Private Sub ShowDeleteGroupDialog(groupId As Strin";
- //BA.debugLineNum = 698;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 732;BA.debugLine="Private Sub ShowDeleteGroupDialog(groupId As Strin";
+ //BA.debugLineNum = 733;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = _modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_groupid);
- //BA.debugLineNum = 699;BA.debugLine="If g.IsInitialized = False Then Return";
+ //BA.debugLineNum = 734;BA.debugLine="If g.IsInitialized = False Then Return";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
 if (true) return "";};
- //BA.debugLineNum = 701;BA.debugLine="CurrentDialogMode = \"delete_group\"";
+ //BA.debugLineNum = 736;BA.debugLine="CurrentDialogMode = \"delete_group\"";
 _currentdialogmode = "delete_group";
- //BA.debugLineNum = 702;BA.debugLine="CurrentGroupId = groupId";
+ //BA.debugLineNum = 737;BA.debugLine="CurrentGroupId = groupId";
 _currentgroupid = _groupid;
- //BA.debugLineNum = 703;BA.debugLine="IsPassVisible = False";
+ //BA.debugLineNum = 738;BA.debugLine="IsPassVisible = False";
 _ispassvisible = __c.False;
- //BA.debugLineNum = 705;BA.debugLine="Dim dialogW As Int = Root.Width - 40dip";
+ //BA.debugLineNum = 740;BA.debugLine="Dim dialogW As Int = Root.Width - 40dip";
 _dialogw = (int) (_root.getWidth()-__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 706;BA.debugLine="pnlDialog.RemoveAllViews";
+ //BA.debugLineNum = 741;BA.debugLine="pnlDialog.RemoveAllViews";
 _pnldialog.RemoveAllViews();
- //BA.debugLineNum = 709;BA.debugLine="Dim lblTitle As Label";
+ //BA.debugLineNum = 744;BA.debugLine="Dim lblTitle As Label";
 _lbltitle = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 710;BA.debugLine="lblTitle.Initialize(\"\")";
+ //BA.debugLineNum = 745;BA.debugLine="lblTitle.Initialize(\"\")";
 _lbltitle.Initialize(ba,"");
- //BA.debugLineNum = 711;BA.debugLine="lblTitle.Text = ModLang.T(\"confirm_delete\")";
+ //BA.debugLineNum = 746;BA.debugLine="lblTitle.Text = ModLang.T(\"confirm_delete\")";
 _lbltitle.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"confirm_delete")));
- //BA.debugLineNum = 712;BA.debugLine="lblTitle.TextSize = 16";
+ //BA.debugLineNum = 747;BA.debugLine="lblTitle.TextSize = 16";
 _lbltitle.setTextSize((float) (16));
- //BA.debugLineNum = 713;BA.debugLine="lblTitle.TextColor = Colors.White";
+ //BA.debugLineNum = 748;BA.debugLine="lblTitle.TextColor = Colors.White";
 _lbltitle.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 714;BA.debugLine="lblTitle.Typeface = Typeface.DEFAULT_BOLD";
+ //BA.debugLineNum = 749;BA.debugLine="lblTitle.Typeface = Typeface.DEFAULT_BOLD";
 _lbltitle.setTypeface(__c.Typeface.DEFAULT_BOLD);
- //BA.debugLineNum = 715;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
+ //BA.debugLineNum = 750;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
 _lbltitle.setGravity(__c.Gravity.CENTER_HORIZONTAL);
- //BA.debugLineNum = 716;BA.debugLine="pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24";
+ //BA.debugLineNum = 751;BA.debugLine="pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24";
 _pnldialog.AddView((android.view.View)(_lbltitle.getObject()),(int) (0),__c.DipToCurrent((int) (12)),_dialogw,__c.DipToCurrent((int) (24)));
- //BA.debugLineNum = 719;BA.debugLine="Dim lblSub As Label";
+ //BA.debugLineNum = 754;BA.debugLine="Dim lblSub As Label";
 _lblsub = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 720;BA.debugLine="lblSub.Initialize(\"\")";
+ //BA.debugLineNum = 755;BA.debugLine="lblSub.Initialize(\"\")";
 _lblsub.Initialize(ba,"");
- //BA.debugLineNum = 721;BA.debugLine="lblSub.Text = g.Name & CRLF & ModLang.T(\"enter_pa";
+ //BA.debugLineNum = 756;BA.debugLine="lblSub.Text = g.Name & CRLF & ModLang.T(\"enter_pa";
 _lblsub.setText(BA.ObjectToCharSequence(_g._name /*String*/ +__c.CRLF+_modlang._t /*String*/ (ba,"enter_passphrase")));
- //BA.debugLineNum = 722;BA.debugLine="lblSub.TextSize = 12";
+ //BA.debugLineNum = 757;BA.debugLine="lblSub.TextSize = 12";
 _lblsub.setTextSize((float) (12));
- //BA.debugLineNum = 723;BA.debugLine="lblSub.TextColor = Colors.ARGB(180, 255, 255, 255";
+ //BA.debugLineNum = 758;BA.debugLine="lblSub.TextColor = Colors.ARGB(180, 255, 255, 255";
 _lblsub.setTextColor(__c.Colors.ARGB((int) (180),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 724;BA.debugLine="lblSub.Gravity = Gravity.CENTER_HORIZONTAL";
+ //BA.debugLineNum = 759;BA.debugLine="lblSub.Gravity = Gravity.CENTER_HORIZONTAL";
 _lblsub.setGravity(__c.Gravity.CENTER_HORIZONTAL);
- //BA.debugLineNum = 725;BA.debugLine="pnlDialog.AddView(lblSub, 0, 36dip, dialogW, 40di";
+ //BA.debugLineNum = 760;BA.debugLine="pnlDialog.AddView(lblSub, 0, 36dip, dialogW, 40di";
 _pnldialog.AddView((android.view.View)(_lblsub.getObject()),(int) (0),__c.DipToCurrent((int) (36)),_dialogw,__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 728;BA.debugLine="Dim pnlInput As Panel";
+ //BA.debugLineNum = 763;BA.debugLine="Dim pnlInput As Panel";
 _pnlinput = new anywheresoftware.b4a.objects.PanelWrapper();
- //BA.debugLineNum = 729;BA.debugLine="pnlInput.Initialize(\"\")";
+ //BA.debugLineNum = 764;BA.debugLine="pnlInput.Initialize(\"\")";
 _pnlinput.Initialize(ba,"");
- //BA.debugLineNum = 730;BA.debugLine="pnlInput.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 765;BA.debugLine="pnlInput.Color = ModTheme.HomeBg";
 _pnlinput.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 731;BA.debugLine="pnlDialog.AddView(pnlInput, 16dip, 85dip, dialogW";
+ //BA.debugLineNum = 766;BA.debugLine="pnlDialog.AddView(pnlInput, 16dip, 85dip, dialogW";
 _pnldialog.AddView((android.view.View)(_pnlinput.getObject()),__c.DipToCurrent((int) (16)),__c.DipToCurrent((int) (85)),(int) (_dialogw-__c.DipToCurrent((int) (32))),__c.DipToCurrent((int) (50)));
- //BA.debugLineNum = 733;BA.debugLine="edtPassphrase.Initialize(\"edtPassphrase\")";
+ //BA.debugLineNum = 768;BA.debugLine="edtPassphrase.Initialize(\"edtPassphrase\")";
 _edtpassphrase.Initialize(ba,"edtPassphrase");
- //BA.debugLineNum = 734;BA.debugLine="edtPassphrase.Hint = ModLang.T(\"passphrase_hint\")";
+ //BA.debugLineNum = 769;BA.debugLine="edtPassphrase.Hint = ModLang.T(\"passphrase_hint\")";
 _edtpassphrase.setHint(_modlang._t /*String*/ (ba,"passphrase_hint"));
- //BA.debugLineNum = 735;BA.debugLine="edtPassphrase.SingleLine = True";
+ //BA.debugLineNum = 770;BA.debugLine="edtPassphrase.SingleLine = True";
 _edtpassphrase.setSingleLine(__c.True);
- //BA.debugLineNum = 736;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecurePa";
+ //BA.debugLineNum = 771;BA.debugLine="edtPassphrase.InputType = ModSecurity.GetSecurePa";
 _edtpassphrase.setInputType(_modsecurity._getsecurepassphraseinputtype /*int*/ (ba));
- //BA.debugLineNum = 737;BA.debugLine="edtPassphrase.Text = \"\"";
+ //BA.debugLineNum = 772;BA.debugLine="edtPassphrase.Text = \"\"";
 _edtpassphrase.setText(BA.ObjectToCharSequence(""));
- //BA.debugLineNum = 738;BA.debugLine="edtPassphrase.TextColor = Colors.White";
+ //BA.debugLineNum = 773;BA.debugLine="edtPassphrase.TextColor = Colors.White";
 _edtpassphrase.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 739;BA.debugLine="edtPassphrase.HintColor = Colors.ARGB(120, 255, 2";
+ //BA.debugLineNum = 774;BA.debugLine="edtPassphrase.HintColor = Colors.ARGB(120, 255, 2";
 _edtpassphrase.setHintColor(__c.Colors.ARGB((int) (120),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 740;BA.debugLine="pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW";
+ //BA.debugLineNum = 775;BA.debugLine="pnlInput.AddView(edtPassphrase, 8dip, 0, dialogW";
 _pnlinput.AddView((android.view.View)(_edtpassphrase.getObject()),__c.DipToCurrent((int) (8)),(int) (0),(int) (_dialogw-__c.DipToCurrent((int) (32))-__c.DipToCurrent((int) (56))),__c.DipToCurrent((int) (50)));
- //BA.debugLineNum = 742;BA.debugLine="btnShowPass.Initialize(\"btnShowPass\")";
+ //BA.debugLineNum = 777;BA.debugLine="btnShowPass.Initialize(\"btnShowPass\")";
 _btnshowpass.Initialize(ba,"btnShowPass");
- //BA.debugLineNum = 743;BA.debugLine="btnShowPass.Text = ModLang.T(\"view\")";
+ //BA.debugLineNum = 778;BA.debugLine="btnShowPass.Text = ModLang.T(\"view\")";
 _btnshowpass.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"view")));
- //BA.debugLineNum = 744;BA.debugLine="btnShowPass.TextSize = Starter.FONT_CAPTION";
+ //BA.debugLineNum = 779;BA.debugLine="btnShowPass.TextSize = Starter.FONT_CAPTION";
 _btnshowpass.setTextSize(_starter._font_caption /*float*/ );
- //BA.debugLineNum = 745;BA.debugLine="btnShowPass.Color = Colors.Transparent";
+ //BA.debugLineNum = 780;BA.debugLine="btnShowPass.Color = Colors.Transparent";
 _btnshowpass.setColor(__c.Colors.Transparent);
- //BA.debugLineNum = 746;BA.debugLine="btnShowPass.TextColor = Colors.ARGB(200, 255, 255";
+ //BA.debugLineNum = 781;BA.debugLine="btnShowPass.TextColor = Colors.ARGB(200, 255, 255";
 _btnshowpass.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 747;BA.debugLine="btnShowPass.Gravity = Gravity.CENTER";
+ //BA.debugLineNum = 782;BA.debugLine="btnShowPass.Gravity = Gravity.CENTER";
 _btnshowpass.setGravity(__c.Gravity.CENTER);
- //BA.debugLineNum = 748;BA.debugLine="pnlInput.AddView(btnShowPass, dialogW - 32dip - 6";
+ //BA.debugLineNum = 783;BA.debugLine="pnlInput.AddView(btnShowPass, dialogW - 32dip - 6";
 _pnlinput.AddView((android.view.View)(_btnshowpass.getObject()),(int) (_dialogw-__c.DipToCurrent((int) (32))-__c.DipToCurrent((int) (65))),__c.DipToCurrent((int) (5)),__c.DipToCurrent((int) (60)),__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 751;BA.debugLine="Dim btnCancel As Button";
+ //BA.debugLineNum = 786;BA.debugLine="Dim btnCancel As Button";
 _btncancel = new anywheresoftware.b4a.objects.ButtonWrapper();
- //BA.debugLineNum = 752;BA.debugLine="btnCancel.Initialize(\"btnDialogCancel\")";
+ //BA.debugLineNum = 787;BA.debugLine="btnCancel.Initialize(\"btnDialogCancel\")";
 _btncancel.Initialize(ba,"btnDialogCancel");
- //BA.debugLineNum = 753;BA.debugLine="btnCancel.Text = ModLang.T(\"cancel\")";
+ //BA.debugLineNum = 788;BA.debugLine="btnCancel.Text = ModLang.T(\"cancel\")";
 _btncancel.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"cancel")));
- //BA.debugLineNum = 754;BA.debugLine="btnCancel.TextSize = 13";
+ //BA.debugLineNum = 789;BA.debugLine="btnCancel.TextSize = 13";
 _btncancel.setTextSize((float) (13));
- //BA.debugLineNum = 755;BA.debugLine="btnCancel.Color = Colors.Transparent";
+ //BA.debugLineNum = 790;BA.debugLine="btnCancel.Color = Colors.Transparent";
 _btncancel.setColor(__c.Colors.Transparent);
- //BA.debugLineNum = 756;BA.debugLine="btnCancel.TextColor = Colors.ARGB(200, 255, 255,";
+ //BA.debugLineNum = 791;BA.debugLine="btnCancel.TextColor = Colors.ARGB(200, 255, 255,";
 _btncancel.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 757;BA.debugLine="pnlDialog.AddView(btnCancel, 16dip, 150dip, 100di";
+ //BA.debugLineNum = 792;BA.debugLine="pnlDialog.AddView(btnCancel, 16dip, 150dip, 100di";
 _pnldialog.AddView((android.view.View)(_btncancel.getObject()),__c.DipToCurrent((int) (16)),__c.DipToCurrent((int) (150)),__c.DipToCurrent((int) (100)),__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 759;BA.debugLine="Dim btnOk As Button";
+ //BA.debugLineNum = 794;BA.debugLine="Dim btnOk As Button";
 _btnok = new anywheresoftware.b4a.objects.ButtonWrapper();
- //BA.debugLineNum = 760;BA.debugLine="btnOk.Initialize(\"btnDialogOk\")";
+ //BA.debugLineNum = 795;BA.debugLine="btnOk.Initialize(\"btnDialogOk\")";
 _btnok.Initialize(ba,"btnDialogOk");
- //BA.debugLineNum = 761;BA.debugLine="btnOk.Text = ModLang.T(\"delete\")";
+ //BA.debugLineNum = 796;BA.debugLine="btnOk.Text = ModLang.T(\"delete\")";
 _btnok.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"delete")));
- //BA.debugLineNum = 762;BA.debugLine="btnOk.TextSize = 12";
+ //BA.debugLineNum = 797;BA.debugLine="btnOk.TextSize = 12";
 _btnok.setTextSize((float) (12));
- //BA.debugLineNum = 763;BA.debugLine="btnOk.Color = ModTheme.Danger";
+ //BA.debugLineNum = 798;BA.debugLine="btnOk.Color = ModTheme.Danger";
 _btnok.setColor(_modtheme._danger /*int*/ (ba));
- //BA.debugLineNum = 764;BA.debugLine="btnOk.TextColor = Colors.White";
+ //BA.debugLineNum = 799;BA.debugLine="btnOk.TextColor = Colors.White";
 _btnok.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 765;BA.debugLine="pnlDialog.AddView(btnOk, dialogW - 130dip, 150dip";
+ //BA.debugLineNum = 800;BA.debugLine="pnlDialog.AddView(btnOk, dialogW - 130dip, 150dip";
 _pnldialog.AddView((android.view.View)(_btnok.getObject()),(int) (_dialogw-__c.DipToCurrent((int) (130))),__c.DipToCurrent((int) (150)),__c.DipToCurrent((int) (114)),__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 767;BA.debugLine="pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dial";
+ //BA.debugLineNum = 802;BA.debugLine="pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dial";
 _pnldialog.SetLayoutAnimated((int) (0),__c.DipToCurrent((int) (20)),__c.DipToCurrent((int) (80)),_dialogw,__c.DipToCurrent((int) (200)));
- //BA.debugLineNum = 769;BA.debugLine="pnlOverlay.Visible = True";
+ //BA.debugLineNum = 804;BA.debugLine="pnlOverlay.Visible = True";
 _pnloverlay.setVisible(__c.True);
- //BA.debugLineNum = 770;BA.debugLine="pnlOverlay.BringToFront";
+ //BA.debugLineNum = 805;BA.debugLine="pnlOverlay.BringToFront";
 _pnloverlay.BringToFront();
- //BA.debugLineNum = 771;BA.debugLine="edtPassphrase.RequestFocus";
+ //BA.debugLineNum = 806;BA.debugLine="edtPassphrase.RequestFocus";
 _edtpassphrase.RequestFocus();
- //BA.debugLineNum = 772;BA.debugLine="End Sub";
+ //BA.debugLineNum = 807;BA.debugLine="End Sub";
 return "";
 }
 public String  _showeditgroupdialog(String _groupid) throws Exception{
@@ -1538,115 +1655,115 @@ anywheresoftware.b4a.objects.LabelWrapper _lblname = null;
 anywheresoftware.b4a.objects.PanelWrapper _pnlname = null;
 anywheresoftware.b4a.objects.ButtonWrapper _btncancel = null;
 anywheresoftware.b4a.objects.ButtonWrapper _btnok = null;
- //BA.debugLineNum = 588;BA.debugLine="Private Sub ShowEditGroupDialog(groupId As String)";
- //BA.debugLineNum = 589;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
+ //BA.debugLineNum = 623;BA.debugLine="Private Sub ShowEditGroupDialog(groupId As String)";
+ //BA.debugLineNum = 624;BA.debugLine="Dim g As clsNoteGroup = ModNotes.GetNoteGroupById";
 _g = _modnotes._getnotegroupbyid /*com.lockzero.clsnotegroup*/ (ba,_groupid);
- //BA.debugLineNum = 590;BA.debugLine="If g.IsInitialized = False Then Return";
+ //BA.debugLineNum = 625;BA.debugLine="If g.IsInitialized = False Then Return";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
 if (true) return "";};
- //BA.debugLineNum = 592;BA.debugLine="CurrentDialogMode = \"edit_group\"";
+ //BA.debugLineNum = 627;BA.debugLine="CurrentDialogMode = \"edit_group\"";
 _currentdialogmode = "edit_group";
- //BA.debugLineNum = 593;BA.debugLine="CurrentGroupId = groupId";
+ //BA.debugLineNum = 628;BA.debugLine="CurrentGroupId = groupId";
 _currentgroupid = _groupid;
- //BA.debugLineNum = 595;BA.debugLine="Dim dialogW As Int = Root.Width - 40dip";
+ //BA.debugLineNum = 630;BA.debugLine="Dim dialogW As Int = Root.Width - 40dip";
 _dialogw = (int) (_root.getWidth()-__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 596;BA.debugLine="pnlDialog.RemoveAllViews";
+ //BA.debugLineNum = 631;BA.debugLine="pnlDialog.RemoveAllViews";
 _pnldialog.RemoveAllViews();
- //BA.debugLineNum = 599;BA.debugLine="Dim lblTitle As Label";
+ //BA.debugLineNum = 634;BA.debugLine="Dim lblTitle As Label";
 _lbltitle = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 600;BA.debugLine="lblTitle.Initialize(\"\")";
+ //BA.debugLineNum = 635;BA.debugLine="lblTitle.Initialize(\"\")";
 _lbltitle.Initialize(ba,"");
- //BA.debugLineNum = 601;BA.debugLine="lblTitle.Text = ModLang.T(\"edit_group\")";
+ //BA.debugLineNum = 636;BA.debugLine="lblTitle.Text = ModLang.T(\"edit_group\")";
 _lbltitle.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"edit_group")));
- //BA.debugLineNum = 602;BA.debugLine="lblTitle.TextSize = 16";
+ //BA.debugLineNum = 637;BA.debugLine="lblTitle.TextSize = 16";
 _lbltitle.setTextSize((float) (16));
- //BA.debugLineNum = 603;BA.debugLine="lblTitle.TextColor = Colors.White";
+ //BA.debugLineNum = 638;BA.debugLine="lblTitle.TextColor = Colors.White";
 _lbltitle.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 604;BA.debugLine="lblTitle.Typeface = Typeface.DEFAULT_BOLD";
+ //BA.debugLineNum = 639;BA.debugLine="lblTitle.Typeface = Typeface.DEFAULT_BOLD";
 _lbltitle.setTypeface(__c.Typeface.DEFAULT_BOLD);
- //BA.debugLineNum = 605;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
+ //BA.debugLineNum = 640;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
 _lbltitle.setGravity(__c.Gravity.CENTER_HORIZONTAL);
- //BA.debugLineNum = 606;BA.debugLine="pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24";
+ //BA.debugLineNum = 641;BA.debugLine="pnlDialog.AddView(lblTitle, 0, 12dip, dialogW, 24";
 _pnldialog.AddView((android.view.View)(_lbltitle.getObject()),(int) (0),__c.DipToCurrent((int) (12)),_dialogw,__c.DipToCurrent((int) (24)));
- //BA.debugLineNum = 608;BA.debugLine="Dim top As Int = 45dip";
+ //BA.debugLineNum = 643;BA.debugLine="Dim top As Int = 45dip";
 _top = __c.DipToCurrent((int) (45));
- //BA.debugLineNum = 611;BA.debugLine="Dim lblName As Label";
+ //BA.debugLineNum = 646;BA.debugLine="Dim lblName As Label";
 _lblname = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 612;BA.debugLine="lblName.Initialize(\"\")";
+ //BA.debugLineNum = 647;BA.debugLine="lblName.Initialize(\"\")";
 _lblname.Initialize(ba,"");
- //BA.debugLineNum = 613;BA.debugLine="lblName.Text = ModLang.T(\"note_group_name\")";
+ //BA.debugLineNum = 648;BA.debugLine="lblName.Text = ModLang.T(\"note_group_name\")";
 _lblname.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"note_group_name")));
- //BA.debugLineNum = 614;BA.debugLine="lblName.TextSize = 12";
+ //BA.debugLineNum = 649;BA.debugLine="lblName.TextSize = 12";
 _lblname.setTextSize((float) (12));
- //BA.debugLineNum = 615;BA.debugLine="lblName.TextColor = Colors.ARGB(180, 255, 255, 25";
+ //BA.debugLineNum = 650;BA.debugLine="lblName.TextColor = Colors.ARGB(180, 255, 255, 25";
 _lblname.setTextColor(__c.Colors.ARGB((int) (180),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 616;BA.debugLine="pnlDialog.AddView(lblName, 16dip, top, dialogW -";
+ //BA.debugLineNum = 651;BA.debugLine="pnlDialog.AddView(lblName, 16dip, top, dialogW -";
 _pnldialog.AddView((android.view.View)(_lblname.getObject()),__c.DipToCurrent((int) (16)),_top,(int) (_dialogw-__c.DipToCurrent((int) (32))),__c.DipToCurrent((int) (18)));
- //BA.debugLineNum = 617;BA.debugLine="top = top + 20dip";
+ //BA.debugLineNum = 652;BA.debugLine="top = top + 20dip";
 _top = (int) (_top+__c.DipToCurrent((int) (20)));
- //BA.debugLineNum = 619;BA.debugLine="Dim pnlName As Panel";
+ //BA.debugLineNum = 654;BA.debugLine="Dim pnlName As Panel";
 _pnlname = new anywheresoftware.b4a.objects.PanelWrapper();
- //BA.debugLineNum = 620;BA.debugLine="pnlName.Initialize(\"\")";
+ //BA.debugLineNum = 655;BA.debugLine="pnlName.Initialize(\"\")";
 _pnlname.Initialize(ba,"");
- //BA.debugLineNum = 621;BA.debugLine="pnlName.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 656;BA.debugLine="pnlName.Color = ModTheme.HomeBg";
 _pnlname.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 622;BA.debugLine="pnlDialog.AddView(pnlName, 16dip, top, dialogW -";
+ //BA.debugLineNum = 657;BA.debugLine="pnlDialog.AddView(pnlName, 16dip, top, dialogW -";
 _pnldialog.AddView((android.view.View)(_pnlname.getObject()),__c.DipToCurrent((int) (16)),_top,(int) (_dialogw-__c.DipToCurrent((int) (32))),__c.DipToCurrent((int) (44)));
- //BA.debugLineNum = 624;BA.debugLine="edtGroupName.Initialize(\"edtGroupName\")";
+ //BA.debugLineNum = 659;BA.debugLine="edtGroupName.Initialize(\"edtGroupName\")";
 _edtgroupname.Initialize(ba,"edtGroupName");
- //BA.debugLineNum = 625;BA.debugLine="edtGroupName.Text = g.Name";
+ //BA.debugLineNum = 660;BA.debugLine="edtGroupName.Text = g.Name";
 _edtgroupname.setText(BA.ObjectToCharSequence(_g._name /*String*/ ));
- //BA.debugLineNum = 626;BA.debugLine="edtGroupName.SingleLine = True";
+ //BA.debugLineNum = 661;BA.debugLine="edtGroupName.SingleLine = True";
 _edtgroupname.setSingleLine(__c.True);
- //BA.debugLineNum = 627;BA.debugLine="edtGroupName.InputType = Bit.Or(1, 8192)  'TEXT +";
+ //BA.debugLineNum = 662;BA.debugLine="edtGroupName.InputType = Bit.Or(1, 8192)  'TEXT +";
 _edtgroupname.setInputType(__c.Bit.Or((int) (1),(int) (8192)));
- //BA.debugLineNum = 628;BA.debugLine="edtGroupName.TextColor = Colors.White";
+ //BA.debugLineNum = 663;BA.debugLine="edtGroupName.TextColor = Colors.White";
 _edtgroupname.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 629;BA.debugLine="edtGroupName.HintColor = Colors.ARGB(120, 255, 25";
+ //BA.debugLineNum = 664;BA.debugLine="edtGroupName.HintColor = Colors.ARGB(120, 255, 25";
 _edtgroupname.setHintColor(__c.Colors.ARGB((int) (120),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 630;BA.debugLine="pnlName.AddView(edtGroupName, 8dip, 0, dialogW -";
+ //BA.debugLineNum = 665;BA.debugLine="pnlName.AddView(edtGroupName, 8dip, 0, dialogW -";
 _pnlname.AddView((android.view.View)(_edtgroupname.getObject()),__c.DipToCurrent((int) (8)),(int) (0),(int) (_dialogw-__c.DipToCurrent((int) (32))-__c.DipToCurrent((int) (16))),__c.DipToCurrent((int) (44)));
- //BA.debugLineNum = 631;BA.debugLine="top = top + 50dip";
+ //BA.debugLineNum = 666;BA.debugLine="top = top + 50dip";
 _top = (int) (_top+__c.DipToCurrent((int) (50)));
- //BA.debugLineNum = 634;BA.debugLine="Dim btnCancel As Button";
+ //BA.debugLineNum = 669;BA.debugLine="Dim btnCancel As Button";
 _btncancel = new anywheresoftware.b4a.objects.ButtonWrapper();
- //BA.debugLineNum = 635;BA.debugLine="btnCancel.Initialize(\"btnDialogCancel\")";
+ //BA.debugLineNum = 670;BA.debugLine="btnCancel.Initialize(\"btnDialogCancel\")";
 _btncancel.Initialize(ba,"btnDialogCancel");
- //BA.debugLineNum = 636;BA.debugLine="btnCancel.Text = ModLang.T(\"cancel\")";
+ //BA.debugLineNum = 671;BA.debugLine="btnCancel.Text = ModLang.T(\"cancel\")";
 _btncancel.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"cancel")));
- //BA.debugLineNum = 637;BA.debugLine="btnCancel.TextSize = 13";
+ //BA.debugLineNum = 672;BA.debugLine="btnCancel.TextSize = 13";
 _btncancel.setTextSize((float) (13));
- //BA.debugLineNum = 638;BA.debugLine="btnCancel.Color = Colors.Transparent";
+ //BA.debugLineNum = 673;BA.debugLine="btnCancel.Color = Colors.Transparent";
 _btncancel.setColor(__c.Colors.Transparent);
- //BA.debugLineNum = 639;BA.debugLine="btnCancel.TextColor = Colors.ARGB(200, 255, 255,";
+ //BA.debugLineNum = 674;BA.debugLine="btnCancel.TextColor = Colors.ARGB(200, 255, 255,";
 _btncancel.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 640;BA.debugLine="pnlDialog.AddView(btnCancel, 16dip, top, 100dip,";
+ //BA.debugLineNum = 675;BA.debugLine="pnlDialog.AddView(btnCancel, 16dip, top, 100dip,";
 _pnldialog.AddView((android.view.View)(_btncancel.getObject()),__c.DipToCurrent((int) (16)),_top,__c.DipToCurrent((int) (100)),__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 642;BA.debugLine="Dim btnOk As Button";
+ //BA.debugLineNum = 677;BA.debugLine="Dim btnOk As Button";
 _btnok = new anywheresoftware.b4a.objects.ButtonWrapper();
- //BA.debugLineNum = 643;BA.debugLine="btnOk.Initialize(\"btnDialogOk\")";
+ //BA.debugLineNum = 678;BA.debugLine="btnOk.Initialize(\"btnDialogOk\")";
 _btnok.Initialize(ba,"btnDialogOk");
- //BA.debugLineNum = 644;BA.debugLine="btnOk.Text = ModLang.T(\"save\")";
+ //BA.debugLineNum = 679;BA.debugLine="btnOk.Text = ModLang.T(\"save\")";
 _btnok.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"save")));
- //BA.debugLineNum = 645;BA.debugLine="btnOk.TextSize = 13";
+ //BA.debugLineNum = 680;BA.debugLine="btnOk.TextSize = 13";
 _btnok.setTextSize((float) (13));
- //BA.debugLineNum = 646;BA.debugLine="btnOk.Color = ModTheme.HomeIconBg";
+ //BA.debugLineNum = 681;BA.debugLine="btnOk.Color = ModTheme.HomeIconBg";
 _btnok.setColor(_modtheme._homeiconbg /*int*/ (ba));
- //BA.debugLineNum = 647;BA.debugLine="btnOk.TextColor = Colors.White";
+ //BA.debugLineNum = 682;BA.debugLine="btnOk.TextColor = Colors.White";
 _btnok.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 648;BA.debugLine="pnlDialog.AddView(btnOk, dialogW - 116dip, top, 1";
+ //BA.debugLineNum = 683;BA.debugLine="pnlDialog.AddView(btnOk, dialogW - 116dip, top, 1";
 _pnldialog.AddView((android.view.View)(_btnok.getObject()),(int) (_dialogw-__c.DipToCurrent((int) (116))),_top,__c.DipToCurrent((int) (100)),__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 649;BA.debugLine="top = top + 50dip";
+ //BA.debugLineNum = 684;BA.debugLine="top = top + 50dip";
 _top = (int) (_top+__c.DipToCurrent((int) (50)));
- //BA.debugLineNum = 651;BA.debugLine="pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dial";
+ //BA.debugLineNum = 686;BA.debugLine="pnlDialog.SetLayoutAnimated(0, 20dip, 80dip, dial";
 _pnldialog.SetLayoutAnimated((int) (0),__c.DipToCurrent((int) (20)),__c.DipToCurrent((int) (80)),_dialogw,_top);
- //BA.debugLineNum = 653;BA.debugLine="pnlOverlay.Visible = True";
+ //BA.debugLineNum = 688;BA.debugLine="pnlOverlay.Visible = True";
 _pnloverlay.setVisible(__c.True);
- //BA.debugLineNum = 654;BA.debugLine="pnlOverlay.BringToFront";
+ //BA.debugLineNum = 689;BA.debugLine="pnlOverlay.BringToFront";
 _pnloverlay.BringToFront();
- //BA.debugLineNum = 655;BA.debugLine="edtGroupName.RequestFocus";
+ //BA.debugLineNum = 690;BA.debugLine="edtGroupName.RequestFocus";
 _edtgroupname.RequestFocus();
- //BA.debugLineNum = 656;BA.debugLine="End Sub";
+ //BA.debugLineNum = 691;BA.debugLine="End Sub";
 return "";
 }
 public void  _showgroupoptions(String _groupid) throws Exception{
@@ -1661,6 +1778,7 @@ this._groupid = _groupid;
 com.lockzero.pagenotesgroups parent;
 String _groupid;
 com.lockzero.clsnotegroup _g = null;
+String _deletetext = "";
 int _result = 0;
 
 @Override
@@ -1696,46 +1814,106 @@ case 6:
 //C
 this.state = 7;
 ;
- //BA.debugLineNum = 579;BA.debugLine="Wait For (xui.Msgbox2Async(g.Name, \"\", ModLang.T(";
-parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(_g._name /*String*/ ),BA.ObjectToCharSequence(""),parent._modlang._t /*String*/ (ba,"edit"),parent._modlang._t /*String*/ (ba,"cancel"),parent._modlang._t /*String*/ (ba,"delete"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
-this.state = 13;
-return;
-case 13:
-//C
-this.state = 7;
-_result = (Integer) result[0];
-;
- //BA.debugLineNum = 581;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+ //BA.debugLineNum = 580;BA.debugLine="Dim deleteText As String";
+_deletetext = "";
+ //BA.debugLineNum = 581;BA.debugLine="If g.IsSystem Then";
 if (true) break;
 
 case 7:
 //if
 this.state = 12;
-if (_result==parent._xui.DialogResponse_Positive) { 
+if (_g._issystem /*boolean*/ ) { 
 this.state = 9;
-}else if(_result==parent._xui.DialogResponse_Negative) { 
+}else {
 this.state = 11;
 }if (true) break;
 
 case 9:
 //C
 this.state = 12;
- //BA.debugLineNum = 582;BA.debugLine="ShowEditGroupDialog(groupId)";
-parent._showeditgroupdialog(_groupid);
+ //BA.debugLineNum = 582;BA.debugLine="deleteText = ModLang.T(\"clear_cards\")";
+_deletetext = parent._modlang._t /*String*/ (ba,"clear_cards");
  if (true) break;
 
 case 11:
 //C
 this.state = 12;
- //BA.debugLineNum = 584;BA.debugLine="ConfirmDeleteGroup(groupId)";
-parent._confirmdeletegroup(_groupid);
+ //BA.debugLineNum = 584;BA.debugLine="deleteText = ModLang.T(\"delete\")";
+_deletetext = parent._modlang._t /*String*/ (ba,"delete");
  if (true) break;
 
 case 12:
 //C
+this.state = 13;
+;
+ //BA.debugLineNum = 587;BA.debugLine="Wait For (xui.Msgbox2Async(g.Name, \"\", ModLang.T(";
+parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(_g._name /*String*/ ),BA.ObjectToCharSequence(""),parent._modlang._t /*String*/ (ba,"edit"),parent._modlang._t /*String*/ (ba,"cancel"),_deletetext,(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
+this.state = 25;
+return;
+case 25:
+//C
+this.state = 13;
+_result = (Integer) result[0];
+;
+ //BA.debugLineNum = 589;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+if (true) break;
+
+case 13:
+//if
+this.state = 24;
+if (_result==parent._xui.DialogResponse_Positive) { 
+this.state = 15;
+}else if(_result==parent._xui.DialogResponse_Negative) { 
+this.state = 17;
+}if (true) break;
+
+case 15:
+//C
+this.state = 24;
+ //BA.debugLineNum = 590;BA.debugLine="ShowEditGroupDialog(groupId)";
+parent._showeditgroupdialog(_groupid);
+ if (true) break;
+
+case 17:
+//C
+this.state = 18;
+ //BA.debugLineNum = 592;BA.debugLine="If g.IsSystem Then";
+if (true) break;
+
+case 18:
+//if
+this.state = 23;
+if (_g._issystem /*boolean*/ ) { 
+this.state = 20;
+}else {
+this.state = 22;
+}if (true) break;
+
+case 20:
+//C
+this.state = 23;
+ //BA.debugLineNum = 594;BA.debugLine="ConfirmClearSystemGroup(groupId)";
+parent._confirmclearsystemgroup(_groupid);
+ if (true) break;
+
+case 22:
+//C
+this.state = 23;
+ //BA.debugLineNum = 596;BA.debugLine="ConfirmDeleteGroup(groupId)";
+parent._confirmdeletegroup(_groupid);
+ if (true) break;
+
+case 23:
+//C
+this.state = 24;
+;
+ if (true) break;
+
+case 24:
+//C
 this.state = -1;
 ;
- //BA.debugLineNum = 586;BA.debugLine="End Sub";
+ //BA.debugLineNum = 599;BA.debugLine="End Sub";
 if (true) break;
 
             }
@@ -1910,36 +2088,36 @@ _edtpassphrase.RequestFocus();
 return "";
 }
 public String  _tmrsession_tick() throws Exception{
- //BA.debugLineNum = 988;BA.debugLine="Private Sub tmrSession_Tick";
- //BA.debugLineNum = 989;BA.debugLine="UpdateSessionTimer";
+ //BA.debugLineNum = 1023;BA.debugLine="Private Sub tmrSession_Tick";
+ //BA.debugLineNum = 1024;BA.debugLine="UpdateSessionTimer";
 _updatesessiontimer();
- //BA.debugLineNum = 990;BA.debugLine="End Sub";
+ //BA.debugLineNum = 1025;BA.debugLine="End Sub";
 return "";
 }
 public String  _updatesessiontimer() throws Exception{
 int _remaining = 0;
- //BA.debugLineNum = 992;BA.debugLine="Private Sub UpdateSessionTimer";
- //BA.debugLineNum = 993;BA.debugLine="If ModSession.IsSessionActive Then";
+ //BA.debugLineNum = 1027;BA.debugLine="Private Sub UpdateSessionTimer";
+ //BA.debugLineNum = 1028;BA.debugLine="If ModSession.IsSessionActive Then";
 if (_modsession._issessionactive /*boolean*/ (ba)) { 
- //BA.debugLineNum = 994;BA.debugLine="lblSessionTimer.Text = ModSession.GetRemainingFo";
+ //BA.debugLineNum = 1029;BA.debugLine="lblSessionTimer.Text = ModSession.GetRemainingFo";
 _lblsessiontimer.setText(BA.ObjectToCharSequence(_modsession._getremainingformatted /*String*/ (ba)));
- //BA.debugLineNum = 997;BA.debugLine="Dim remaining As Int = ModSession.GetRemainingSe";
+ //BA.debugLineNum = 1032;BA.debugLine="Dim remaining As Int = ModSession.GetRemainingSe";
 _remaining = _modsession._getremainingseconds /*int*/ (ba);
- //BA.debugLineNum = 998;BA.debugLine="If remaining < 60 Then";
+ //BA.debugLineNum = 1033;BA.debugLine="If remaining < 60 Then";
 if (_remaining<60) { 
- //BA.debugLineNum = 999;BA.debugLine="lblSessionTimer.TextColor = Colors.RGB(0, 220,";
+ //BA.debugLineNum = 1034;BA.debugLine="lblSessionTimer.TextColor = Colors.RGB(0, 220,";
 _lblsessiontimer.setTextColor(__c.Colors.RGB((int) (0),(int) (220),(int) (255)));
  }else {
- //BA.debugLineNum = 1001;BA.debugLine="lblSessionTimer.TextColor = Colors.ARGB(200, 25";
+ //BA.debugLineNum = 1036;BA.debugLine="lblSessionTimer.TextColor = Colors.ARGB(200, 25";
 _lblsessiontimer.setTextColor(__c.Colors.ARGB((int) (200),(int) (255),(int) (255),(int) (255)));
  };
  }else {
- //BA.debugLineNum = 1004;BA.debugLine="lblSessionTimer.Text = \"00:00\"";
+ //BA.debugLineNum = 1039;BA.debugLine="lblSessionTimer.Text = \"00:00\"";
 _lblsessiontimer.setText(BA.ObjectToCharSequence("00:00"));
- //BA.debugLineNum = 1005;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Danger";
+ //BA.debugLineNum = 1040;BA.debugLine="lblSessionTimer.TextColor = ModTheme.Danger";
 _lblsessiontimer.setTextColor(_modtheme._danger /*int*/ (ba));
  };
- //BA.debugLineNum = 1007;BA.debugLine="End Sub";
+ //BA.debugLineNum = 1042;BA.debugLine="End Sub";
 return "";
 }
 public Object callSub(String sub, Object sender, Object[] args) throws Exception {

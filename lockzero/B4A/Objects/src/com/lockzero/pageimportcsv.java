@@ -154,7 +154,7 @@ _fullpath = _csvfolder+"/"+_csvfilename;
  //BA.debugLineNum = 83;BA.debugLine="If CSVEntries.Size = 0 Or fullPath <> LastParsed";
 if (_csventries.getSize()==0 || (_fullpath).equals(_lastparsedfile) == false) { 
  //BA.debugLineNum = 84;BA.debugLine="Log(\"Parseando CSV: \" & CSVFileName)";
-__c.LogImpl("828311559","Parseando CSV: "+_csvfilename,0);
+__c.LogImpl("631195143","Parseando CSV: "+_csvfilename,0);
  //BA.debugLineNum = 86;BA.debugLine="CSVEntries.Initialize";
 _csventries.Initialize();
  //BA.debugLineNum = 87;BA.debugLine="SelectedIndexes.Initialize";
@@ -281,9 +281,9 @@ _btn = (anywheresoftware.b4a.objects.ButtonWrapper) anywheresoftware.b4a.AbsObje
  //BA.debugLineNum = 737;BA.debugLine="Dim tag As String = btn.Tag";
 _tag = BA.ObjectToString(_btn.getTag());
  //BA.debugLineNum = 739;BA.debugLine="Log(\"=== btnGroupItem_Click ===\")";
-__c.LogImpl("829425668","=== btnGroupItem_Click ===",0);
+__c.LogImpl("632505860","=== btnGroupItem_Click ===",0);
  //BA.debugLineNum = 740;BA.debugLine="Log(\"Tag: \" & tag)";
-__c.LogImpl("829425669","Tag: "+_tag,0);
+__c.LogImpl("632505861","Tag: "+_tag,0);
  //BA.debugLineNum = 743;BA.debugLine="Dim pipePos As Int = tag.IndexOf(\"|\")";
 _pipepos = _tag.indexOf("|");
  //BA.debugLineNum = 744;BA.debugLine="If pipePos > 0 Then";
@@ -293,12 +293,12 @@ _selectedgroupid = _tag.substring((int) (0),_pipepos);
  //BA.debugLineNum = 746;BA.debugLine="SelectedGroupName = tag.SubString(pipePos + 1)";
 _selectedgroupname = _tag.substring((int) (_pipepos+1));
  //BA.debugLineNum = 747;BA.debugLine="Log(\"SelectedGroupId: \" & SelectedGroupId)";
-__c.LogImpl("829425676","SelectedGroupId: "+_selectedgroupid,0);
+__c.LogImpl("632505868","SelectedGroupId: "+_selectedgroupid,0);
  //BA.debugLineNum = 748;BA.debugLine="Log(\"SelectedGroupName: \" & SelectedGroupName)";
-__c.LogImpl("829425677","SelectedGroupName: "+_selectedgroupname,0);
+__c.LogImpl("632505869","SelectedGroupName: "+_selectedgroupname,0);
  }else {
  //BA.debugLineNum = 750;BA.debugLine="Log(\"ERRO: Tag invalida - pipe nao encontrado: \"";
-__c.LogImpl("829425679","ERRO: Tag invalida - pipe nao encontrado: "+_tag,0);
+__c.LogImpl("632505871","ERRO: Tag invalida - pipe nao encontrado: "+_tag,0);
  };
  //BA.debugLineNum = 753;BA.debugLine="HideDialog";
 _hidedialog();
@@ -326,7 +326,7 @@ if (true) return "";
  //BA.debugLineNum = 644;BA.debugLine="If ModSession.IsSessionActive Then";
 if (_modsession._issessionactive /*boolean*/ (ba)) { 
  //BA.debugLineNum = 645;BA.debugLine="Log(\"Sessao ativa - importando direto\")";
-__c.LogImpl("829229069","Sessao ativa - importando direto",0);
+__c.LogImpl("632309261","Sessao ativa - importando direto",0);
  //BA.debugLineNum = 646;BA.debugLine="DoImport";
 _doimport();
  }else {
@@ -460,17 +460,17 @@ __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"error_e
 if (true) return "";
  };
  //BA.debugLineNum = 985;BA.debugLine="Log(\"=== btnUnlockGroup_Click ===\")";
-__c.LogImpl("829753352","=== btnUnlockGroup_Click ===",0);
+__c.LogImpl("632833544","=== btnUnlockGroup_Click ===",0);
  //BA.debugLineNum = 986;BA.debugLine="Log(\"SelectedGroupId: \" & SelectedGroupId)";
-__c.LogImpl("829753353","SelectedGroupId: "+_selectedgroupid,0);
+__c.LogImpl("632833545","SelectedGroupId: "+_selectedgroupid,0);
  //BA.debugLineNum = 987;BA.debugLine="Log(\"SelectedGroupName: \" & SelectedGroupName)";
-__c.LogImpl("829753354","SelectedGroupName: "+_selectedgroupname,0);
+__c.LogImpl("632833546","SelectedGroupName: "+_selectedgroupname,0);
  //BA.debugLineNum = 990;BA.debugLine="Dim g As clsPasswordGroup = ModPasswords.GetGroup";
 _g = _modpasswords._getgroupbyid /*com.lockzero.clspasswordgroup*/ (ba,_selectedgroupid);
  //BA.debugLineNum = 991;BA.debugLine="If g.IsInitialized = False Then";
 if (_g._isinitialized /*boolean*/ ()==__c.False) { 
  //BA.debugLineNum = 992;BA.debugLine="Log(\"ERRO: Grupo nao encontrado com ID: \" & Sele";
-__c.LogImpl("829753359","ERRO: Grupo nao encontrado com ID: "+_selectedgroupid,0);
+__c.LogImpl("632833551","ERRO: Grupo nao encontrado com ID: "+_selectedgroupid,0);
  //BA.debugLineNum = 993;BA.debugLine="ToastMessageShow(ModLang.T(\"error\") & \" - Grupo";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"error")+" - Grupo não encontrado"),__c.True);
  //BA.debugLineNum = 994;BA.debugLine="HideDialog";
@@ -479,7 +479,7 @@ _hidedialog();
 if (true) return "";
  };
  //BA.debugLineNum = 998;BA.debugLine="Log(\"Grupo encontrado: \" & g.Name)";
-__c.LogImpl("829753365","Grupo encontrado: "+_g._name /*String*/ ,0);
+__c.LogImpl("632833557","Grupo encontrado: "+_g._name /*String*/ ,0);
  //BA.debugLineNum = 1000;BA.debugLine="If g.ValidatePhrase(phrase) = False Then";
 if (_g._validatephrase /*boolean*/ (_phrase)==__c.False) { 
  //BA.debugLineNum = 1001;BA.debugLine="ToastMessageShow(ModLang.T(\"wrong_passphrase\"),";
@@ -851,13 +851,13 @@ _note = BA.ObjectToString(_csventry.Get((Object)("note")));
 if ((_name).equals("")) { 
 _name = _url;};
  //BA.debugLineNum = 1059;BA.debugLine="Log(\"=== Importando: \" & name & \" ===\")";
-__c.LogImpl("830015503","=== Importando: "+_name+" ===",0);
+__c.LogImpl("633095695","=== Importando: "+_name+" ===",0);
  //BA.debugLineNum = 1060;BA.debugLine="Log(\"Username plain: \" & username)";
-__c.LogImpl("830015504","Username plain: "+_username,0);
+__c.LogImpl("633095696","Username plain: "+_username,0);
  //BA.debugLineNum = 1061;BA.debugLine="Log(\"Password plain: \" & password.SubString2(0,";
-__c.LogImpl("830015505","Password plain: "+_password.substring((int) (0),(int) (__c.Min(3,_password.length())))+"***",0);
+__c.LogImpl("633095697","Password plain: "+_password.substring((int) (0),(int) (__c.Min(3,_password.length())))+"***",0);
  //BA.debugLineNum = 1062;BA.debugLine="Log(\"Session active: \" & ModSession.IsSessionAct";
-__c.LogImpl("830015506","Session active: "+BA.ObjectToString(_modsession._issessionactive /*boolean*/ (ba)),0);
+__c.LogImpl("633095698","Session active: "+BA.ObjectToString(_modsession._issessionactive /*boolean*/ (ba)),0);
  //BA.debugLineNum = 1065;BA.debugLine="Dim encUsername As String = ModSession.Encrypt(u";
 _encusername = _modsession._encrypt /*String*/ (ba,_username);
  //BA.debugLineNum = 1066;BA.debugLine="Dim encPassword As String = ModSession.Encrypt(p";
@@ -868,13 +868,13 @@ _encnote = "";
 if ((_note).equals("") == false) { 
 _encnote = _modsession._encrypt /*String*/ (ba,_note);};
  //BA.debugLineNum = 1070;BA.debugLine="Log(\"Username enc: \" & encUsername.SubString2(0,";
-__c.LogImpl("830015514","Username enc: "+_encusername.substring((int) (0),(int) (__c.Min(20,_encusername.length())))+"...",0);
+__c.LogImpl("633095706","Username enc: "+_encusername.substring((int) (0),(int) (__c.Min(20,_encusername.length())))+"...",0);
  //BA.debugLineNum = 1071;BA.debugLine="Log(\"Password enc: \" & encPassword.SubString2(0,";
-__c.LogImpl("830015515","Password enc: "+_encpassword.substring((int) (0),(int) (__c.Min(20,_encpassword.length())))+"...",0);
+__c.LogImpl("633095707","Password enc: "+_encpassword.substring((int) (0),(int) (__c.Min(20,_encpassword.length())))+"...",0);
  //BA.debugLineNum = 1074;BA.debugLine="If encUsername = \"\" Or encPassword = \"\" Then";
 if ((_encusername).equals("") || (_encpassword).equals("")) { 
  //BA.debugLineNum = 1075;BA.debugLine="Log(\"ERRO: Criptografia falhou!\")";
-__c.LogImpl("830015519","ERRO: Criptografia falhou!",0);
+__c.LogImpl("633095711","ERRO: Criptografia falhou!",0);
  //BA.debugLineNum = 1076;BA.debugLine="Continue";
 if (true) continue;
  };
@@ -932,7 +932,7 @@ __c.ToastMessageShow(BA.ObjectToCharSequence(_msg),__c.True);
  //BA.debugLineNum = 1113;BA.debugLine="Dim hasFilter As Boolean = edtSearch.IsInitialize";
 _hasfilter = _edtsearch.IsInitialized() && _edtsearch.getText().trim().length()>0;
  //BA.debugLineNum = 1114;BA.debugLine="Log(\"DoImport - hasFilter: \" & hasFilter & \", edt";
-__c.LogImpl("830015558","DoImport - hasFilter: "+BA.ObjectToString(_hasfilter)+", edtSearch.Text: "+_edtsearch.getText(),0);
+__c.LogImpl("633095750","DoImport - hasFilter: "+BA.ObjectToString(_hasfilter)+", edtSearch.Text: "+_edtsearch.getText(),0);
  //BA.debugLineNum = 1116;BA.debugLine="If hasFilter Then";
 if (_hasfilter) { 
  //BA.debugLineNum = 1118;BA.debugLine="Dim toRemove As List";
@@ -1342,7 +1342,7 @@ _idxnote = _i;};
  }
 };
  //BA.debugLineNum = 310;BA.debugLine="Log(\"CSV Columns: name=\" & idxName & \" url=\" & i";
-__c.LogImpl("828573731","CSV Columns: name="+BA.NumberToString(_idxname)+" url="+BA.NumberToString(_idxurl)+" user="+BA.NumberToString(_idxusername)+" pass="+BA.NumberToString(_idxpassword)+" note="+BA.NumberToString(_idxnote),0);
+__c.LogImpl("631457315","CSV Columns: name="+BA.NumberToString(_idxname)+" url="+BA.NumberToString(_idxurl)+" user="+BA.NumberToString(_idxusername)+" pass="+BA.NumberToString(_idxpassword)+" note="+BA.NumberToString(_idxnote),0);
  //BA.debugLineNum = 313;BA.debugLine="For i = 1 To lines.Length - 1";
 {
 final int step26 = 1;
@@ -1393,7 +1393,7 @@ _entry.Put((Object)("note"),(Object)(""));};
  //BA.debugLineNum = 336;BA.debugLine="If entry.Get(\"username\") = \"\" Or entry.Get(\"pas";
 if ((_entry.Get((Object)("username"))).equals((Object)("")) || (_entry.Get((Object)("password"))).equals((Object)(""))) { 
  //BA.debugLineNum = 337;BA.debugLine="Log(\"CSV: Ignorando linha \" & i & \" (username";
-__c.LogImpl("828573758","CSV: Ignorando linha "+BA.NumberToString(_i)+" (username ou password vazio)",0);
+__c.LogImpl("631457342","CSV: Ignorando linha "+BA.NumberToString(_i)+" (username ou password vazio)",0);
  //BA.debugLineNum = 338;BA.debugLine="Continue";
 if (true) continue;
  };
@@ -1402,11 +1402,11 @@ _csventries.Add((Object)(_entry.getObject()));
  }
 };
  //BA.debugLineNum = 345;BA.debugLine="Log(\"CSV: \" & CSVEntries.Size & \" entradas valid";
-__c.LogImpl("828573766","CSV: "+BA.NumberToString(_csventries.getSize())+" entradas validas",0);
+__c.LogImpl("631457350","CSV: "+BA.NumberToString(_csventries.getSize())+" entradas validas",0);
  } 
        catch (Exception e50) {
 			ba.setLastException(e50); //BA.debugLineNum = 348;BA.debugLine="Log(\"ParseCSV erro: \" & LastException)";
-__c.LogImpl("828573769","ParseCSV erro: "+BA.ObjectToString(__c.LastException(ba)),0);
+__c.LogImpl("631457353","ParseCSV erro: "+BA.ObjectToString(__c.LastException(ba)),0);
  //BA.debugLineNum = 349;BA.debugLine="ToastMessageShow(ModLang.T(\"csv_error_parse\"), T";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"csv_error_parse")),__c.True);
  };

@@ -541,8 +541,6 @@ C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmain
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_AnimatePulseAndNavigateNotes.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_B4XPage_CloseRequest.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_lblSessionTimer_Click.dex
-C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_pnlCards_Click.dex
-C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_pnlDocuments_Click.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage$ResumableSub_ShowLockScreen.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xmainpage.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\b4xorderedmap.dex
@@ -598,10 +596,15 @@ C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagebac
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagebackup$ResumableSub_DoImport.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagebackup.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pageimportcsv.dex
+C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_btnBack_Click.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_chkItem_CheckedChange.dex
+C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_ContentChooser1_Result.dex
+C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_FocusAttachInput.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_ivIconDelete_Click.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_ivIconShare_Click.dex
+C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit$ResumableSub_ScrollToCardField.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenoteedit.dex
+C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenotesgroups$ResumableSub_ConfirmClearSystemGroup.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenotesgroups$ResumableSub_ConfirmDeleteGroup.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenotesgroups$ResumableSub_lblSessionTimer_Click.dex
 C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A\Objects\dexed\com\lockzero\pagenotesgroups$ResumableSub_ShowGroupOptions.dex

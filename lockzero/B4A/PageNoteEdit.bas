@@ -66,11 +66,23 @@ Sub Class_Globals
 	'Lista de itens (para modo lista)
 	Private ItemsList As List
 	Private ItemPanels As List  'Paineis dos itens na UI
+
+	'Modo cartao - UI exclusiva sem checkboxes/filtro/add
+	Private IsCardTemplate As Boolean = False
+
+	'Anexos
+	Private ivIconAttach As ImageView  'Icone de anexo no header
+	Private pnlAttachments As Panel    'Container para lista de anexos
+	Private AttachmentsList As List    'Lista de caminhos de anexos
+	Private ContentChooser1 As ContentChooser  'Para selecionar arquivos
+	Private PendingAttachUri As String  'URI temporaria do anexo sendo adicionado
+	Private edtAttachName As EditText  'Campo para nome do anexo no dialog
 End Sub
 
 Public Sub Initialize
 	ItemsList.Initialize
 	ItemPanels.Initialize
+	AttachmentsList.Initialize
 End Sub
 
 Private Sub B4XPage_Created(Root1 As B4XView)
@@ -83,7 +95,11 @@ Private Sub B4XPage_Appear
 	'Breadcrumb: Nota → NomeGrupo → Titulo
 	Dim lastPart As String
 	If IsNewNote Then
-		If NoteType = "list" Then
+		'Verifica se e grupo de cartoes
+		Dim group As clsNoteGroup = ModNotes.GetNoteGroupById(CurrentGroupId)
+		If group <> Null And group.TemplateType = "card" Then
+			lastPart = ModLang.T("new_card")
+		Else If NoteType = "list" Then
 			lastPart = ModLang.T("new_list")
 		Else
 			lastPart = ModLang.T("new_text")
@@ -121,7 +137,12 @@ Public Sub SetParams(params As Map)
 	IsNewNote = (CurrentNoteId.Length = 0)
 	ItemsList.Initialize
 	ItemPanels.Initialize
+	AttachmentsList.Initialize
 	CurrentFilter = ""  'Limpa filtro ao abrir
+
+	'Verifica se e grupo de cartoes (UI exclusiva)
+	Dim grp As clsNoteGroup = ModNotes.GetNoteGroupById(CurrentGroupId)
+	IsCardTemplate = (grp <> Null And grp.TemplateType = "card")
 
 	'Configura UI baseado no modo
 	SetupModeUI
@@ -130,6 +151,14 @@ Public Sub SetParams(params As Map)
 		edtTitle.Text = ""
 		If NoteType = "text" Then
 			edtContent.Text = ""
+		Else If NoteType = "list" Then
+			'Verifica se grupo tem template (ex: cartoes)
+			Dim group As clsNoteGroup = ModNotes.GetNoteGroupById(CurrentGroupId)
+			If group <> Null And group.TemplateType = "card" Then
+				'Aplica template de cartao
+				ItemsList = ModNotes.GetCardTemplate
+				RebuildItemsUI
+			End If
 		End If
 		chkFavorite.Checked = False
 	Else
@@ -190,13 +219,14 @@ Private Sub CreateUI
 	CreateCommonFields
 	CreateTextModeUI
 	CreateListModeUI
+	CreateAttachmentsUI
 	CreateInputDialog
 End Sub
 
 Private Sub CreateIconBar(pnlIconBar As Panel, width As Int)
 	Dim iconSize As Int = 44dip
 	Dim spacing As Int = 8dip
-	Dim startX As Int = width - (iconSize * 4) - (spacing * 3) - 16dip  'Alinha a direita
+	Dim startX As Int = width - (iconSize * 5) - (spacing * 4) - 16dip  'Alinha a direita (5 icones agora)
 
 	'+ Adicionar item (so para listas)
 	lblIconAdd.Initialize("lblIconAdd")
@@ -208,17 +238,23 @@ Private Sub CreateIconBar(pnlIconBar As Panel, width As Int)
 	Dim xvAdd As B4XView = lblIconAdd
 	xvAdd.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 22dip)
 
+	'Anexar arquivo (clips icon)
+	ivIconAttach.Initialize("ivIconAttach")
+	ivIconAttach.Gravity = Gravity.CENTER
+	pnlIconBar.AddView(ivIconAttach, startX + iconSize + spacing, 3dip, iconSize, iconSize)
+	SetAndroidIcon(ivIconAttach, "ic_menu_attachment")
+
 	'Lixeira - excluir nota (icone Android padrao)
 	ivIconDelete.Initialize("ivIconDelete")
 	ivIconDelete.Gravity = Gravity.CENTER
 	ivIconDelete.Visible = False  'So aparece ao editar
-	pnlIconBar.AddView(ivIconDelete, startX + iconSize + spacing, 3dip, iconSize, iconSize)
+	pnlIconBar.AddView(ivIconDelete, startX + (iconSize + spacing) * 2, 3dip, iconSize, iconSize)
 	SetAndroidIcon(ivIconDelete, "ic_menu_delete")
 
 	'Compartilhar (icone Android padrao)
 	ivIconShare.Initialize("ivIconShare")
 	ivIconShare.Gravity = Gravity.CENTER
-	pnlIconBar.AddView(ivIconShare, startX + (iconSize + spacing) * 2, 3dip, iconSize, iconSize)
+	pnlIconBar.AddView(ivIconShare, startX + (iconSize + spacing) * 3, 3dip, iconSize, iconSize)
 	SetAndroidIcon(ivIconShare, "ic_menu_share")
 
 	'Salvar (check verde)
@@ -227,7 +263,7 @@ Private Sub CreateIconBar(pnlIconBar As Panel, width As Int)
 	lblIconSave.TextSize = 22
 	lblIconSave.TextColor = Colors.RGB(100, 200, 100)
 	lblIconSave.Gravity = Gravity.CENTER
-	pnlIconBar.AddView(lblIconSave, startX + (iconSize + spacing) * 3, 3dip, iconSize, iconSize)
+	pnlIconBar.AddView(lblIconSave, startX + (iconSize + spacing) * 4, 3dip, iconSize, iconSize)
 End Sub
 
 Private Sub CreateCommonFields
@@ -342,20 +378,63 @@ Private Sub CreateListModeUI
 	pnlAddRow.AddView(lblAddItemText, 52dip, 0, fieldWidth - 60dip, 50dip)
 End Sub
 
+Private Sub CreateAttachmentsUI
+	Dim width As Int = Root.Width
+	Dim margin As Int = 16dip
+	Dim fieldWidth As Int = width - (margin * 2)
+
+	'Container para anexos (sera posicionado abaixo do conteudo/lista)
+	pnlAttachments.Initialize("")
+	pnlAttachments.Color = Colors.Transparent
+	'Posicao inicial - sera ajustada em RebuildAttachmentsUI
+	pnlContent.AddView(pnlAttachments, margin, 420dip, fieldWidth, 200dip)
+
+	'Inicializa ContentChooser
+	ContentChooser1.Initialize("ContentChooser1")
+End Sub
+
 Private Sub SetupModeUI
 	If NoteType = "list" Then
 		pnlTextMode.Visible = False
 		pnlListMode.Visible = True
-		lblIconAdd.Visible = True
-		ivIconShare.Visible = True
+
+		'Cartoes: esconder + adicionar, filtro, titulo, favorito e anexos
+		If IsCardTemplate Then
+			lblIconAdd.Visible = False
+			ivIconShare.Visible = True  'Compartilhar habilitado para cartoes
+			ivIconAttach.Visible = False  'Sem anexos para cartoes
+			edtFilter.Visible = False
+			lblClearFilter.Visible = False
+			pnlAddRow.Visible = False
+			edtTitle.Visible = False
+			chkFavorite.Visible = False
+			pnlAttachments.Visible = False
+			'Ajusta posicao do pnlListMode (sem titulo)
+			pnlListMode.Top = 10dip
+		Else
+			lblIconAdd.Visible = True
+			ivIconShare.Visible = True
+			ivIconAttach.Visible = True  'Anexos habilitados para listas
+			edtFilter.Visible = True
+			lblClearFilter.Visible = True
+			pnlAddRow.Visible = True
+			edtTitle.Visible = True
+			chkFavorite.Visible = True
+			pnlAttachments.Visible = True
+			pnlListMode.Top = 70dip
+		End If
 		RebuildItemsUI
+		RebuildAttachmentsUI
 	Else
 		pnlTextMode.Visible = True
 		pnlListMode.Visible = False
 		lblIconAdd.Visible = False  'Nao tem + para texto
 		ivIconShare.Visible = False  'Nao compartilha texto
+		ivIconAttach.Visible = True  'Anexos habilitados para texto
+		pnlAttachments.Visible = True
 		'Altura do conteudo para modo texto
 		pnlContent.Height = 92dip + 350dip + 20dip
+		RebuildAttachmentsUI
 	End If
 
 	'Lixeira so aparece ao editar (nota existente)
@@ -554,14 +633,27 @@ Private Sub RebuildItemsUI
 	Dim itemHeight As Int = 50dip
 	Dim y As Int = 0
 
+	'Cartoes: reposiciona pnlItems para cima (sem filtro)
+	If IsCardTemplate Then
+		pnlItems.Top = 0
+	Else
+		pnlItems.Top = 52dip
+	End If
+
 	For i = 0 To ItemsList.Size - 1
 		Dim item As Map = ItemsList.Get(i)
 		Dim itemText As String = item.GetDefault("text", "")
 
-		'Aplica filtro
-		If ItemMatchesFilter(itemText) = False Then Continue
+		'Aplica filtro (nao para cartoes)
+		If IsCardTemplate = False And ItemMatchesFilter(itemText) = False Then Continue
 
-		Dim pnlItem As Panel = CreateItemPanel(i, item, width)
+		'Cria painel diferente para cartoes
+		Dim pnlItem As Panel
+		If IsCardTemplate Then
+			pnlItem = CreateCardItemPanel(i, item, width)
+		Else
+			pnlItem = CreateItemPanel(i, item, width)
+		End If
 		pnlItems.AddView(pnlItem, 0, y, width, itemHeight)
 		ItemPanels.Add(pnlItem)
 		y = y + itemHeight + 8dip
@@ -570,20 +662,99 @@ Private Sub RebuildItemsUI
 	'Ajusta altura do container de itens
 	pnlItems.Height = Max(y, 50dip)
 
-	'Reposiciona container do botao adicionar
-	'pnlItems esta em Top=52dip, entao pnlAddRow fica logo abaixo
-	Dim addRowTop As Int = 52dip + pnlItems.Height + 10dip
-	pnlAddRow.Top = addRowTop
-
-	'Ajusta altura do pnlListMode para conter tudo
-	'52dip (filtro) + pnlItems.Height + 10dip (espaco) + 50dip (pnlAddRow) + 10dip (margem)
-	pnlListMode.Height = addRowTop + 60dip
+	'Reposiciona container do botao adicionar (nao usado para cartoes)
+	If IsCardTemplate = False Then
+		'pnlItems esta em Top=52dip, entao pnlAddRow fica logo abaixo
+		Dim addRowTop As Int = 52dip + pnlItems.Height + 10dip
+		pnlAddRow.Top = addRowTop
+		'Ajusta altura do pnlListMode para conter tudo
+		pnlListMode.Height = addRowTop + 60dip
+	Else
+		'Cartoes: sem filtro e sem botao add + espaco extra para scroll com teclado
+		pnlListMode.Height = pnlItems.Height + 300dip  'Espaco extra para teclado
+	End If
 
 	'Ajusta pnlContent
 	Dim totalHeight As Int = 70dip + pnlListMode.Height + 20dip
 	pnlContent.Height = Max(totalHeight, 300dip)
 
 	IsRebuildingUI = False  'Libera eventos de checkbox
+End Sub
+
+'Painel de item para cartao - sem checkbox, apenas label:valor
+Private Sub CreateCardItemPanel(index As Int, item As Map, panelWidth As Int) As Panel
+	Dim pnl As Panel
+	pnl.Initialize("pnlCardItem")
+	pnl.Tag = index
+
+	Dim xv As B4XView = pnl
+	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+
+	Dim text As String = item.GetDefault("text", "")
+
+	'Separa label:valor
+	Dim colonPos As Int = text.IndexOf(":")
+	Dim labelText As String = ""
+	Dim valueText As String = ""
+	If colonPos > 0 Then
+		labelText = text.SubString2(0, colonPos + 1)  'Inclui o ":"
+		valueText = text.SubString(colonPos + 1).Trim
+	Else
+		labelText = text
+		valueText = ""
+	End If
+
+	'Label fixo (ex: "Nome:")
+	Dim lblCardLabel As Label
+	lblCardLabel.Initialize("")
+	lblCardLabel.Text = labelText
+	lblCardLabel.TextSize = Starter.FONT_LABEL
+	lblCardLabel.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblCardLabel.Gravity = Gravity.CENTER_VERTICAL
+	pnl.AddView(lblCardLabel, 12dip, 0, 100dip, 50dip)
+
+	'Campo editavel para valor
+	Dim edtCardValue As EditText
+
+	'Determina tipo de campo baseado no index
+	'0=Nome, 1=Bandeira, 2=Numero, 3=Validade, 4=CVV, 5=Senha, 6=Titular, 7=Limite, 8=Notas
+	Select index
+		Case 2  'Numero do cartao
+			edtCardValue.Initialize("edtCardNumber")
+			edtCardValue.InputType = 2  'TYPE_CLASS_NUMBER
+			edtCardValue.Hint = "0000 0000 0000 0000"
+		Case 3  'Validade
+			edtCardValue.Initialize("edtCardExpiry")
+			edtCardValue.InputType = 2  'TYPE_CLASS_NUMBER
+			edtCardValue.Hint = "MM/AA"
+		Case 4  'CVV
+			edtCardValue.Initialize("edtCardCVV")
+			edtCardValue.InputType = 2  'TYPE_CLASS_NUMBER
+			edtCardValue.Hint = "000"
+		Case 5  'Senha - sem sugestoes
+			edtCardValue.Initialize("edtCardValue")
+			edtCardValue.InputType = Bit.Or(1, 524288)  'TEXT + NO_SUGGESTIONS
+		Case 7  'Limite
+			edtCardValue.Initialize("edtCardValue")
+			edtCardValue.InputType = 2  'TYPE_CLASS_NUMBER
+		Case Else
+			edtCardValue.Initialize("edtCardValue")
+			edtCardValue.InputType = Bit.Or(1, 8192)  'TEXT + CAP_WORDS
+	End Select
+
+	edtCardValue.Tag = index
+	edtCardValue.Text = valueText
+	edtCardValue.TextSize = Starter.FONT_BODY
+	edtCardValue.TextColor = Colors.White
+	edtCardValue.HintColor = Colors.ARGB(80, 255, 255, 255)
+	edtCardValue.SingleLine = True
+
+	'Fundo transparente para integrar com o painel
+	edtCardValue.Background = Null
+
+	pnl.AddView(edtCardValue, 115dip, 5dip, panelWidth - 130dip, 40dip)
+
+	Return pnl
 End Sub
 
 Private Sub CreateItemPanel(index As Int, item As Map, panelWidth As Int) As Panel
@@ -621,6 +792,252 @@ End Sub
 ' ============================================
 '  EVENTOS - LISTA
 ' ============================================
+
+'Evento para campos de cartao - atualiza valor na lista
+Private Sub edtCardValue_TextChanged(Old As String, New As String)
+	If IsRebuildingUI Then Return
+
+	Dim edt As EditText = Sender
+	Dim index As Int = edt.Tag
+
+	If index >= 0 And index < ItemsList.Size Then
+		Dim item As Map = ItemsList.Get(index)
+		Dim text As String = item.GetDefault("text", "")
+
+		'Reconstroi o texto com label:valor
+		Dim colonPos As Int = text.IndexOf(":")
+		If colonPos > 0 Then
+			Dim labelPart As String = text.SubString2(0, colonPos + 1)
+			item.Put("text", labelPart & " " & New.Trim)
+		Else
+			item.Put("text", text & ": " & New.Trim)
+		End If
+	End If
+End Sub
+
+'Extrai titulo do cartao a partir do primeiro item (Nome)
+Private Sub GetCardTitle As String
+	If ItemsList.IsInitialized = False Or ItemsList.Size = 0 Then Return ""
+
+	Dim firstItem As Map = ItemsList.Get(0)
+	Dim text As String = firstItem.GetDefault("text", "")
+
+	'Extrai valor apos ":"
+	Dim colonPos As Int = text.IndexOf(":")
+	If colonPos > 0 Then
+		Return text.SubString(colonPos + 1).Trim
+	End If
+	Return text.Trim
+End Sub
+
+'Formata numero do cartao: espaço a cada 4 digitos
+Private Sub edtCardNumber_TextChanged(Old As String, New As String)
+	If IsRebuildingUI Then Return
+
+	Dim edt As EditText = Sender
+	Dim index As Int = edt.Tag
+
+	'Remove tudo que nao e digito
+	Dim digits As String = ""
+	For i = 0 To New.Length - 1
+		Dim charCode As Int = Asc(New.CharAt(i))
+		If charCode >= 48 And charCode <= 57 Then  '0-9
+			digits = digits & Chr(charCode)
+		End If
+	Next
+
+	'Limita a 16 digitos
+	If digits.Length > 16 Then digits = digits.SubString2(0, 16)
+
+	'Formata com espacos a cada 4 digitos
+	Dim formatted As String = ""
+	For i = 0 To digits.Length - 1
+		If i > 0 And i Mod 4 = 0 Then formatted = formatted & " "
+		formatted = formatted & digits.SubString2(i, i + 1)
+	Next
+
+	'Atualiza campo se diferente (evita loop)
+	If formatted <> New Then
+		edt.Text = formatted
+		edt.SelectionStart = formatted.Length
+	End If
+
+	'Atualiza ItemsList
+	If index >= 0 And index < ItemsList.Size Then
+		Dim item As Map = ItemsList.Get(index)
+		Dim text As String = item.GetDefault("text", "")
+		Dim colonPos As Int = text.IndexOf(":")
+		If colonPos > 0 Then
+			item.Put("text", text.SubString2(0, colonPos + 1) & " " & formatted)
+		End If
+	End If
+End Sub
+
+'Formata validade: MM/AA
+Private Sub edtCardExpiry_TextChanged(Old As String, New As String)
+	If IsRebuildingUI Then Return
+
+	Dim edt As EditText = Sender
+	Dim index As Int = edt.Tag
+
+	'Remove tudo que nao e digito
+	Dim digits As String = ""
+	For i = 0 To New.Length - 1
+		Dim charCode As Int = Asc(New.CharAt(i))
+		If charCode >= 48 And charCode <= 57 Then  '0-9
+			digits = digits & Chr(charCode)
+		End If
+	Next
+
+	'Limita a 4 digitos (MMAA)
+	If digits.Length > 4 Then digits = digits.SubString2(0, 4)
+
+	'Formata como MM/AA
+	Dim formatted As String = ""
+	If digits.Length >= 1 Then
+		'Valida mes (01-12)
+		Dim firstDigit As Int = Asc(digits.CharAt(0)) - 48
+		If firstDigit > 1 Then
+			formatted = "0" & digits.SubString2(0, 1) & "/"
+			digits = digits.SubString(1)
+		Else If digits.Length >= 2 Then
+			Dim month As Int = (Asc(digits.CharAt(0)) - 48) * 10 + (Asc(digits.CharAt(1)) - 48)
+			If month >= 1 And month <= 12 Then
+				formatted = digits.SubString2(0, 2) & "/"
+				digits = digits.SubString(2)
+			Else If month > 12 Then
+				formatted = "12/"
+				digits = digits.SubString(2)
+			Else
+				formatted = digits.SubString2(0, 2)
+				digits = ""
+			End If
+		Else
+			formatted = digits
+			digits = ""
+		End If
+	End If
+
+	'Adiciona ano
+	If digits.Length > 0 Then
+		formatted = formatted & digits
+	End If
+
+	'Atualiza campo se diferente
+	If formatted <> New Then
+		edt.Text = formatted
+		edt.SelectionStart = formatted.Length
+	End If
+
+	'Atualiza ItemsList
+	If index >= 0 And index < ItemsList.Size Then
+		Dim item As Map = ItemsList.Get(index)
+		Dim text As String = item.GetDefault("text", "")
+		Dim colonPos As Int = text.IndexOf(":")
+		If colonPos > 0 Then
+			item.Put("text", text.SubString2(0, colonPos + 1) & " " & formatted)
+		End If
+	End If
+End Sub
+
+'Limita CVV a 3 digitos
+Private Sub edtCardCVV_TextChanged(Old As String, New As String)
+	If IsRebuildingUI Then Return
+
+	Dim edt As EditText = Sender
+	Dim index As Int = edt.Tag
+
+	'Remove tudo que nao e digito
+	Dim digits As String = ""
+	For i = 0 To New.Length - 1
+		Dim charCode As Int = Asc(New.CharAt(i))
+		If charCode >= 48 And charCode <= 57 Then  '0-9
+			digits = digits & Chr(charCode)
+		End If
+	Next
+
+	'Limita a 3 digitos
+	If digits.Length > 3 Then digits = digits.SubString2(0, 3)
+
+	'Atualiza campo se diferente
+	If digits <> New Then
+		edt.Text = digits
+		edt.SelectionStart = digits.Length
+	End If
+
+	'Atualiza ItemsList
+	If index >= 0 And index < ItemsList.Size Then
+		Dim item As Map = ItemsList.Get(index)
+		Dim text As String = item.GetDefault("text", "")
+		Dim colonPos As Int = text.IndexOf(":")
+		If colonPos > 0 Then
+			item.Put("text", text.SubString2(0, colonPos + 1) & " " & digits)
+		End If
+	End If
+End Sub
+
+'Algoritmo de Luhn para validar numero do cartao
+Private Sub ValidateCardNumber(number As String) As Boolean
+	'Remove espacos
+	Dim digits As String = number.Replace(" ", "")
+
+	If digits.Length < 13 Or digits.Length > 19 Then Return False
+
+	Dim sum As Int = 0
+	Dim alternate As Boolean = False
+
+	For i = digits.Length - 1 To 0 Step -1
+		Dim digitValue As Int = Asc(digits.CharAt(i)) - 48
+		If digitValue < 0 Or digitValue > 9 Then Return False
+
+		If alternate Then
+			digitValue = digitValue * 2
+			If digitValue > 9 Then digitValue = digitValue - 9
+		End If
+		sum = sum + digitValue
+		alternate = Not(alternate)
+	Next
+
+	Return (sum Mod 10 = 0)
+End Sub
+
+'Scroll quando campos do cartao recebem foco
+Private Sub edtCardValue_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToCardField(Sender)
+End Sub
+
+Private Sub edtCardNumber_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToCardField(Sender)
+End Sub
+
+Private Sub edtCardExpiry_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToCardField(Sender)
+End Sub
+
+Private Sub edtCardCVV_FocusChanged(HasFocus As Boolean)
+	If HasFocus Then ScrollToCardField(Sender)
+End Sub
+
+'Faz scroll para mostrar o campo acima do teclado
+Private Sub ScrollToCardField(field As Object)
+	Dim edt As EditText = field
+	Dim index As Int = edt.Tag
+
+	'Delay para teclado aparecer primeiro
+	Sleep(150)
+
+	'Calcula posicao do campo (cada item tem 58dip)
+	Dim fieldTop As Int = index * 58dip
+
+	'Campos 5+ (Senha, Titular, Limite, Notas) precisam scroll maior
+	If index >= 5 Then
+		'Scroll agressivo para campos inferiores
+		svContent.ScrollPosition = fieldTop - 30dip
+	Else If index >= 3 Then
+		'Campos do meio (Validade, CVV)
+		svContent.ScrollPosition = Max(0, fieldTop - 80dip)
+	End If
+End Sub
 
 Private Sub lblAddItem_Click
 	If IsSecure Then ModSession.Touch
@@ -763,6 +1180,27 @@ Private Sub LoadNote
 			edtContent.Text = note.Content
 		End If
 	End If
+
+	'Carrega anexos
+	If IsCardTemplate = False Then
+		AttachmentsList.Initialize
+		Dim attachJson As String
+		If IsSecure Then
+			attachJson = note.GetDecryptedAttachments(Passphrase)
+		Else
+			attachJson = note.Attachments
+		End If
+		If attachJson <> "" And attachJson <> "[]" Then
+			Try
+				Dim parserAtt As JSONParser
+				parserAtt.Initialize(attachJson)
+				AttachmentsList = parserAtt.NextArray
+			Catch
+				Log("LoadNote: erro ao parsear anexos")
+			End Try
+		End If
+		RebuildAttachmentsUI
+	End If
 End Sub
 
 ' ============================================
@@ -777,12 +1215,36 @@ Private Sub SaveNote(closeAfter As Boolean) As Boolean
 
 	If IsSecure Then ModSession.Touch
 
-	Dim title As String = edtTitle.Text.Trim
+	Dim title As String
 
-	'Validacoes
-	If title.Length < 1 Then
-		ToastMessageShow(ModLang.T("error_empty_field"), True)
-		Return False
+	'Cartoes: extrai titulo do primeiro item (Nome)
+	If IsCardTemplate Then
+		title = GetCardTitle
+		If title.Length < 1 Then
+			ToastMessageShow(ModLang.T("error_empty_field"), True)
+			Return False
+		End If
+
+		'Valida numero do cartao (index 2) se preenchido
+		If ItemsList.Size > 2 Then
+			Dim cardNumItem As Map = ItemsList.Get(2)
+			Dim cardNumText As String = cardNumItem.GetDefault("text", "")
+			Dim colonPos As Int = cardNumText.IndexOf(":")
+			If colonPos > 0 Then
+				Dim cardNumber As String = cardNumText.SubString(colonPos + 1).Trim
+				If cardNumber.Length > 0 And ValidateCardNumber(cardNumber) = False Then
+					ToastMessageShow(ModLang.T("invalid_card_number"), True)
+					Return False
+				End If
+			End If
+		End If
+	Else
+		title = edtTitle.Text.Trim
+		'Validacoes
+		If title.Length < 1 Then
+			ToastMessageShow(ModLang.T("error_empty_field"), True)
+			Return False
+		End If
 	End If
 
 	'Verifica passphrase para grupos seguros
@@ -852,6 +1314,20 @@ Private Sub SaveNote(closeAfter As Boolean) As Boolean
 		End If
 	End If
 
+	'Salva anexos
+	If IsCardTemplate = False And AttachmentsList.IsInitialized And AttachmentsList.Size > 0 Then
+		Dim genAtt As JSONGenerator
+		genAtt.Initialize2(AttachmentsList)
+		Dim jsonAttach As String = genAtt.ToString
+		If IsSecure Then
+			note.EncryptAttachments(Passphrase, jsonAttach)
+		Else
+			note.Attachments = jsonAttach
+		End If
+	Else
+		note.Attachments = "[]"
+	End If
+
 	note.IsFavorite = chkFavorite.Checked
 	Log("Chamando ModNotes.SaveNote...")
 	ModNotes.SaveNote(note)
@@ -878,6 +1354,29 @@ End Sub
 ' ============================================
 
 Private Sub btnBack_Click
+	'Para cartoes novos, perguntar se quer descartar
+	If IsCardTemplate And IsNewNote Then
+		'Verifica se tem dados preenchidos
+		Dim hasData As Boolean = False
+		For i = 0 To ItemsList.Size - 1
+			Dim item As Map = ItemsList.Get(i)
+			Dim text As String = item.GetDefault("text", "")
+			Dim colonPos As Int = text.IndexOf(":")
+			If colonPos > 0 Then
+				Dim value As String = text.SubString(colonPos + 1).Trim
+				If value.Length > 0 Then
+					hasData = True
+					Exit
+				End If
+			End If
+		Next
+
+		If hasData Then
+			Wait For (xui.Msgbox2Async(ModLang.T("discard_changes"), ModLang.T("confirm"), ModLang.T("discard"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+			If Result <> xui.DialogResponse_Positive Then Return
+		End If
+	End If
+
 	B4XPages.ClosePage(Me)
 End Sub
 
@@ -907,6 +1406,12 @@ Private Sub ivIconShare_Click
 		Return
 	End If
 
+	'Cartoes: compartilha direto (nome, bandeira, numero, validade)
+	If IsCardTemplate Then
+		ShareCard
+		Return
+	End If
+
 	'Pergunta: todos ou so marcados?
 	Wait For (xui.Msgbox2Async(ModLang.T("share_which"), ModLang.T("share"), ModLang.T("share_all"), ModLang.T("cancel"), ModLang.T("share_checked"), Null)) Msgbox_Result(Result As Int)
 
@@ -917,6 +1422,31 @@ Private Sub ivIconShare_Click
 		'Todos
 		ShareItems(False)
 	End If
+End Sub
+
+'Compartilha dados do cartao (nome, bandeira, numero, validade)
+Private Sub ShareCard
+	If ItemsList.Size < 4 Then Return
+
+	Dim sb As StringBuilder
+	sb.Initialize
+
+	'0=Nome, 1=Bandeira, 2=Numero, 3=Validade
+	For i = 0 To 3
+		Dim item As Map = ItemsList.Get(i)
+		Dim text As String = item.GetDefault("text", "")
+		sb.Append(text).Append(Chr(10))
+	Next
+
+	'Compartilha via intent com seletor de apps
+	Dim shareIntent As Intent
+	shareIntent.Initialize(shareIntent.ACTION_SEND, "")
+	shareIntent.SetType("text/plain")
+	shareIntent.PutExtra("android.intent.extra.TEXT", sb.ToString)
+
+	Dim jo As JavaObject
+	jo.InitializeStatic("android.content.Intent")
+	StartActivity(jo.RunMethod("createChooser", Array(shareIntent, ModLang.T("share"))))
 End Sub
 
 'Compartilha itens da lista
@@ -947,12 +1477,318 @@ Private Sub ShareItems(onlyChecked As Boolean)
 		Return
 	End If
 
-	'Compartilha via intent
+	'Compartilha via intent com seletor de apps
 	Dim shareIntent As Intent
 	shareIntent.Initialize(shareIntent.ACTION_SEND, "")
 	shareIntent.SetType("text/plain")
 	shareIntent.PutExtra("android.intent.extra.TEXT", sb.ToString)
-	StartActivity(shareIntent)
+
+	Dim jo As JavaObject
+	jo.InitializeStatic("android.content.Intent")
+	StartActivity(jo.RunMethod("createChooser", Array(shareIntent, ModLang.T("share"))))
+End Sub
+
+' ============================================
+'  ANEXOS
+' ============================================
+
+'Icone anexar - abre seletor de arquivos
+Private Sub ivIconAttach_Click
+	If IsSecure Then ModSession.Touch
+	ContentChooser1.Show("*/*", ModLang.T("select_file"))
+End Sub
+
+'Resultado da selecao de arquivo
+Private Sub ContentChooser1_Result(Success As Boolean, Dir As String, FileName As String)
+	If Success = False Then Return
+
+	'Guarda URI temporariamente
+	If Dir.StartsWith("content") Then
+		PendingAttachUri = Dir
+	Else If FileName.StartsWith("content") Then
+		PendingAttachUri = FileName
+	Else
+		PendingAttachUri = File.Combine(Dir, FileName)
+	End If
+
+	'Tenta extrair nome do arquivo da URI
+	Dim suggestedName As String = ""
+	If FileName.Contains("/") Then
+		suggestedName = FileName.SubString(FileName.LastIndexOf("/") + 1)
+	Else If FileName.Contains("%2F") Then
+		suggestedName = FileName.SubString(FileName.LastIndexOf("%2F") + 3)
+	End If
+
+	'Remove parametros da URL se houver
+	If suggestedName.Contains("?") Then
+		suggestedName = suggestedName.SubString2(0, suggestedName.IndexOf("?"))
+	End If
+
+	'Se nao conseguiu extrair nome, usa generico
+	If suggestedName = "" Or suggestedName.StartsWith("content") Then
+		suggestedName = "arquivo"
+	End If
+
+	'Cria panel customizado para o dialog
+	Dim pnlDialog As B4XView = xui.CreatePanel("")
+	pnlDialog.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
+	pnlDialog.Color = ModTheme.HomeHeaderBg
+
+	edtAttachName.Initialize("")
+	edtAttachName.Text = suggestedName
+	edtAttachName.Hint = ModLang.T("attachment_name")
+	edtAttachName.SingleLine = True
+	edtAttachName.TextSize = Starter.FONT_INPUT
+	edtAttachName.TextColor = Colors.White
+	edtAttachName.HintColor = Colors.ARGB(120, 255, 255, 255)
+	pnlDialog.AddView(edtAttachName, 10dip, 10dip, 260dip, 44dip)
+
+	'Mostra dialog
+	Dim dlg As B4XDialog
+	dlg.Initialize(Root)
+	dlg.Title = ModLang.T("attachment_name")
+
+	'Foca o campo e mostra teclado apos um pequeno delay
+	CallSubDelayed(Me, "FocusAttachInput")
+
+	Wait For (dlg.ShowCustom(pnlDialog, "OK", "", ModLang.T("cancel"))) Complete (dialogResult As Int)
+
+	If dialogResult = xui.DialogResponse_Positive Then
+		Dim attachName As String = edtAttachName.Text.Trim
+		If attachName = "" Then attachName = suggestedName
+
+		'Verifica se ja existe (pelo nome)
+		For i = 0 To AttachmentsList.Size - 1
+			Dim item As Object = AttachmentsList.Get(i)
+			Dim existingName As String = ""
+			If item Is Map Then
+				Dim existing As Map = item
+				existingName = existing.GetDefault("name", "")
+			End If
+			If existingName = attachName Then
+				ToastMessageShow(ModLang.T("file_exists"), False)
+				Return
+			End If
+		Next
+
+		'Adiciona anexo com nome amigavel
+		Dim attachment As Map
+		attachment.Initialize
+		attachment.Put("uri", PendingAttachUri)
+		attachment.Put("name", attachName)
+		AttachmentsList.Add(attachment)
+		RebuildAttachmentsUI
+		ToastMessageShow(ModLang.T("attachment_added"), False)
+	End If
+End Sub
+
+'Foca o campo de nome do anexo e mostra teclado
+Private Sub FocusAttachInput
+	Sleep(150)  'Aguarda dialog aparecer
+	If edtAttachName.IsInitialized Then
+		edtAttachName.RequestFocus
+		edtAttachName.SelectAll
+		'Mostra teclado
+		Dim imm As JavaObject
+		Dim ctxt As JavaObject
+		ctxt.InitializeContext
+		imm = ctxt.RunMethod("getSystemService", Array("input_method"))
+		imm.RunMethod("showSoftInput", Array(edtAttachName, 0))
+	End If
+End Sub
+
+'Reconstroi UI de anexos
+Private Sub RebuildAttachmentsUI
+	pnlAttachments.RemoveAllViews
+
+	Dim width As Int = pnlAttachments.Width
+	Dim y As Int = 0
+	Dim itemHeight As Int = 44dip
+
+	'Titulo "Anexos" se houver anexos
+	If AttachmentsList.Size > 0 Then
+		Dim lblAttachTitle As Label
+		lblAttachTitle.Initialize("")
+		lblAttachTitle.Text = ModLang.T("attachments") & " (" & AttachmentsList.Size & ")"
+		lblAttachTitle.TextSize = Starter.FONT_LABEL
+		lblAttachTitle.TextColor = Colors.ARGB(180, 255, 255, 255)
+		lblAttachTitle.Gravity = Gravity.CENTER_VERTICAL
+		pnlAttachments.AddView(lblAttachTitle, 0, y, width, 24dip)
+		y = y + 28dip
+	End If
+
+	'Lista de anexos
+	For i = 0 To AttachmentsList.Size - 1
+		Dim item As Object = AttachmentsList.Get(i)
+		Dim fileName As String = ""
+
+		'Trata formato antigo (string) e novo (Map)
+		If item Is Map Then
+			Dim attachment As Map = item
+			fileName = attachment.GetDefault("name", "")
+		Else If item Is String Then
+			'Formato antigo - string e o path/nome
+			fileName = item
+		End If
+
+		If fileName <> "" Then
+			Dim pnlItem As Panel = CreateAttachmentPanel(i, fileName, width)
+			pnlAttachments.AddView(pnlItem, 0, y, width, itemHeight)
+			y = y + itemHeight + 6dip
+		End If
+	Next
+
+	'Ajusta altura do painel
+	pnlAttachments.Height = Max(y, 10dip)
+
+	'Ajusta posicao do painel de anexos
+	If NoteType = "text" Then
+		pnlAttachments.Top = pnlTextMode.Top + pnlTextMode.Height + 10dip
+		pnlContent.Height = pnlAttachments.Top + pnlAttachments.Height + 50dip
+	Else If IsCardTemplate = False Then
+		pnlAttachments.Top = pnlListMode.Top + pnlListMode.Height + 10dip
+		pnlContent.Height = Max(pnlContent.Height, pnlAttachments.Top + pnlAttachments.Height + 50dip)
+	End If
+End Sub
+
+'Cria painel para um anexo
+Private Sub CreateAttachmentPanel(index As Int, fileName As String, panelWidth As Int) As Panel
+	Dim pnl As Panel
+	pnl.Initialize("pnlAttachment")
+	pnl.Tag = index
+
+	Dim xv As B4XView = pnl
+	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
+
+	'Trunca nome se muito longo
+	Dim displayName As String = fileName
+	If displayName.Length > 30 Then displayName = displayName.SubString2(0, 27) & "..."
+
+	'Icone de arquivo (clip)
+	Dim lblIcon As Label
+	lblIcon.Initialize("")
+	lblIcon.Text = Chr(0x1F4CE)  'Paperclip emoji
+	lblIcon.TextSize = 18
+	lblIcon.Gravity = Gravity.CENTER
+	pnl.AddView(lblIcon, 8dip, 0, 30dip, 44dip)
+
+	'Nome do arquivo (clicavel para abrir)
+	Dim lblFileName As Label
+	lblFileName.Initialize("lblAttachOpen")
+	lblFileName.Tag = index
+	lblFileName.Text = displayName
+	lblFileName.TextSize = Starter.FONT_BODY
+	lblFileName.TextColor = Colors.RGB(100, 180, 255)  'Azul link
+	lblFileName.Gravity = Gravity.CENTER_VERTICAL
+	pnl.AddView(lblFileName, 42dip, 0, panelWidth - 100dip, 44dip)
+
+	'Botao X para remover
+	Dim lblRemove As Label
+	lblRemove.Initialize("lblAttachRemove")
+	lblRemove.Tag = index
+	lblRemove.Text = "X"
+	lblRemove.TextSize = 16
+	lblRemove.TextColor = Colors.RGB(255, 100, 100)
+	lblRemove.Gravity = Gravity.CENTER
+	pnl.AddView(lblRemove, panelWidth - 44dip, 0, 40dip, 44dip)
+
+	Return pnl
+End Sub
+
+'Clique no nome do arquivo - abre com app externo
+Private Sub lblAttachOpen_Click
+	Dim lbl As Label = Sender
+	Dim index As Int = lbl.Tag
+
+	If index < 0 Or index >= AttachmentsList.Size Then Return
+
+	Dim item As Object = AttachmentsList.Get(index)
+	Dim uri As String = ""
+	Dim fileName As String = ""
+
+	If item Is Map Then
+		Dim attachment As Map = item
+		'Novo formato usa "uri", antigo usava "dir"
+		uri = attachment.GetDefault("uri", "")
+		If uri = "" Then uri = attachment.GetDefault("dir", "")
+		fileName = attachment.GetDefault("name", "")
+	End If
+
+	If uri <> "" Then
+		OpenFileWithUri(uri, fileName)
+	Else
+		ToastMessageShow(ModLang.T("file_not_found"), True)
+	End If
+End Sub
+
+'Abre arquivo usando URI
+Private Sub OpenFileWithUri(uri As String, displayName As String)
+	Try
+		Log("OpenFileWithUri: uri=" & uri & ", name=" & displayName)
+
+		'Determina MIME type pelo nome do arquivo
+		Dim mimeType As String = "*/*"
+		Dim lowerName As String = displayName.ToLowerCase
+		If lowerName.EndsWith(".pdf") Then mimeType = "application/pdf"
+		If lowerName.EndsWith(".jpg") Or lowerName.EndsWith(".jpeg") Then mimeType = "image/jpeg"
+		If lowerName.EndsWith(".png") Then mimeType = "image/png"
+		If lowerName.EndsWith(".gif") Then mimeType = "image/gif"
+		If lowerName.EndsWith(".webp") Then mimeType = "image/webp"
+		If lowerName.EndsWith(".bmp") Then mimeType = "image/bmp"
+		If lowerName.EndsWith(".doc") Then mimeType = "application/msword"
+		If lowerName.EndsWith(".docx") Then mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+		If lowerName.EndsWith(".xls") Then mimeType = "application/vnd.ms-excel"
+		If lowerName.EndsWith(".xlsx") Then mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+		If lowerName.EndsWith(".txt") Then mimeType = "text/plain"
+		If lowerName.EndsWith(".mp4") Then mimeType = "video/mp4"
+		If lowerName.EndsWith(".mp3") Then mimeType = "audio/mpeg"
+		If lowerName.EndsWith(".wav") Then mimeType = "audio/wav"
+		If lowerName.EndsWith(".zip") Then mimeType = "application/zip"
+
+		'Se nome nao tem extensao, tenta detectar pelo tipo generico
+		If mimeType = "*/*" Then
+			'Verifica se parece ser imagem pela URI
+			If uri.Contains("image") Or uri.Contains("photo") Or uri.Contains("camera") Then
+				mimeType = "image/*"
+			Else If uri.Contains("video") Then
+				mimeType = "video/*"
+			Else If uri.Contains("audio") Then
+				mimeType = "audio/*"
+			End If
+		End If
+
+		Log("OpenFileWithUri: mimeType=" & mimeType)
+
+		'Parse URI
+		Dim uriParser As JavaObject
+		uriParser.InitializeStatic("android.net.Uri")
+		Dim parsedUri As Object = uriParser.RunMethod("parse", Array(uri))
+
+		'Cria Intent para abrir
+		Dim openIntent As Intent
+		openIntent.Initialize(openIntent.ACTION_VIEW, "")
+		Dim intentJO As JavaObject = openIntent
+		intentJO.RunMethod("setDataAndType", Array(parsedUri, mimeType))
+		intentJO.RunMethod("addFlags", Array(1))  'FLAG_GRANT_READ_URI_PERMISSION
+
+		Dim jo As JavaObject
+		jo.InitializeStatic("android.content.Intent")
+		StartActivity(jo.RunMethod("createChooser", Array(openIntent, ModLang.T("open_file"))))
+	Catch
+		Log("OpenFileWithUri error: " & LastException.Message)
+		ToastMessageShow(ModLang.T("file_not_found"), True)
+	End Try
+End Sub
+
+'Clique no X - remove anexo
+Private Sub lblAttachRemove_Click
+	Dim lbl As Label = Sender
+	Dim index As Int = lbl.Tag
+
+	If index >= 0 And index < AttachmentsList.Size Then
+		AttachmentsList.RemoveAt(index)
+		RebuildAttachmentsUI
+	End If
 End Sub
 
 'Icone salvar

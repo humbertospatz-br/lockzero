@@ -64,30 +64,30 @@ public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
 public String  _applytheme() throws Exception{
- //BA.debugLineNum = 582;BA.debugLine="Private Sub ApplyTheme";
- //BA.debugLineNum = 583;BA.debugLine="Root.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 584;BA.debugLine="Private Sub ApplyTheme";
+ //BA.debugLineNum = 585;BA.debugLine="Root.Color = ModTheme.HomeBg";
 _root.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 584;BA.debugLine="svContent.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 586;BA.debugLine="svContent.Color = ModTheme.HomeBg";
 _svcontent.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 585;BA.debugLine="pnlContent.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 587;BA.debugLine="pnlContent.Color = ModTheme.HomeBg";
 _pnlcontent.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 587;BA.debugLine="btnExport.Color = ModTheme.HomeIconBg";
+ //BA.debugLineNum = 589;BA.debugLine="btnExport.Color = ModTheme.HomeIconBg";
 _btnexport.setColor(_modtheme._homeiconbg /*int*/ (ba));
- //BA.debugLineNum = 588;BA.debugLine="btnExport.TextColor = Colors.White";
+ //BA.debugLineNum = 590;BA.debugLine="btnExport.TextColor = Colors.White";
 _btnexport.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 590;BA.debugLine="btnImport.Color = ModTheme.HomeIconBg";
+ //BA.debugLineNum = 592;BA.debugLine="btnImport.Color = ModTheme.HomeIconBg";
 _btnimport.setColor(_modtheme._homeiconbg /*int*/ (ba));
- //BA.debugLineNum = 591;BA.debugLine="btnImport.TextColor = Colors.White";
+ //BA.debugLineNum = 593;BA.debugLine="btnImport.TextColor = Colors.White";
 _btnimport.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 593;BA.debugLine="btnImportText.Color = ModTheme.HomeHeaderBg";
+ //BA.debugLineNum = 595;BA.debugLine="btnImportText.Color = ModTheme.HomeHeaderBg";
 _btnimporttext.setColor(_modtheme._homeheaderbg /*int*/ (ba));
- //BA.debugLineNum = 594;BA.debugLine="btnImportText.TextColor = Colors.White";
+ //BA.debugLineNum = 596;BA.debugLine="btnImportText.TextColor = Colors.White";
 _btnimporttext.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 596;BA.debugLine="btnTestRestore.Color = ModTheme.HomeHeaderBg";
+ //BA.debugLineNum = 598;BA.debugLine="btnTestRestore.Color = ModTheme.HomeHeaderBg";
 _btntestrestore.setColor(_modtheme._homeheaderbg /*int*/ (ba));
- //BA.debugLineNum = 597;BA.debugLine="btnTestRestore.TextColor = Colors.White";
+ //BA.debugLineNum = 599;BA.debugLine="btnTestRestore.TextColor = Colors.White";
 _btntestrestore.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 598;BA.debugLine="End Sub";
+ //BA.debugLineNum = 600;BA.debugLine="End Sub";
 return "";
 }
 public String  _b4xpage_appear() throws Exception{
@@ -101,7 +101,7 @@ _updatelastbackupinfo();
  //BA.debugLineNum = 61;BA.debugLine="If Main.PendingBackupFile <> \"\" Then";
 if ((_main._pendingbackupfile /*String*/ ).equals("") == false) { 
  //BA.debugLineNum = 62;BA.debugLine="Log(\"PageBackup: Arquivo pendente para importar:";
-__c.LogImpl("826017801","PageBackup: Arquivo pendente para importar: "+_main._pendingbackupfile /*String*/ ,0);
+__c.LogImpl("623396361","PageBackup: Arquivo pendente para importar: "+_main._pendingbackupfile /*String*/ ,0);
  //BA.debugLineNum = 63;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFol";
 _currentbackupfolder = _starter._provider /*com.lockzero.fileprovider*/ ._sharedfolder /*String*/ ;
  //BA.debugLineNum = 64;BA.debugLine="CurrentBackupFileName = Main.PendingBackupFile";
@@ -117,7 +117,7 @@ return "";
 public String  _b4xpage_created(anywheresoftware.b4a.objects.B4XViewWrapper _root1) throws Exception{
  //BA.debugLineNum = 45;BA.debugLine="Private Sub B4XPage_Created(Root1 As B4XView)";
  //BA.debugLineNum = 46;BA.debugLine="Log(\"PageBackup: B4XPage_Created inicio\")";
-__c.LogImpl("825952257","PageBackup: B4XPage_Created inicio",0);
+__c.LogImpl("623330817","PageBackup: B4XPage_Created inicio",0);
  //BA.debugLineNum = 47;BA.debugLine="Root = Root1";
 _root = _root1;
  //BA.debugLineNum = 48;BA.debugLine="CreateUI";
@@ -125,7 +125,7 @@ _createui();
  //BA.debugLineNum = 49;BA.debugLine="ApplyTheme";
 _applytheme();
  //BA.debugLineNum = 50;BA.debugLine="Log(\"PageBackup: B4XPage_Created fim\")";
-__c.LogImpl("825952261","PageBackup: B4XPage_Created fim",0);
+__c.LogImpl("623330821","PageBackup: B4XPage_Created fim",0);
  //BA.debugLineNum = 51;BA.debugLine="End Sub";
 return "";
 }
@@ -139,7 +139,7 @@ return "";
 public String  _btnexport_click() throws Exception{
  //BA.debugLineNum = 423;BA.debugLine="Private Sub btnExport_Click";
  //BA.debugLineNum = 424;BA.debugLine="Log(\"=== btnExport_Click ===\")";
-__c.LogImpl("826738689","=== btnExport_Click ===",0);
+__c.LogImpl("624117249","=== btnExport_Click ===",0);
  //BA.debugLineNum = 425;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
  //BA.debugLineNum = 426;BA.debugLine="ShowExportDialog";
@@ -157,68 +157,68 @@ _showimportdialog();
 return "";
 }
 public String  _btnimporttext_click() throws Exception{
- //BA.debugLineNum = 662;BA.debugLine="Private Sub btnImportText_Click";
- //BA.debugLineNum = 663;BA.debugLine="ModSession.Touch";
+ //BA.debugLineNum = 664;BA.debugLine="Private Sub btnImportText_Click";
+ //BA.debugLineNum = 665;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
- //BA.debugLineNum = 664;BA.debugLine="ShowImportTextDialog";
+ //BA.debugLineNum = 666;BA.debugLine="ShowImportTextDialog";
 _showimporttextdialog();
- //BA.debugLineNum = 665;BA.debugLine="End Sub";
+ //BA.debugLineNum = 667;BA.debugLine="End Sub";
 return "";
 }
 public String  _btnimporttextcancel_click() throws Exception{
- //BA.debugLineNum = 681;BA.debugLine="Private Sub btnImportTextCancel_Click";
- //BA.debugLineNum = 682;BA.debugLine="HideImportTextDialog";
+ //BA.debugLineNum = 683;BA.debugLine="Private Sub btnImportTextCancel_Click";
+ //BA.debugLineNum = 684;BA.debugLine="HideImportTextDialog";
 _hideimporttextdialog();
- //BA.debugLineNum = 683;BA.debugLine="End Sub";
+ //BA.debugLineNum = 685;BA.debugLine="End Sub";
 return "";
 }
 public String  _btnimporttextok_click() throws Exception{
 String _backuptext = "";
 anywheresoftware.b4a.objects.collections.JSONParser _parser = null;
 anywheresoftware.b4a.objects.collections.Map _backupmap = null;
- //BA.debugLineNum = 685;BA.debugLine="Private Sub btnImportTextOk_Click";
- //BA.debugLineNum = 686;BA.debugLine="Dim backupText As String = edtImportText.Text.Tri";
+ //BA.debugLineNum = 687;BA.debugLine="Private Sub btnImportTextOk_Click";
+ //BA.debugLineNum = 688;BA.debugLine="Dim backupText As String = edtImportText.Text.Tri";
 _backuptext = _edtimporttext.getText().trim();
- //BA.debugLineNum = 688;BA.debugLine="If backupText = \"\" Then";
+ //BA.debugLineNum = 690;BA.debugLine="If backupText = \"\" Then";
 if ((_backuptext).equals("")) { 
- //BA.debugLineNum = 689;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_paste_empty\")";
+ //BA.debugLineNum = 691;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_paste_empty\")";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_paste_empty")),__c.True);
- //BA.debugLineNum = 690;BA.debugLine="Return";
+ //BA.debugLineNum = 692;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 694;BA.debugLine="Try";
-try { //BA.debugLineNum = 695;BA.debugLine="Dim parser As JSONParser";
+ //BA.debugLineNum = 696;BA.debugLine="Try";
+try { //BA.debugLineNum = 697;BA.debugLine="Dim parser As JSONParser";
 _parser = new anywheresoftware.b4a.objects.collections.JSONParser();
- //BA.debugLineNum = 696;BA.debugLine="parser.Initialize(backupText)";
+ //BA.debugLineNum = 698;BA.debugLine="parser.Initialize(backupText)";
 _parser.Initialize(_backuptext);
- //BA.debugLineNum = 697;BA.debugLine="Dim backupMap As Map = parser.NextObject";
+ //BA.debugLineNum = 699;BA.debugLine="Dim backupMap As Map = parser.NextObject";
 _backupmap = new anywheresoftware.b4a.objects.collections.Map();
 _backupmap = _parser.NextObject();
- //BA.debugLineNum = 698;BA.debugLine="If backupMap.ContainsKey(\"version\") = False Or b";
+ //BA.debugLineNum = 700;BA.debugLine="If backupMap.ContainsKey(\"version\") = False Or b";
 if (_backupmap.ContainsKey((Object)("version"))==__c.False || _backupmap.ContainsKey((Object)("data"))==__c.False) { 
- //BA.debugLineNum = 699;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_invalid\"), T";
+ //BA.debugLineNum = 701;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_invalid\"), T";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_invalid")),__c.True);
- //BA.debugLineNum = 700;BA.debugLine="Return";
+ //BA.debugLineNum = 702;BA.debugLine="Return";
 if (true) return "";
  };
  } 
        catch (Exception e15) {
-			ba.setLastException(e15); //BA.debugLineNum = 703;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_invalid\"), Tr";
+			ba.setLastException(e15); //BA.debugLineNum = 705;BA.debugLine="ToastMessageShow(ModLang.T(\"backup_invalid\"), Tr";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_invalid")),__c.True);
- //BA.debugLineNum = 704;BA.debugLine="Return";
+ //BA.debugLineNum = 706;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 707;BA.debugLine="HideImportTextDialog";
+ //BA.debugLineNum = 709;BA.debugLine="HideImportTextDialog";
 _hideimporttextdialog();
- //BA.debugLineNum = 710;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
+ //BA.debugLineNum = 712;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
 _currentbackupfolder = _starter._provider /*com.lockzero.fileprovider*/ ._sharedfolder /*String*/ ;
- //BA.debugLineNum = 711;BA.debugLine="CurrentBackupFileName = \"pasted_backup_\" & DateTi";
+ //BA.debugLineNum = 713;BA.debugLine="CurrentBackupFileName = \"pasted_backup_\" & DateTi";
 _currentbackupfilename = "pasted_backup_"+BA.NumberToString(__c.DateTime.getNow())+".lockzero";
- //BA.debugLineNum = 712;BA.debugLine="File.WriteString(CurrentBackupFolder, CurrentBack";
+ //BA.debugLineNum = 714;BA.debugLine="File.WriteString(CurrentBackupFolder, CurrentBack";
 __c.File.WriteString(_currentbackupfolder,_currentbackupfilename,_backuptext);
- //BA.debugLineNum = 714;BA.debugLine="ShowPhraseDialog(\"import\", ModLang.T(\"backup_ente";
+ //BA.debugLineNum = 716;BA.debugLine="ShowPhraseDialog(\"import\", ModLang.T(\"backup_ente";
 _showphrasedialog("import",_modlang._t /*String*/ (ba,"backup_enter_phrase"));
- //BA.debugLineNum = 715;BA.debugLine="End Sub";
+ //BA.debugLineNum = 717;BA.debugLine="End Sub";
 return "";
 }
 public String  _btnphrasecancel_click() throws Exception{
@@ -357,94 +357,94 @@ anywheresoftware.b4a.objects.PanelWrapper _pnlbox = null;
 anywheresoftware.b4a.objects.LabelWrapper _lbltitle = null;
 anywheresoftware.b4a.objects.drawable.ColorDrawable _cd = null;
 int _btnw = 0;
- //BA.debugLineNum = 604;BA.debugLine="Private Sub CreateImportTextDialog";
- //BA.debugLineNum = 605;BA.debugLine="pnlImportTextDialog.Initialize(\"\")";
+ //BA.debugLineNum = 606;BA.debugLine="Private Sub CreateImportTextDialog";
+ //BA.debugLineNum = 607;BA.debugLine="pnlImportTextDialog.Initialize(\"\")";
 _pnlimporttextdialog.Initialize(ba,"");
- //BA.debugLineNum = 606;BA.debugLine="pnlImportTextDialog.Color = Colors.ARGB(180, 0, 0";
+ //BA.debugLineNum = 608;BA.debugLine="pnlImportTextDialog.Color = Colors.ARGB(180, 0, 0";
 _pnlimporttextdialog.setColor(__c.Colors.ARGB((int) (180),(int) (0),(int) (0),(int) (0)));
- //BA.debugLineNum = 607;BA.debugLine="Root.AddView(pnlImportTextDialog, 0, 0, Root.Widt";
+ //BA.debugLineNum = 609;BA.debugLine="Root.AddView(pnlImportTextDialog, 0, 0, Root.Widt";
 _root.AddView((android.view.View)(_pnlimporttextdialog.getObject()),(int) (0),(int) (0),_root.getWidth(),_root.getHeight());
- //BA.debugLineNum = 608;BA.debugLine="pnlImportTextDialog.Visible = False";
+ //BA.debugLineNum = 610;BA.debugLine="pnlImportTextDialog.Visible = False";
 _pnlimporttextdialog.setVisible(__c.False);
- //BA.debugLineNum = 610;BA.debugLine="Dim boxW As Int = Root.Width - 40dip";
+ //BA.debugLineNum = 612;BA.debugLine="Dim boxW As Int = Root.Width - 40dip";
 _boxw = (int) (_root.getWidth()-__c.DipToCurrent((int) (40)));
- //BA.debugLineNum = 611;BA.debugLine="Dim boxH As Int = 350dip";
+ //BA.debugLineNum = 613;BA.debugLine="Dim boxH As Int = 350dip";
 _boxh = __c.DipToCurrent((int) (350));
- //BA.debugLineNum = 612;BA.debugLine="Dim boxL As Int = 20dip";
+ //BA.debugLineNum = 614;BA.debugLine="Dim boxL As Int = 20dip";
 _boxl = __c.DipToCurrent((int) (20));
- //BA.debugLineNum = 613;BA.debugLine="Dim boxT As Int = (Root.Height - boxH) / 2";
+ //BA.debugLineNum = 615;BA.debugLine="Dim boxT As Int = (Root.Height - boxH) / 2";
 _boxt = (int) ((_root.getHeight()-_boxh)/(double)2);
- //BA.debugLineNum = 615;BA.debugLine="Dim pnlBox As Panel";
+ //BA.debugLineNum = 617;BA.debugLine="Dim pnlBox As Panel";
 _pnlbox = new anywheresoftware.b4a.objects.PanelWrapper();
- //BA.debugLineNum = 616;BA.debugLine="pnlBox.Initialize(\"\")";
+ //BA.debugLineNum = 618;BA.debugLine="pnlBox.Initialize(\"\")";
 _pnlbox.Initialize(ba,"");
- //BA.debugLineNum = 617;BA.debugLine="pnlBox.Color = ModTheme.HomeHeaderBg";
+ //BA.debugLineNum = 619;BA.debugLine="pnlBox.Color = ModTheme.HomeHeaderBg";
 _pnlbox.setColor(_modtheme._homeheaderbg /*int*/ (ba));
- //BA.debugLineNum = 618;BA.debugLine="pnlImportTextDialog.AddView(pnlBox, boxL, boxT, b";
+ //BA.debugLineNum = 620;BA.debugLine="pnlImportTextDialog.AddView(pnlBox, boxL, boxT, b";
 _pnlimporttextdialog.AddView((android.view.View)(_pnlbox.getObject()),_boxl,_boxt,_boxw,_boxh);
- //BA.debugLineNum = 621;BA.debugLine="Dim lblTitle As Label";
+ //BA.debugLineNum = 623;BA.debugLine="Dim lblTitle As Label";
 _lbltitle = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 622;BA.debugLine="lblTitle.Initialize(\"\")";
+ //BA.debugLineNum = 624;BA.debugLine="lblTitle.Initialize(\"\")";
 _lbltitle.Initialize(ba,"");
- //BA.debugLineNum = 623;BA.debugLine="lblTitle.Text = ModLang.T(\"backup_paste_instructi";
+ //BA.debugLineNum = 625;BA.debugLine="lblTitle.Text = ModLang.T(\"backup_paste_instructi";
 _lbltitle.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_paste_instructions")));
- //BA.debugLineNum = 624;BA.debugLine="lblTitle.TextSize = Starter.FONT_BODY";
+ //BA.debugLineNum = 626;BA.debugLine="lblTitle.TextSize = Starter.FONT_BODY";
 _lbltitle.setTextSize(_starter._font_body /*float*/ );
- //BA.debugLineNum = 625;BA.debugLine="lblTitle.TextColor = Colors.White";
+ //BA.debugLineNum = 627;BA.debugLine="lblTitle.TextColor = Colors.White";
 _lbltitle.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 626;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
+ //BA.debugLineNum = 628;BA.debugLine="lblTitle.Gravity = Gravity.CENTER_HORIZONTAL";
 _lbltitle.setGravity(__c.Gravity.CENTER_HORIZONTAL);
- //BA.debugLineNum = 627;BA.debugLine="pnlBox.AddView(lblTitle, 15dip, 15dip, boxW - 30d";
+ //BA.debugLineNum = 629;BA.debugLine="pnlBox.AddView(lblTitle, 15dip, 15dip, boxW - 30d";
 _pnlbox.AddView((android.view.View)(_lbltitle.getObject()),__c.DipToCurrent((int) (15)),__c.DipToCurrent((int) (15)),(int) (_boxw-__c.DipToCurrent((int) (30))),__c.DipToCurrent((int) (50)));
- //BA.debugLineNum = 630;BA.debugLine="edtImportText.Initialize(\"edtImportText\")";
+ //BA.debugLineNum = 632;BA.debugLine="edtImportText.Initialize(\"edtImportText\")";
 _edtimporttext.Initialize(ba,"edtImportText");
- //BA.debugLineNum = 631;BA.debugLine="edtImportText.Hint = ModLang.T(\"backup_paste_hint";
+ //BA.debugLineNum = 633;BA.debugLine="edtImportText.Hint = ModLang.T(\"backup_paste_hint";
 _edtimporttext.setHint(_modlang._t /*String*/ (ba,"backup_paste_hint"));
- //BA.debugLineNum = 632;BA.debugLine="edtImportText.SingleLine = False";
+ //BA.debugLineNum = 634;BA.debugLine="edtImportText.SingleLine = False";
 _edtimporttext.setSingleLine(__c.False);
- //BA.debugLineNum = 633;BA.debugLine="edtImportText.Gravity = Gravity.TOP";
+ //BA.debugLineNum = 635;BA.debugLine="edtImportText.Gravity = Gravity.TOP";
 _edtimporttext.setGravity(__c.Gravity.TOP);
- //BA.debugLineNum = 634;BA.debugLine="edtImportText.TextSize = Starter.FONT_CAPTION";
+ //BA.debugLineNum = 636;BA.debugLine="edtImportText.TextSize = Starter.FONT_CAPTION";
 _edtimporttext.setTextSize(_starter._font_caption /*float*/ );
- //BA.debugLineNum = 635;BA.debugLine="edtImportText.TextColor = Colors.White";
+ //BA.debugLineNum = 637;BA.debugLine="edtImportText.TextColor = Colors.White";
 _edtimporttext.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 636;BA.debugLine="edtImportText.HintColor = Colors.ARGB(120, 255, 2";
+ //BA.debugLineNum = 638;BA.debugLine="edtImportText.HintColor = Colors.ARGB(120, 255, 2";
 _edtimporttext.setHintColor(__c.Colors.ARGB((int) (120),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 638;BA.debugLine="Dim cd As ColorDrawable";
+ //BA.debugLineNum = 640;BA.debugLine="Dim cd As ColorDrawable";
 _cd = new anywheresoftware.b4a.objects.drawable.ColorDrawable();
- //BA.debugLineNum = 639;BA.debugLine="cd.Initialize2(ModTheme.HomeBg, 8dip, 1dip, Color";
+ //BA.debugLineNum = 641;BA.debugLine="cd.Initialize2(ModTheme.HomeBg, 8dip, 1dip, Color";
 _cd.Initialize2(_modtheme._homebg /*int*/ (ba),__c.DipToCurrent((int) (8)),__c.DipToCurrent((int) (1)),__c.Colors.ARGB((int) (80),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 640;BA.debugLine="edtImportText.Background = cd";
+ //BA.debugLineNum = 642;BA.debugLine="edtImportText.Background = cd";
 _edtimporttext.setBackground((android.graphics.drawable.Drawable)(_cd.getObject()));
- //BA.debugLineNum = 642;BA.debugLine="pnlBox.AddView(edtImportText, 15dip, 70dip, boxW";
+ //BA.debugLineNum = 644;BA.debugLine="pnlBox.AddView(edtImportText, 15dip, 70dip, boxW";
 _pnlbox.AddView((android.view.View)(_edtimporttext.getObject()),__c.DipToCurrent((int) (15)),__c.DipToCurrent((int) (70)),(int) (_boxw-__c.DipToCurrent((int) (30))),__c.DipToCurrent((int) (200)));
- //BA.debugLineNum = 645;BA.debugLine="Dim btnW As Int = 100dip";
+ //BA.debugLineNum = 647;BA.debugLine="Dim btnW As Int = 100dip";
 _btnw = __c.DipToCurrent((int) (100));
- //BA.debugLineNum = 647;BA.debugLine="btnImportTextCancel.Initialize(\"btnImportTextCanc";
+ //BA.debugLineNum = 649;BA.debugLine="btnImportTextCancel.Initialize(\"btnImportTextCanc";
 _btnimporttextcancel.Initialize(ba,"btnImportTextCancel");
- //BA.debugLineNum = 648;BA.debugLine="btnImportTextCancel.Text = ModLang.T(\"cancel\")";
+ //BA.debugLineNum = 650;BA.debugLine="btnImportTextCancel.Text = ModLang.T(\"cancel\")";
 _btnimporttextcancel.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"cancel")));
- //BA.debugLineNum = 649;BA.debugLine="btnImportTextCancel.TextSize = Starter.FONT_BUTTO";
+ //BA.debugLineNum = 651;BA.debugLine="btnImportTextCancel.TextSize = Starter.FONT_BUTTO";
 _btnimporttextcancel.setTextSize(_starter._font_button /*float*/ );
- //BA.debugLineNum = 650;BA.debugLine="btnImportTextCancel.Color = Colors.Gray";
+ //BA.debugLineNum = 652;BA.debugLine="btnImportTextCancel.Color = Colors.Gray";
 _btnimporttextcancel.setColor(__c.Colors.Gray);
- //BA.debugLineNum = 651;BA.debugLine="btnImportTextCancel.TextColor = Colors.White";
+ //BA.debugLineNum = 653;BA.debugLine="btnImportTextCancel.TextColor = Colors.White";
 _btnimporttextcancel.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 652;BA.debugLine="pnlBox.AddView(btnImportTextCancel, 15dip, boxH -";
+ //BA.debugLineNum = 654;BA.debugLine="pnlBox.AddView(btnImportTextCancel, 15dip, boxH -";
 _pnlbox.AddView((android.view.View)(_btnimporttextcancel.getObject()),__c.DipToCurrent((int) (15)),(int) (_boxh-__c.DipToCurrent((int) (60))),_btnw,__c.DipToCurrent((int) (45)));
- //BA.debugLineNum = 654;BA.debugLine="btnImportTextOk.Initialize(\"btnImportTextOk\")";
+ //BA.debugLineNum = 656;BA.debugLine="btnImportTextOk.Initialize(\"btnImportTextOk\")";
 _btnimporttextok.Initialize(ba,"btnImportTextOk");
- //BA.debugLineNum = 655;BA.debugLine="btnImportTextOk.Text = ModLang.T(\"backup_restore\"";
+ //BA.debugLineNum = 657;BA.debugLine="btnImportTextOk.Text = ModLang.T(\"backup_restore\"";
 _btnimporttextok.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_restore")));
- //BA.debugLineNum = 656;BA.debugLine="btnImportTextOk.TextSize = Starter.FONT_BUTTON";
+ //BA.debugLineNum = 658;BA.debugLine="btnImportTextOk.TextSize = Starter.FONT_BUTTON";
 _btnimporttextok.setTextSize(_starter._font_button /*float*/ );
- //BA.debugLineNum = 657;BA.debugLine="btnImportTextOk.Color = ModTheme.HomeIconBg";
+ //BA.debugLineNum = 659;BA.debugLine="btnImportTextOk.Color = ModTheme.HomeIconBg";
 _btnimporttextok.setColor(_modtheme._homeiconbg /*int*/ (ba));
- //BA.debugLineNum = 658;BA.debugLine="btnImportTextOk.TextColor = Colors.White";
+ //BA.debugLineNum = 660;BA.debugLine="btnImportTextOk.TextColor = Colors.White";
 _btnimporttextok.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 659;BA.debugLine="pnlBox.AddView(btnImportTextOk, boxW - btnW - 15d";
+ //BA.debugLineNum = 661;BA.debugLine="pnlBox.AddView(btnImportTextOk, boxW - btnW - 15d";
 _pnlbox.AddView((android.view.View)(_btnimporttextok.getObject()),(int) (_boxw-_btnw-__c.DipToCurrent((int) (15))),(int) (_boxh-__c.DipToCurrent((int) (60))),_btnw,__c.DipToCurrent((int) (45)));
- //BA.debugLineNum = 660;BA.debugLine="End Sub";
+ //BA.debugLineNum = 662;BA.debugLine="End Sub";
 return "";
 }
 public String  _createphrasedialog() throws Exception{
@@ -456,7 +456,7 @@ int _edtw = 0;
 anywheresoftware.b4a.objects.drawable.ColorDrawable _cd = null;
  //BA.debugLineNum = 247;BA.debugLine="Private Sub CreatePhraseDialog";
  //BA.debugLineNum = 248;BA.debugLine="Log(\"CreatePhraseDialog: inicio\")";
-__c.LogImpl("826148865","CreatePhraseDialog: inicio",0);
+__c.LogImpl("623527425","CreatePhraseDialog: inicio",0);
  //BA.debugLineNum = 250;BA.debugLine="pnlOverlay.Initialize(\"pnlOverlay\")";
 _pnloverlay.Initialize(ba,"pnlOverlay");
  //BA.debugLineNum = 251;BA.debugLine="pnlOverlay.Color = Colors.ARGB(180, 0, 0, 0)";
@@ -466,7 +466,7 @@ _root.AddView((android.view.View)(_pnloverlay.getObject()),(int) (0),(int) (0),_
  //BA.debugLineNum = 253;BA.debugLine="pnlOverlay.Visible = False";
 _pnloverlay.setVisible(__c.False);
  //BA.debugLineNum = 254;BA.debugLine="Log(\"CreatePhraseDialog: overlay criado\")";
-__c.LogImpl("826148871","CreatePhraseDialog: overlay criado",0);
+__c.LogImpl("623527431","CreatePhraseDialog: overlay criado",0);
  //BA.debugLineNum = 257;BA.debugLine="Dim dialogW As Int = Root.Width - 40dip";
 _dialogw = (int) (_root.getWidth()-__c.DipToCurrent((int) (40)));
  //BA.debugLineNum = 258;BA.debugLine="Dim dialogH As Int = 210dip";
@@ -554,7 +554,7 @@ _btnphraseok.setTextColor(__c.Colors.White);
  //BA.debugLineNum = 311;BA.debugLine="pnlPhraseDialog.AddView(btnPhraseOk, dialogW - 12";
 _pnlphrasedialog.AddView((android.view.View)(_btnphraseok.getObject()),(int) (_dialogw-__c.DipToCurrent((int) (120))),__c.DipToCurrent((int) (145)),__c.DipToCurrent((int) (100)),__c.DipToCurrent((int) (45)));
  //BA.debugLineNum = 312;BA.debugLine="Log(\"CreatePhraseDialog: fim - dialog completo\")";
-__c.LogImpl("826148929","CreatePhraseDialog: fim - dialog completo",0);
+__c.LogImpl("623527489","CreatePhraseDialog: fim - dialog completo",0);
  //BA.debugLineNum = 313;BA.debugLine="End Sub";
 return "";
 }
@@ -891,7 +891,7 @@ this.state = 4;
  //BA.debugLineNum = 456;BA.debugLine="Dim fileName As String = fullPath.SubString(full";
 _filename = _fullpath.substring((int) (_fullpath.lastIndexOf("/")+1));
  //BA.debugLineNum = 457;BA.debugLine="Log(\"DoExport: arquivo = \" & fileName)";
-parent.__c.LogImpl("827000840","DoExport: arquivo = "+_filename,0);
+parent.__c.LogImpl("624379400","DoExport: arquivo = "+_filename,0);
  //BA.debugLineNum = 459;BA.debugLine="UpdateLastBackupInfo";
 parent._updatelastbackupinfo();
  //BA.debugLineNum = 462;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"backup_suc";
@@ -977,7 +977,7 @@ return;
 case 0:
 //C
 this.state = 1;
- //BA.debugLineNum = 515;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"backup_conf";
+ //BA.debugLineNum = 517;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"backup_conf";
 parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"backup_confirm_restore")+parent.__c.CRLF+parent.__c.CRLF+parent._modlang._t /*String*/ (ba,"backup_continue")),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"confirm")),parent._modlang._t /*String*/ (ba,"yes"),"",parent._modlang._t /*String*/ (ba,"cancel"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
 this.state = 13;
 return;
@@ -986,7 +986,7 @@ case 13:
 this.state = 1;
 _dialogresult = (Integer) result[0];
 ;
- //BA.debugLineNum = 517;BA.debugLine="If DialogResult <> xui.DialogResponse_Positive Th";
+ //BA.debugLineNum = 519;BA.debugLine="If DialogResult <> xui.DialogResponse_Positive Th";
 if (true) break;
 
 case 1:
@@ -1006,10 +1006,10 @@ case 6:
 //C
 this.state = 7;
 ;
- //BA.debugLineNum = 519;BA.debugLine="Dim importResult As Map = ModBackup.ImportBackup(";
+ //BA.debugLineNum = 521;BA.debugLine="Dim importResult As Map = ModBackup.ImportBackup(";
 _importresult = new anywheresoftware.b4a.objects.collections.Map();
 _importresult = parent._modbackup._importbackup /*anywheresoftware.b4a.objects.collections.Map*/ (ba,_phrase,_folder,_filename);
- //BA.debugLineNum = 521;BA.debugLine="If importResult.Get(\"success\") = True Then";
+ //BA.debugLineNum = 523;BA.debugLine="If importResult.Get(\"success\") = True Then";
 if (true) break;
 
 case 7:
@@ -1024,25 +1024,25 @@ this.state = 11;
 case 9:
 //C
 this.state = 12;
- //BA.debugLineNum = 522;BA.debugLine="Dim stats As Map = importResult.Get(\"stats\")";
+ //BA.debugLineNum = 524;BA.debugLine="Dim stats As Map = importResult.Get(\"stats\")";
 _stats = new anywheresoftware.b4a.objects.collections.Map();
 _stats = (anywheresoftware.b4a.objects.collections.Map) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.collections.Map(), (java.util.Map)(_importresult.Get((Object)("stats"))));
- //BA.debugLineNum = 523;BA.debugLine="Dim msg As String = ModLang.T(\"backup_restored\")";
+ //BA.debugLineNum = 525;BA.debugLine="Dim msg As String = ModLang.T(\"backup_restored\")";
 _msg = parent._modlang._t /*String*/ (ba,"backup_restored")+parent.__c.CRLF+parent.__c.CRLF;
- //BA.debugLineNum = 524;BA.debugLine="msg = msg & ModLang.T(\"backup_groups\") & \" \" & s";
+ //BA.debugLineNum = 526;BA.debugLine="msg = msg & ModLang.T(\"backup_groups\") & \" \" & s";
 _msg = _msg+parent._modlang._t /*String*/ (ba,"backup_groups")+" "+BA.ObjectToString(_stats.Get((Object)("groupsImported")))+parent.__c.CRLF;
- //BA.debugLineNum = 525;BA.debugLine="msg = msg & ModLang.T(\"backup_entries\") & \" \" &";
+ //BA.debugLineNum = 527;BA.debugLine="msg = msg & ModLang.T(\"backup_entries\") & \" \" &";
 _msg = _msg+parent._modlang._t /*String*/ (ba,"backup_entries")+" "+BA.ObjectToString(_stats.Get((Object)("entriesImported")))+parent.__c.CRLF;
- //BA.debugLineNum = 526;BA.debugLine="msg = msg & ModLang.T(\"backup_notes\") & \" \" & st";
+ //BA.debugLineNum = 528;BA.debugLine="msg = msg & ModLang.T(\"backup_notes\") & \" \" & st";
 _msg = _msg+parent._modlang._t /*String*/ (ba,"backup_notes")+" "+BA.ObjectToString(_stats.GetDefault((Object)("notesImported"),(Object)(0)));
- //BA.debugLineNum = 527;BA.debugLine="xui.MsgboxAsync(msg, ModLang.T(\"success\"))";
+ //BA.debugLineNum = 529;BA.debugLine="xui.MsgboxAsync(msg, ModLang.T(\"success\"))";
 parent._xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_msg),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"success")));
  if (true) break;
 
 case 11:
 //C
 this.state = 12;
- //BA.debugLineNum = 529;BA.debugLine="xui.MsgboxAsync(importResult.Get(\"message\"), Mod";
+ //BA.debugLineNum = 531;BA.debugLine="xui.MsgboxAsync(importResult.Get(\"message\"), Mod";
 parent._xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_importresult.Get((Object)("message"))),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"error")));
  if (true) break;
 
@@ -1050,7 +1050,7 @@ case 12:
 //C
 this.state = -1;
 ;
- //BA.debugLineNum = 531;BA.debugLine="End Sub";
+ //BA.debugLineNum = 533;BA.debugLine="End Sub";
 if (true) break;
 
             }
@@ -1058,10 +1058,10 @@ if (true) break;
     }
 }
 public String  _doimportwithphrase(String _phrase) throws Exception{
- //BA.debugLineNum = 509;BA.debugLine="Private Sub DoImportWithPhrase(phrase As String)";
- //BA.debugLineNum = 510;BA.debugLine="DoImport(phrase, CurrentBackupFolder, CurrentBack";
+ //BA.debugLineNum = 511;BA.debugLine="Private Sub DoImportWithPhrase(phrase As String)";
+ //BA.debugLineNum = 512;BA.debugLine="DoImport(phrase, CurrentBackupFolder, CurrentBack";
 _doimport(_phrase,_currentbackupfolder,_currentbackupfilename);
- //BA.debugLineNum = 511;BA.debugLine="End Sub";
+ //BA.debugLineNum = 513;BA.debugLine="End Sub";
 return "";
 }
 public String  _dotest(String _phrase,String _folder,String _filename) throws Exception{
@@ -1070,57 +1070,57 @@ anywheresoftware.b4a.objects.collections.Map _stats = null;
 long _createdat = 0L;
 String _datestr = "";
 String _msg = "";
- //BA.debugLineNum = 554;BA.debugLine="Private Sub DoTest(phrase As String, folder As Str";
- //BA.debugLineNum = 555;BA.debugLine="Dim result As Map = ModBackup.ValidateBackup(phra";
+ //BA.debugLineNum = 556;BA.debugLine="Private Sub DoTest(phrase As String, folder As Str";
+ //BA.debugLineNum = 557;BA.debugLine="Dim result As Map = ModBackup.ValidateBackup(phra";
 _result = new anywheresoftware.b4a.objects.collections.Map();
 _result = _modbackup._validatebackup /*anywheresoftware.b4a.objects.collections.Map*/ (ba,_phrase,_folder,_filename);
- //BA.debugLineNum = 557;BA.debugLine="If result.Get(\"valid\") = True Then";
+ //BA.debugLineNum = 559;BA.debugLine="If result.Get(\"valid\") = True Then";
 if ((_result.Get((Object)("valid"))).equals((Object)(__c.True))) { 
- //BA.debugLineNum = 558;BA.debugLine="Dim stats As Map = result.Get(\"stats\")";
+ //BA.debugLineNum = 560;BA.debugLine="Dim stats As Map = result.Get(\"stats\")";
 _stats = new anywheresoftware.b4a.objects.collections.Map();
 _stats = (anywheresoftware.b4a.objects.collections.Map) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.collections.Map(), (java.util.Map)(_result.Get((Object)("stats"))));
- //BA.debugLineNum = 559;BA.debugLine="Dim createdAt As Long = result.Get(\"createdAt\")";
+ //BA.debugLineNum = 561;BA.debugLine="Dim createdAt As Long = result.Get(\"createdAt\")";
 _createdat = BA.ObjectToLongNumber(_result.Get((Object)("createdAt")));
- //BA.debugLineNum = 561;BA.debugLine="DateTime.DateFormat = \"dd/MM/yyyy HH:mm\"";
+ //BA.debugLineNum = 563;BA.debugLine="DateTime.DateFormat = \"dd/MM/yyyy HH:mm\"";
 __c.DateTime.setDateFormat("dd/MM/yyyy HH:mm");
- //BA.debugLineNum = 562;BA.debugLine="Dim dateStr As String = DateTime.Date(createdAt)";
+ //BA.debugLineNum = 564;BA.debugLine="Dim dateStr As String = DateTime.Date(createdAt)";
 _datestr = __c.DateTime.Date(_createdat);
- //BA.debugLineNum = 564;BA.debugLine="Dim msg As String = ModLang.T(\"backup_valid\") &";
+ //BA.debugLineNum = 566;BA.debugLine="Dim msg As String = ModLang.T(\"backup_valid\") &";
 _msg = _modlang._t /*String*/ (ba,"backup_valid")+__c.CRLF+__c.CRLF;
- //BA.debugLineNum = 565;BA.debugLine="msg = msg & ModLang.T(\"backup_created_at\") & \" \"";
+ //BA.debugLineNum = 567;BA.debugLine="msg = msg & ModLang.T(\"backup_created_at\") & \" \"";
 _msg = _msg+_modlang._t /*String*/ (ba,"backup_created_at")+" "+_datestr+__c.CRLF;
- //BA.debugLineNum = 566;BA.debugLine="If stats <> Null Then";
+ //BA.debugLineNum = 568;BA.debugLine="If stats <> Null Then";
 if (_stats!= null) { 
- //BA.debugLineNum = 567;BA.debugLine="msg = msg & ModLang.T(\"backup_groups\") & \" \" &";
+ //BA.debugLineNum = 569;BA.debugLine="msg = msg & ModLang.T(\"backup_groups\") & \" \" &";
 _msg = _msg+_modlang._t /*String*/ (ba,"backup_groups")+" "+BA.ObjectToString(_stats.GetDefault((Object)("totalGroups"),(Object)(0)))+__c.CRLF;
- //BA.debugLineNum = 568;BA.debugLine="msg = msg & ModLang.T(\"backup_entries\") & \" \" &";
+ //BA.debugLineNum = 570;BA.debugLine="msg = msg & ModLang.T(\"backup_entries\") & \" \" &";
 _msg = _msg+_modlang._t /*String*/ (ba,"backup_entries")+" "+BA.ObjectToString(_stats.GetDefault((Object)("totalEntries"),(Object)(0)))+__c.CRLF;
- //BA.debugLineNum = 569;BA.debugLine="msg = msg & ModLang.T(\"backup_notes\") & \" \" & s";
+ //BA.debugLineNum = 571;BA.debugLine="msg = msg & ModLang.T(\"backup_notes\") & \" \" & s";
 _msg = _msg+_modlang._t /*String*/ (ba,"backup_notes")+" "+BA.ObjectToString(_stats.GetDefault((Object)("totalNotes"),(Object)(0)));
  };
- //BA.debugLineNum = 572;BA.debugLine="xui.MsgboxAsync(msg, ModLang.T(\"backup_test_ok\")";
+ //BA.debugLineNum = 574;BA.debugLine="xui.MsgboxAsync(msg, ModLang.T(\"backup_test_ok\")";
 _xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_msg),BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_test_ok")));
  }else {
- //BA.debugLineNum = 574;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_test_failed\"),";
+ //BA.debugLineNum = 576;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_test_failed\"),";
 _xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_test_failed")),BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"error")));
  };
- //BA.debugLineNum = 576;BA.debugLine="End Sub";
+ //BA.debugLineNum = 578;BA.debugLine="End Sub";
 return "";
 }
 public String  _dotestwithphrase(String _phrase) throws Exception{
- //BA.debugLineNum = 550;BA.debugLine="Private Sub DoTestWithPhrase(phrase As String)";
- //BA.debugLineNum = 551;BA.debugLine="DoTest(phrase, CurrentBackupFolder, CurrentBackup";
+ //BA.debugLineNum = 552;BA.debugLine="Private Sub DoTestWithPhrase(phrase As String)";
+ //BA.debugLineNum = 553;BA.debugLine="DoTest(phrase, CurrentBackupFolder, CurrentBackup";
 _dotest(_phrase,_currentbackupfolder,_currentbackupfilename);
- //BA.debugLineNum = 552;BA.debugLine="End Sub";
+ //BA.debugLineNum = 554;BA.debugLine="End Sub";
 return "";
 }
 public String  _hideimporttextdialog() throws Exception{
- //BA.debugLineNum = 676;BA.debugLine="Private Sub HideImportTextDialog";
- //BA.debugLineNum = 677;BA.debugLine="pnlImportTextDialog.Visible = False";
+ //BA.debugLineNum = 678;BA.debugLine="Private Sub HideImportTextDialog";
+ //BA.debugLineNum = 679;BA.debugLine="pnlImportTextDialog.Visible = False";
 _pnlimporttextdialog.setVisible(__c.False);
- //BA.debugLineNum = 678;BA.debugLine="edtImportText.Text = \"\"";
+ //BA.debugLineNum = 680;BA.debugLine="edtImportText.Text = \"\"";
 _edtimporttext.setText(BA.ObjectToCharSequence(""));
- //BA.debugLineNum = 679;BA.debugLine="End Sub";
+ //BA.debugLineNum = 681;BA.debugLine="End Sub";
 return "";
 }
 public String  _hidephrasedialog() throws Exception{
@@ -1153,14 +1153,15 @@ return "";
 public String  _sharebackupasfile(String _filename) throws Exception{
 Object _uri = null;
 anywheresoftware.b4a.objects.IntentWrapper _shareintent = null;
+anywheresoftware.b4j.object.JavaObject _jo = null;
  //BA.debugLineNum = 472;BA.debugLine="Private Sub ShareBackupAsFile(fileName As String)";
  //BA.debugLineNum = 473;BA.debugLine="Try";
 try { //BA.debugLineNum = 474;BA.debugLine="Log(\"ShareBackupAsFile: \" & fileName)";
-__c.LogImpl("827066370","ShareBackupAsFile: "+_filename,0);
+__c.LogImpl("624444930","ShareBackupAsFile: "+_filename,0);
  //BA.debugLineNum = 475;BA.debugLine="Dim uri As Object = Starter.Provider.GetFileUri(";
 _uri = _starter._provider /*com.lockzero.fileprovider*/ ._getfileuri /*Object*/ (_filename);
  //BA.debugLineNum = 476;BA.debugLine="Log(\"ShareBackupAsFile URI: \" & uri)";
-__c.LogImpl("827066372","ShareBackupAsFile URI: "+BA.ObjectToString(_uri),0);
+__c.LogImpl("624444932","ShareBackupAsFile URI: "+BA.ObjectToString(_uri),0);
  //BA.debugLineNum = 478;BA.debugLine="Dim shareIntent As Intent";
 _shareintent = new anywheresoftware.b4a.objects.IntentWrapper();
  //BA.debugLineNum = 479;BA.debugLine="shareIntent.Initialize(shareIntent.ACTION_SEND,";
@@ -1173,69 +1174,73 @@ _shareintent.PutExtra("android.intent.extra.SUBJECT",(Object)("LockZero Backup")
 _shareintent.PutExtra("android.intent.extra.STREAM",_uri);
  //BA.debugLineNum = 483;BA.debugLine="shareIntent.Flags = 1 'FLAG_GRANT_READ_URI_PERMI";
 _shareintent.setFlags((int) (1));
- //BA.debugLineNum = 484;BA.debugLine="StartActivity(shareIntent)";
-__c.StartActivity(ba,(Object)(_shareintent.getObject()));
+ //BA.debugLineNum = 484;BA.debugLine="Dim jo As JavaObject";
+_jo = new anywheresoftware.b4j.object.JavaObject();
+ //BA.debugLineNum = 485;BA.debugLine="jo.InitializeStatic(\"android.content.Intent\")";
+_jo.InitializeStatic("android.content.Intent");
+ //BA.debugLineNum = 486;BA.debugLine="StartActivity(jo.RunMethod(\"createChooser\", Arra";
+__c.StartActivity(ba,_jo.RunMethod("createChooser",new Object[]{(Object)(_shareintent.getObject()),(Object)(_modlang._t /*String*/ (ba,"share"))}));
  } 
-       catch (Exception e13) {
-			ba.setLastException(e13); //BA.debugLineNum = 486;BA.debugLine="Log(\"ShareBackupAsFile erro: \" & LastException)";
-__c.LogImpl("827066382","ShareBackupAsFile erro: "+BA.ObjectToString(__c.LastException(ba)),0);
- //BA.debugLineNum = 487;BA.debugLine="ToastMessageShow(ModLang.T(\"share_error\"), True)";
+       catch (Exception e15) {
+			ba.setLastException(e15); //BA.debugLineNum = 488;BA.debugLine="Log(\"ShareBackupAsFile erro: \" & LastException)";
+__c.LogImpl("624444944","ShareBackupAsFile erro: "+BA.ObjectToString(__c.LastException(ba)),0);
+ //BA.debugLineNum = 489;BA.debugLine="ToastMessageShow(ModLang.T(\"share_error\"), True)";
 __c.ToastMessageShow(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"share_error")),__c.True);
  };
- //BA.debugLineNum = 489;BA.debugLine="End Sub";
+ //BA.debugLineNum = 491;BA.debugLine="End Sub";
 return "";
 }
 public String  _showexportdialog() throws Exception{
  //BA.debugLineNum = 443;BA.debugLine="Private Sub ShowExportDialog";
  //BA.debugLineNum = 444;BA.debugLine="Log(\"ShowExportDialog: inicio\")";
-__c.LogImpl("826935297","ShowExportDialog: inicio",0);
+__c.LogImpl("624313857","ShowExportDialog: inicio",0);
  //BA.debugLineNum = 445;BA.debugLine="ShowPhraseDialog(\"export\", ModLang.T(\"backup_phra";
 _showphrasedialog("export",_modlang._t /*String*/ (ba,"backup_phrase_hint"));
  //BA.debugLineNum = 446;BA.debugLine="Log(\"ShowExportDialog: fim\")";
-__c.LogImpl("826935299","ShowExportDialog: fim",0);
+__c.LogImpl("624313859","ShowExportDialog: fim",0);
  //BA.debugLineNum = 447;BA.debugLine="End Sub";
 return "";
 }
 public String  _showimportdialog() throws Exception{
 anywheresoftware.b4a.objects.collections.List _backups = null;
 anywheresoftware.b4a.objects.collections.Map _latest = null;
- //BA.debugLineNum = 491;BA.debugLine="Private Sub ShowImportDialog";
- //BA.debugLineNum = 493;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
+ //BA.debugLineNum = 493;BA.debugLine="Private Sub ShowImportDialog";
+ //BA.debugLineNum = 495;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
 _currentbackupfolder = _starter._provider /*com.lockzero.fileprovider*/ ._sharedfolder /*String*/ ;
- //BA.debugLineNum = 495;BA.debugLine="Dim backups As List = ModBackup.ListBackups(Curre";
+ //BA.debugLineNum = 497;BA.debugLine="Dim backups As List = ModBackup.ListBackups(Curre";
 _backups = new anywheresoftware.b4a.objects.collections.List();
 _backups = _modbackup._listbackups /*anywheresoftware.b4a.objects.collections.List*/ (ba,_currentbackupfolder);
- //BA.debugLineNum = 497;BA.debugLine="If backups.Size = 0 Then";
+ //BA.debugLineNum = 499;BA.debugLine="If backups.Size = 0 Then";
 if (_backups.getSize()==0) { 
- //BA.debugLineNum = 498;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_none_found\") &";
+ //BA.debugLineNum = 500;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_none_found\") &";
 _xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_none_found")+":"+__c.CRLF+_currentbackupfolder),BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup")));
- //BA.debugLineNum = 499;BA.debugLine="Return";
+ //BA.debugLineNum = 501;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 503;BA.debugLine="Dim latest As Map = backups.Get(backups.Size - 1)";
+ //BA.debugLineNum = 505;BA.debugLine="Dim latest As Map = backups.Get(backups.Size - 1)";
 _latest = new anywheresoftware.b4a.objects.collections.Map();
 _latest = (anywheresoftware.b4a.objects.collections.Map) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.collections.Map(), (java.util.Map)(_backups.Get((int) (_backups.getSize()-1))));
- //BA.debugLineNum = 504;BA.debugLine="CurrentBackupFileName = latest.Get(\"fileName\")";
+ //BA.debugLineNum = 506;BA.debugLine="CurrentBackupFileName = latest.Get(\"fileName\")";
 _currentbackupfilename = BA.ObjectToString(_latest.Get((Object)("fileName")));
- //BA.debugLineNum = 506;BA.debugLine="ShowPhraseDialog(\"import\", CurrentBackupFileName";
+ //BA.debugLineNum = 508;BA.debugLine="ShowPhraseDialog(\"import\", CurrentBackupFileName";
 _showphrasedialog("import",_currentbackupfilename+__c.CRLF+_modlang._t /*String*/ (ba,"backup_enter_phrase"));
- //BA.debugLineNum = 507;BA.debugLine="End Sub";
+ //BA.debugLineNum = 509;BA.debugLine="End Sub";
 return "";
 }
 public String  _showimporttextdialog() throws Exception{
- //BA.debugLineNum = 667;BA.debugLine="Private Sub ShowImportTextDialog";
- //BA.debugLineNum = 668;BA.debugLine="If pnlImportTextDialog.IsInitialized = False Then";
+ //BA.debugLineNum = 669;BA.debugLine="Private Sub ShowImportTextDialog";
+ //BA.debugLineNum = 670;BA.debugLine="If pnlImportTextDialog.IsInitialized = False Then";
 if (_pnlimporttextdialog.IsInitialized()==__c.False) { 
- //BA.debugLineNum = 669;BA.debugLine="CreateImportTextDialog";
+ //BA.debugLineNum = 671;BA.debugLine="CreateImportTextDialog";
 _createimporttextdialog();
  };
- //BA.debugLineNum = 671;BA.debugLine="edtImportText.Text = \"\"";
+ //BA.debugLineNum = 673;BA.debugLine="edtImportText.Text = \"\"";
 _edtimporttext.setText(BA.ObjectToCharSequence(""));
- //BA.debugLineNum = 672;BA.debugLine="pnlImportTextDialog.Visible = True";
+ //BA.debugLineNum = 674;BA.debugLine="pnlImportTextDialog.Visible = True";
 _pnlimporttextdialog.setVisible(__c.True);
- //BA.debugLineNum = 673;BA.debugLine="pnlImportTextDialog.BringToFront";
+ //BA.debugLineNum = 675;BA.debugLine="pnlImportTextDialog.BringToFront";
 _pnlimporttextdialog.BringToFront();
- //BA.debugLineNum = 674;BA.debugLine="End Sub";
+ //BA.debugLineNum = 676;BA.debugLine="End Sub";
 return "";
 }
 public String  _showphrasedialog(String _mode,String _title) throws Exception{
@@ -1244,15 +1249,15 @@ anywheresoftware.b4a.objects.ConcreteViewWrapper _v = null;
 anywheresoftware.b4a.objects.LabelWrapper _lbl = null;
  //BA.debugLineNum = 315;BA.debugLine="Private Sub ShowPhraseDialog(mode As String, title";
  //BA.debugLineNum = 316;BA.debugLine="Log(\"ShowPhraseDialog: mode=\" & mode)";
-__c.LogImpl("826214401","ShowPhraseDialog: mode="+_mode,0);
+__c.LogImpl("623592961","ShowPhraseDialog: mode="+_mode,0);
  //BA.debugLineNum = 317;BA.debugLine="Log(\"ShowPhraseDialog: pnlOverlay.IsInitialized=\"";
-__c.LogImpl("826214402","ShowPhraseDialog: pnlOverlay.IsInitialized="+BA.ObjectToString(_pnloverlay.IsInitialized()),0);
+__c.LogImpl("623592962","ShowPhraseDialog: pnlOverlay.IsInitialized="+BA.ObjectToString(_pnloverlay.IsInitialized()),0);
  //BA.debugLineNum = 318;BA.debugLine="Log(\"ShowPhraseDialog: pnlPhraseDialog.IsInitiali";
-__c.LogImpl("826214403","ShowPhraseDialog: pnlPhraseDialog.IsInitialized="+BA.ObjectToString(_pnlphrasedialog.IsInitialized()),0);
+__c.LogImpl("623592963","ShowPhraseDialog: pnlPhraseDialog.IsInitialized="+BA.ObjectToString(_pnlphrasedialog.IsInitialized()),0);
  //BA.debugLineNum = 320;BA.debugLine="If pnlOverlay.IsInitialized = False Then";
 if (_pnloverlay.IsInitialized()==__c.False) { 
  //BA.debugLineNum = 321;BA.debugLine="Log(\"ShowPhraseDialog: criando dialog pois nao e";
-__c.LogImpl("826214406","ShowPhraseDialog: criando dialog pois nao existe",0);
+__c.LogImpl("623592966","ShowPhraseDialog: criando dialog pois nao existe",0);
  //BA.debugLineNum = 322;BA.debugLine="CreatePhraseDialog";
 _createphrasedialog();
  };
@@ -1267,7 +1272,7 @@ _edtphrase.setInputType(_modsecurity._getsecurepassphraseinputtype /*int*/ (ba))
  //BA.debugLineNum = 329;BA.debugLine="btnPhraseShow.Text = ModLang.T(\"show\")";
 _btnphraseshow.setText(BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"show")));
  //BA.debugLineNum = 331;BA.debugLine="Log(\"ShowPhraseDialog: atualizando titulo\")";
-__c.LogImpl("826214416","ShowPhraseDialog: atualizando titulo",0);
+__c.LogImpl("623592976","ShowPhraseDialog: atualizando titulo",0);
  //BA.debugLineNum = 333;BA.debugLine="For i = 0 To pnlPhraseDialog.NumberOfViews - 1";
 {
 final int step14 = 1;
@@ -1291,7 +1296,7 @@ _lbl.setText(BA.ObjectToCharSequence(_title));
  }
 };
  //BA.debugLineNum = 343;BA.debugLine="Log(\"ShowPhraseDialog: mostrando overlay\")";
-__c.LogImpl("826214428","ShowPhraseDialog: mostrando overlay",0);
+__c.LogImpl("623592988","ShowPhraseDialog: mostrando overlay",0);
  //BA.debugLineNum = 344;BA.debugLine="pnlOverlay.Visible = True";
 _pnloverlay.setVisible(__c.True);
  //BA.debugLineNum = 345;BA.debugLine="pnlOverlay.BringToFront";
@@ -1299,34 +1304,34 @@ _pnloverlay.BringToFront();
  //BA.debugLineNum = 346;BA.debugLine="edtPhrase.RequestFocus";
 _edtphrase.RequestFocus();
  //BA.debugLineNum = 347;BA.debugLine="Log(\"ShowPhraseDialog: fim\")";
-__c.LogImpl("826214432","ShowPhraseDialog: fim",0);
+__c.LogImpl("623592992","ShowPhraseDialog: fim",0);
  //BA.debugLineNum = 348;BA.debugLine="End Sub";
 return "";
 }
 public String  _showtestdialog() throws Exception{
 anywheresoftware.b4a.objects.collections.List _backups = null;
 anywheresoftware.b4a.objects.collections.Map _latest = null;
- //BA.debugLineNum = 533;BA.debugLine="Private Sub ShowTestDialog";
- //BA.debugLineNum = 535;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
+ //BA.debugLineNum = 535;BA.debugLine="Private Sub ShowTestDialog";
+ //BA.debugLineNum = 537;BA.debugLine="CurrentBackupFolder = Starter.Provider.SharedFold";
 _currentbackupfolder = _starter._provider /*com.lockzero.fileprovider*/ ._sharedfolder /*String*/ ;
- //BA.debugLineNum = 537;BA.debugLine="Dim backups As List = ModBackup.ListBackups(Curre";
+ //BA.debugLineNum = 539;BA.debugLine="Dim backups As List = ModBackup.ListBackups(Curre";
 _backups = new anywheresoftware.b4a.objects.collections.List();
 _backups = _modbackup._listbackups /*anywheresoftware.b4a.objects.collections.List*/ (ba,_currentbackupfolder);
- //BA.debugLineNum = 539;BA.debugLine="If backups.Size = 0 Then";
+ //BA.debugLineNum = 541;BA.debugLine="If backups.Size = 0 Then";
 if (_backups.getSize()==0) { 
- //BA.debugLineNum = 540;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_none_found\"),";
+ //BA.debugLineNum = 542;BA.debugLine="xui.MsgboxAsync(ModLang.T(\"backup_none_found\"),";
 _xui.MsgboxAsync(ba,BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup_none_found")),BA.ObjectToCharSequence(_modlang._t /*String*/ (ba,"backup")));
- //BA.debugLineNum = 541;BA.debugLine="Return";
+ //BA.debugLineNum = 543;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 544;BA.debugLine="Dim latest As Map = backups.Get(backups.Size - 1)";
+ //BA.debugLineNum = 546;BA.debugLine="Dim latest As Map = backups.Get(backups.Size - 1)";
 _latest = new anywheresoftware.b4a.objects.collections.Map();
 _latest = (anywheresoftware.b4a.objects.collections.Map) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.collections.Map(), (java.util.Map)(_backups.Get((int) (_backups.getSize()-1))));
- //BA.debugLineNum = 545;BA.debugLine="CurrentBackupFileName = latest.Get(\"fileName\")";
+ //BA.debugLineNum = 547;BA.debugLine="CurrentBackupFileName = latest.Get(\"fileName\")";
 _currentbackupfilename = BA.ObjectToString(_latest.Get((Object)("fileName")));
- //BA.debugLineNum = 547;BA.debugLine="ShowPhraseDialog(\"test\", CurrentBackupFileName &";
+ //BA.debugLineNum = 549;BA.debugLine="ShowPhraseDialog(\"test\", CurrentBackupFileName &";
 _showphrasedialog("test",_currentbackupfilename+__c.CRLF+_modlang._t /*String*/ (ba,"backup_enter_phrase"));
- //BA.debugLineNum = 548;BA.debugLine="End Sub";
+ //BA.debugLineNum = 550;BA.debugLine="End Sub";
 return "";
 }
 public String  _updatelastbackupinfo() throws Exception{

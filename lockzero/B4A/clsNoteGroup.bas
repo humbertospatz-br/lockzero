@@ -13,6 +13,8 @@ Sub Class_Globals
 	Public Name As String              'Ex: "Compras", "Ideias", "Trabalho"
 	Public Icon As String              'Emoji escolhido pelo usuario
 	Public IsSecure As Boolean         'True = seguro com cadeado, False = aberto
+	Public IsSystem As Boolean         'True = grupo do sistema (nao pode ser deletado)
+	Public TemplateType As String      '"" = normal, "card" = template de cartao
 	Public Salt As String              'Salt aleatorio (hex, 32 chars) - apenas grupos seguros
 	Public TestValue As String         '"LOCKZERO" criptografado - apenas grupos seguros
 	Public CreatedAt As Long
@@ -24,6 +26,8 @@ Public Sub Initialize
 	Name = ""
 	Icon = Chr(0xD83D) & Chr(0xDCDD)  'Padrao: emoji de nota 📝 (surrogate pair)
 	IsSecure = True  'Default: grupo seguro
+	IsSystem = False 'Default: grupo normal (pode ser deletado)
+	TemplateType = "" 'Default: sem template
 	Salt = ""
 	TestValue = ""
 	CreatedAt = DateTime.Now
@@ -85,6 +89,8 @@ Public Sub Clone As clsNoteGroup
 	g.Name = Name
 	g.Icon = Icon
 	g.IsSecure = IsSecure
+	g.IsSystem = IsSystem
+	g.TemplateType = TemplateType
 	g.Salt = Salt
 	g.TestValue = TestValue
 	g.CreatedAt = CreatedAt
@@ -100,6 +106,8 @@ Public Sub ToMap As Map
 	m.Put("name", Name)
 	m.Put("icon", Icon)
 	m.Put("isSecure", IsSecure)
+	m.Put("isSystem", IsSystem)
+	m.Put("templateType", TemplateType)
 	m.Put("salt", Salt)
 	m.Put("testValue", TestValue)
 	m.Put("createdAt", CreatedAt)
@@ -115,6 +123,8 @@ Public Sub FromMap(m As Map)
 	'Converte valores antigos de texto para emoji
 	If Icon = "note" Or Icon = "" Then Icon = Chr(0xD83D) & Chr(0xDCDD)  '📝 (surrogate pair)
 	IsSecure = m.GetDefault("isSecure", True)
+	IsSystem = m.GetDefault("isSystem", False)
+	TemplateType = m.GetDefault("templateType", "")
 	Salt = m.GetDefault("salt", "")
 	TestValue = m.GetDefault("testValue", "")
 	CreatedAt = m.GetDefault("createdAt", DateTime.Now)

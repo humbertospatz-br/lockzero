@@ -17,6 +17,7 @@ Sub Class_Globals
 	Public Content As String       'Conteudo texto livre (criptografado se grupo seguro)
 	Public NoteType As String      '"text" ou "list"
 	Public Items As String         'JSON array de itens para lista: [{text, checked}, ...]
+	Public Attachments As String   'JSON array de caminhos de arquivos anexados
 	Public GroupId As String       'Grupo ao qual pertence
 	Public SortOrder As Int        'Ordem manual (drag & drop)
 	Public IsFavorite As Boolean   'Marcado como favorito
@@ -30,6 +31,7 @@ Public Sub Initialize
 	Content = ""
 	NoteType = "text"  'Padrao: nota de texto
 	Items = "[]"       'Array vazio
+	Attachments = "[]" 'Array vazio de anexos
 	GroupId = ""
 	SortOrder = 0
 	IsFavorite = False
@@ -46,6 +48,7 @@ Public Sub ToMap As Map
 	m.Put("content", Content)
 	m.Put("noteType", NoteType)
 	m.Put("items", Items)
+	m.Put("attachments", Attachments)
 	m.Put("groupId", GroupId)
 	m.Put("sortOrder", SortOrder)
 	m.Put("isFavorite", IsFavorite)
@@ -81,6 +84,22 @@ Public Sub FromMap(m As Map)
 		End If
 	Else
 		Items = "[]"
+	End If
+
+	'Attachments - mesmo tratamento que Items
+	If m.ContainsKey("attachments") Then
+		Dim attachValue As Object = m.Get("attachments")
+		If attachValue Is String Then
+			Attachments = attachValue
+		Else If attachValue Is List Then
+			Dim genAtt As JSONGenerator
+			genAtt.Initialize2(attachValue)
+			Attachments = genAtt.ToString
+		Else
+			Attachments = "[]"
+		End If
+	Else
+		Attachments = "[]"
 	End If
 End Sub
 
@@ -269,4 +288,73 @@ Public Sub GetDecryptedItems(passPhrase As String) As String
 		Return ModSecurity.Decrypt(passPhrase, Items)
 	End If
 	Return Items
+End Sub
+
+'===========================================
+' METODOS PARA ANEXOS
+'===========================================
+
+'Retorna lista de anexos como List de Strings (caminhos)
+Public Sub GetAttachmentsList As List
+	Dim attachList As List
+	attachList.Initialize
+	Try
+		If Attachments = "" Or Attachments = "[]" Then Return attachList
+		Dim parser As JSONParser
+		parser.Initialize(Attachments)
+		attachList = parser.NextArray
+	Catch
+		Log("clsNoteEntry.GetAttachmentsList error: " & LastException.Message)
+	End Try
+	Return attachList
+End Sub
+
+'Define lista de anexos a partir de List de Strings
+Public Sub SetAttachmentsList(attachList As List)
+	If attachList = Null Or attachList.IsInitialized = False Or attachList.Size = 0 Then
+		Attachments = "[]"
+	Else
+		Dim gen As JSONGenerator
+		gen.Initialize2(attachList)
+		Attachments = gen.ToString
+	End If
+	UpdatedAt = DateTime.Now
+End Sub
+
+'Adiciona um anexo
+Public Sub AddAttachment(filePath As String)
+	Dim attachList As List = GetAttachmentsList
+	If attachList.IndexOf(filePath) = -1 Then  'Evita duplicatas
+		attachList.Add(filePath)
+		SetAttachmentsList(attachList)
+	End If
+End Sub
+
+'Remove um anexo pelo indice
+Public Sub RemoveAttachment(index As Int)
+	Dim attachList As List = GetAttachmentsList
+	If index >= 0 And index < attachList.Size Then
+		attachList.RemoveAt(index)
+		SetAttachmentsList(attachList)
+	End If
+End Sub
+
+'Retorna quantidade de anexos
+Public Sub GetAttachmentsCount As Int
+	Dim attachList As List = GetAttachmentsList
+	Return attachList.Size
+End Sub
+
+'Criptografa Attachments (para grupos seguros)
+Public Sub EncryptAttachments(passPhrase As String, plainAttachments As String)
+	Attachments = ModSecurity.Encrypt(passPhrase, plainAttachments)
+	UpdatedAt = DateTime.Now
+End Sub
+
+'Retorna Attachments descriptografado
+Public Sub GetDecryptedAttachments(passPhrase As String) As String
+	If ModSecurity.IsEncrypted(Attachments) Then
+		Return ModSecurity.Decrypt(passPhrase, Attachments)
+	End If
+	Return Attachments
 End Sub

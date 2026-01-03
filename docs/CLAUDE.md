@@ -1,8 +1,9 @@
 # CLAUDE - DOCUMENTO DE SESSAO - LOCKZERO
 
-**Versao:** 1.0
+**Versao:** 2.0
+**Atualizado:** 2026-01-02
 **Criado:** 2025-12-25
-**Projeto:** LockZero - Gerenciador de Senhas Seguro
+**Projeto:** LockZero - Gerenciador de Senhas e Informacoes Seguras
 **Mote:** "Lock and ZERO worries - Guarde suas informacoes e ZERO preocupacao"
 
 ---
@@ -11,13 +12,14 @@
 
 ```
 NOME_PROJETO: LockZero
-STACK: B4xPages (B4A/B4i) + JSON
-VERSAO_ATUAL: v0.1.0 (desenvolvimento)
+STACK: B4xPages (B4A) + JSON + AES-256
+VERSAO_ATUAL: v2.0 (MVP completo)
 DATA_INICIO: 2025-12-25
-PLATAFORMA: Android (B4A) - futuro: iOS (B4i)
+PLATAFORMA: Android (B4A)
 PATH_PROJETO: C:\Basic4a\lockzero\lockzero_VSC\lockzero\B4A
 PATH_OLD: C:\Basic4a\lockzero\lockzero_VSC\lockzero_old
 ORIGEM: Modulo extraido do LockSeed em 2025-12-09
+IDIOMAS: PT, EN, ES, HE (Hebraico)
 ```
 
 ---
@@ -94,7 +96,7 @@ Dependendo do tipo de tarefa, o Claude DEVE ler os arquivos de padrao correspond
 | **Novo Modulo (CRUD)** | `UI_PATTERNS.md`, modulo similar existente |
 | **Nova Classe (cls*)** | Classe similar existente (ex: clsPasswordEntry) |
 | **Modificar UI** | `UI_PATTERNS.md` |
-| **Textos/Traducao** | `ModLang.bas` (ver padrao PT/EN) |
+| **Textos/Traducao** | `ModLang.bas` (ver padrao PT/EN/ES/HE) |
 | **Cores/Tema** | `ModTheme.bas` |
 | **Criptografia** | `ModSecurity.bas` |
 | **Sessao** | `ModSession.bas` |
@@ -104,10 +106,11 @@ Dependendo do tipo de tarefa, o Claude DEVE ler os arquivos de padrao correspond
 
 | Arquivo | Conteudo |
 |---------|----------|
-| `docs/UI_PATTERNS.md` | Header, botoes, timer, dialogs, estrutura de pagina |
+| `docs/UI_PATTERNS.md` | Header, botoes, dialogs, estrutura de pagina |
 | `docs/LOCKZERO_SPEC.md` | Especificacao geral do app |
 | `C:\Basic4a\docs\DICAS_B4A.md` | Dicas de desenvolvimento B4A (arquivo global) |
 | `docs/DECISOES_ARQUITETURA.md` | Decisoes tecnicas do projeto |
+| `ModLang.bas` | Textos em 4 idiomas (PT/EN/ES/HE) |
 
 ### Exemplo de Uso
 
@@ -180,8 +183,9 @@ NUNCA: lblTitle.Text = "Configuracoes"
 SEMPRE: lblTitle.Text = ModLang.T("settings")
 ```
 
-- Adicionar chave em LoadPortuguese E LoadEnglish
+- Adicionar chave em LoadPortuguese, LoadEnglish, LoadSpanish E LoadHebrew
 - Nunca deixar texto hardcoded no codigo
+- 4 idiomas suportados: PT, EN, ES, HE
 
 ### 4. Cores - SEMPRE usar ModTheme.*
 
@@ -313,7 +317,7 @@ pnlParent.AddView(btnSave, width - margin - 100dip, y, 100dip, 44dip)
 
 - [ ] TextSize usa Starter.FONT_*?
 - [ ] Heights usam Starter.HEIGHT_*?
-- [ ] Textos usam ModLang.T()?
+- [ ] Textos usam ModLang.T()? (4 idiomas: PT/EN/ES/HE)
 - [ ] Cores usam ModTheme.*?
 - [ ] Header usa breadcrumb (Categoria → Nome)?
 - [ ] Nomes/titulos usam Capitalize()?
@@ -377,20 +381,27 @@ O Claude deve buscar referencias, exemplos e solucoes existentes ANTES de desist
 
 O LockZero e um aplicativo mobile (B4A/B4X) para Android que:
 
-1. **Gerencia senhas** de sites, cartoes, aplicativos, etc.
-2. **Usa frase-senha pessoal** para criptografar todos os dados (AES-256)
-3. **Sessao com timeout** configuravel (1-5 minutos)
-4. **Funciona 100% offline** - sem internet, sem servidores, sem nuvem
-5. **Organiza por grupos** (Bancos, Redes Sociais, E-mails, etc.)
+1. **Gerencia senhas** de sites, aplicativos, etc. - com importacao de CSV
+2. **Gerencia notas seguras** - texto livre, listas com checkbox, anexos de arquivos
+3. **Templates de cartoes** - estruturas customizaveis para qualquer tipo de dado
+4. **Usa frase-senha pessoal** para criptografar todos os dados (AES-256)
+5. **PIN + Biometria** para acesso rapido ao app
+6. **Sessao com timeout** configuravel (1-30 minutos)
+7. **Funciona 100% offline** - sem internet, sem servidores, sem nuvem
+8. **Backup criptografado** - exportar/importar todos os dados
+9. **Multi-idioma** - Portugues, English, Espanol, Hebraico
+10. **Organiza por grupos** (Bancos, Redes Sociais, E-mails, etc.)
 
 ### Filosofia de Seguranca
 
-- Dados criptografados com AES-256
+- Dados criptografados com AES-256 por grupo
 - Frase-senha NUNCA armazenada (apenas usada em memoria durante sessao)
-- Sessao expira automaticamente
+- PIN armazenado com hash seguro (nao reversivel)
+- Biometria usa APIs nativas do Android
+- Sessao expira automaticamente (1-30 min configuravel)
 - Sem coleta de dados pessoais
 - Sem envio de informacoes para terceiros
-- 100% offline
+- 100% offline - funciona sem internet
 
 ---
 
@@ -400,71 +411,109 @@ O LockZero e um aplicativo mobile (B4A/B4X) para Android que:
 lockzero_VSC/
 ├── docs/
 │   ├── CLAUDE.md              # Este arquivo
-│   ├── TODO_LIST.md           # Tarefas pendentes
-│   ├── HISTORICO.md           # Historico de trabalho
-│   └── LOCKZERO_SPEC.md       # Especificacao tecnica completa
+│   ├── UI_PATTERNS.md         # Padroes de UI
+│   ├── LOCKZERO_SPEC.md       # Especificacao tecnica
+│   └── DECISOES_ARQUITETURA.md # Decisoes tecnicas
 │
 ├── lockzero/
 │   └── B4A/                   # Projeto Android (B4xPages)
 │       ├── lockzero.b4a       # Projeto principal
+│       ├── Main.bas           # Activity principal
 │       ├── Starter.bas        # Service de inicializacao
-│       ├── B4XMainPage.bas    # Pagina principal B4xPages
 │       │
-│       ├── # PAGES (B4xPages)
-│       ├── PageHome.bas       # Dashboard principal
-│       ├── PagePasswords.bas  # Lista de senhas
-│       ├── PageCards.bas      # Lista de cartoes
-│       ├── PageDocuments.bas  # Lista de documentos
-│       ├── PageNotes.bas      # Lista de notas
-│       ├── PageWifi.bas       # Lista de redes wifi
-│       ├── PageSettings.bas   # Configuracoes
-│       ├── PageGenerator.bas  # Gerador de senhas
-│       ├── PageScanner.bas    # Scanner OCR
+│       ├── # PAGINAS PRINCIPAIS
+│       ├── B4XMainPage.bas        # Home (dashboard)
+│       ├── PageOnboarding.bas     # Primeiro uso (4 idiomas)
+│       ├── PageSettings.bas       # Configuracoes
+│       ├── PageGenerator.bas      # Gerador de senhas
 │       │
-│       ├── # CLASSES
-│       ├── clsPasswordEntry.bas   # Modelo de senha
-│       ├── clsPasswordGroup.bas   # Modelo de grupo
-│       ├── clsCardEntry.bas       # Modelo de cartao
-│       ├── clsDocumentEntry.bas   # Modelo de documento
-│       ├── clsNoteEntry.bas       # Modelo de nota
-│       ├── clsWifiEntry.bas       # Modelo de wifi
+│       ├── # SENHAS
+│       ├── PagePasswords.bas      # Grupos de senhas
+│       ├── PagePasswordList.bas   # Lista de senhas (por grupo)
+│       ├── PagePasswordEdit.bas   # Editar/criar senha
+│       ├── PageImportCSV.bas      # Importar senhas de CSV
 │       │
-│       ├── # MODULOS
-│       ├── ModPasswords.bas   # CRUD de senhas
-│       ├── ModCards.bas       # CRUD de cartoes
-│       ├── ModSecurity.bas    # Criptografia AES-256
-│       ├── ModSession.bas     # Gerenciador de sessao
-│       ├── ModTheme.bas       # Tema claro/escuro
-│       ├── ModLang.bas        # Multi-lingua PT/EN
-│       ├── ModGenerator.bas   # Gerador de senhas
+│       ├── # NOTAS
+│       ├── PageNotesGroups.bas    # Grupos de notas
+│       ├── PageNotesList.bas      # Lista de notas (por grupo)
+│       ├── PageNoteEdit.bas       # Editar/criar nota (texto/lista/anexos)
 │       │
-│       └── Files/             # Assets do app
+│       ├── # CARTOES (TEMPLATES)
+│       ├── PageCardsGroups.bas    # Grupos de templates
+│       ├── PageCardsList.bas      # Lista de cartoes (por template)
+│       ├── PageCardEdit.bas       # Editar/criar cartao
+│       ├── PageTemplateEdit.bas   # Editar/criar template
+│       │
+│       ├── # BACKUP
+│       ├── PageBackupExport.bas   # Exportar backup
+│       ├── PageBackupImport.bas   # Importar backup
+│       │
+│       ├── # CLASSES (Modelos de Dados)
+│       ├── clsPasswordEntry.bas   # Entrada de senha
+│       ├── clsPasswordGroup.bas   # Grupo de senhas
+│       ├── clsNoteEntry.bas       # Nota (texto/lista + anexos)
+│       ├── clsNoteGroup.bas       # Grupo de notas
+│       ├── clsCardEntry.bas       # Cartao (template preenchido)
+│       ├── clsCardGroup.bas       # Grupo/Template de cartoes
+│       │
+│       ├── # MODULOS DE DADOS
+│       ├── ModPasswords.bas       # CRUD senhas
+│       ├── ModNotes.bas           # CRUD notas
+│       ├── ModCards.bas           # CRUD cartoes/templates
+│       ├── ModBackup.bas          # Backup/restore
+│       │
+│       ├── # MODULOS DE SISTEMA
+│       ├── ModSecurity.bas        # Criptografia AES + PIN + Biometria
+│       ├── ModSession.bas         # Sessao por grupo
+│       ├── ModLang.bas            # Multi-idioma (PT/EN/ES/HE)
+│       ├── ModTheme.bas           # Tema visual
+│       ├── ModGenerator.bas       # Gerador de senhas
+│       ├── ModTransition.bas      # Transicoes de tela
+│       │
+│       └── Files/                 # Assets (icones, fontes)
 │
-└── lockzero_old/              # Codigo legado (7 arquivos para referencia)
+└── lockzero_old/                  # Codigo antigo (referencia)
 ```
 
 ---
 
-## FUNCIONALIDADES EXISTENTES (do LockSeed)
+## FUNCIONALIDADES IMPLEMENTADAS (v2.0)
 
-### Implementadas:
+### Senhas
 - [x] CRUD de grupos de senhas
 - [x] CRUD de entradas de senha
-- [x] Criptografia AES-256
-- [x] Sessao com timeout configuravel (1-5 min)
-- [x] Copiar senha para clipboard
+- [x] Criptografia AES-256 (frase-senha por grupo)
+- [x] Sessao com timeout configuravel
+- [x] Copiar senha/usuario para clipboard
 - [x] Mostrar/esconder senha
+- [x] Busca de senhas por nome/URL
+- [x] Importar CSV (Chrome, Firefox, etc.)
 
-### A Implementar:
-- [ ] Tela inicial (Main)
-- [ ] Configuracoes (idioma, tema, timeout)
-- [ ] Multi-lingua
-- [ ] Tema claro/escuro
-- [ ] PIN de acesso
-- [ ] Biometria
-- [ ] Gerador de senhas
-- [ ] Backup/restore
-- [ ] Busca de senhas
+### Notas Seguras
+- [x] Sistema de grupos de notas (seguros e nao-seguros)
+- [x] Notas de texto livre
+- [x] Notas de lista (checkbox items)
+- [x] Anexos de arquivos (documentos, imagens, etc.)
+- [x] Criptografia de notas em grupos seguros
+
+### Cartoes (Cards Template)
+- [x] Template generico para dados estruturados
+- [x] Criar templates customizados (campos personalizados)
+- [x] CRUD de entradas por template
+- [x] Criptografia por grupo
+
+### Seguranca
+- [x] PIN de acesso ao app
+- [x] Biometria (impressao digital)
+- [x] Timeout de sessao configuravel (1-30 min)
+- [x] Onboarding com avisos de seguranca
+
+### Sistema
+- [x] Multi-idioma: PT, EN, ES, HE (Hebraico)
+- [x] Tema escuro (padrao)
+- [x] Backup criptografado (exportar/importar)
+- [x] Gerador de senhas aleatorias
+- [x] Configuracoes completas
 
 ---
 
@@ -487,8 +536,8 @@ SEMPRE: ModLang.GetText("chave_do_texto")
 - Tudo local no dispositivo
 
 ### 4. MULTI-LINGUA
-- Todos os textos via ModLang.GetText()
-- Suporte minimo: Portugues e Ingles
+- Todos os textos via ModLang.T()
+- Idiomas suportados: Portugues, English, Español, עברית (Hebraico)
 
 ---
 
@@ -538,21 +587,33 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 | Dado | Criptografia | Chave |
 |------|--------------|-------|
-| Senhas | AES-256 | Frase-senha do usuario |
-| Usernames | AES-256 | Frase-senha do usuario |
-| Notas | AES-256 | Frase-senha do usuario |
+| Senhas | AES-256 | Frase-senha do grupo |
+| Usernames | AES-256 | Frase-senha do grupo |
+| Notas (grupos seguros) | AES-256 | Frase-senha do grupo |
+| Anexos de notas | AES-256 | Frase-senha do grupo |
+| Itens de lista | AES-256 | Frase-senha do grupo |
+| Cartoes | AES-256 | Frase-senha do template |
 | Nomes de grupos | Nao | - |
+| PIN do app | Hash SHA | - |
+
+### Autenticacao do App
+
+- **PIN**: 4 digitos, hash armazenado (nao reversivel)
+- **Biometria**: Impressao digital via APIs Android nativas
+- Configuravel em Settings: apenas PIN, apenas biometria, ou ambos
 
 ### Sessao de Frase-Senha
 
-- Usuario digita frase-senha ao abrir grupo
-- Sessao fica ativa por X minutos (configuravel)
+- Usuario digita frase-senha ao abrir grupo seguro
+- Sessao fica ativa por X minutos (configuravel 1-30 min)
 - Ao expirar, precisa digitar novamente
 - Funcoes em ModSecurity:
   - `StartSession(groupId, passphrase)`
   - `IsSessionValid(groupId)`
   - `GetSessionPassphrase(groupId)`
   - `ClearSession()`
+  - `ValidatePIN(pin)` / `SetPIN(pin)`
+  - `IsBiometricEnabled()` / `SetBiometricEnabled()`
 
 ---
 
@@ -562,12 +623,20 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 |-------|-------------|
 | Frase | Abreviacao de "frase-senha" (usar sempre assim) |
 | Frase-senha | Texto pessoal usado como chave de criptografia |
-| Grupo | Pasta que organiza senhas (ex: "Bancos") |
+| Grupo | Pasta que organiza senhas/notas (ex: "Bancos") |
+| Grupo seguro | Grupo com criptografia (requer frase-senha) |
+| Grupo nao-seguro | Grupo sem criptografia (acesso livre) |
 | Entrada | Uma senha especifica (site + usuario + senha) |
+| Nota | Texto ou lista com itens de checkbox |
+| Template | Estrutura de campos customizaveis (Cards) |
+| Anexo | Arquivo vinculado a uma nota |
 | Sessao | Periodo em que a frase fica em memoria (ofuscada) |
 | Timeout | Tempo ate a sessao expirar automaticamente |
 | TestValue | "LOCKZERO" criptografado - usado para validar frase |
 | Salt | String aleatoria unica por grupo para criptografia |
+| PIN | 4 digitos para acesso rapido ao app |
+| Biometria | Impressao digital para acesso ao app |
+| Backup | Arquivo JSON criptografado com todos os dados |
 
 ---
 
@@ -598,6 +667,7 @@ Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>
 
 ---
 
-**Versao do Documento:** 1.0
-**Baseado em:** LockSeed CLAUDE.md + Modulo de Senhas (renomeado para LockZero)
+**Versao do Documento:** 2.0
+**Atualizado:** 2026-01-02
+**Baseado em:** LockSeed CLAUDE.md + evolucao continua do LockZero
 **Criado por:** Claude + Humberto

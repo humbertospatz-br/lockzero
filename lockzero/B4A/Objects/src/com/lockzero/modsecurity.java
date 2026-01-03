@@ -204,7 +204,7 @@ _cm.RunMethod("setPrimaryClip",new Object[]{(Object)(_clipdata.getObject())});
  } 
        catch (Exception e9) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e9); //BA.debugLineNum = 837;BA.debugLine="Log(\"ClearClipboard error: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("879101963","ClearClipboard error: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("612713995","ClearClipboard error: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 839;BA.debugLine="End Sub";
 return "";
@@ -334,7 +334,7 @@ _result = anywheresoftware.b4a.keywords.Common.BytesToString(_decrypted,(int) (0
  } 
        catch (Exception e24) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e24); //BA.debugLineNum = 247;BA.debugLine="Log(\"ModSecurity.Decrypt erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("89895970","ModSecurity.Decrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610158114","ModSecurity.Decrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 251;BA.debugLine="ZeroBytes(keyBytes)";
 _zerobytes(_ba,_keybytes);
@@ -427,7 +427,7 @@ _expectedhmachex = _bytestohex(_ba,_expectedhmac);
  //BA.debugLineNum = 423;BA.debugLine="If SecureCompare(hmacHex, expectedHmacHex) = Fa";
 if (_securecompare(_ba,_hmachex,_expectedhmachex)==anywheresoftware.b4a.keywords.Common.False) { 
  //BA.debugLineNum = 424;BA.debugLine="Log(\"DecryptWithSalt: HMAC invalido - dados po";
-anywheresoftware.b4a.keywords.Common.LogImpl("810158119","DecryptWithSalt: HMAC invalido - dados podem ter sido alterados!",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610420263","DecryptWithSalt: HMAC invalido - dados podem ter sido alterados!",0);
  //BA.debugLineNum = 426;BA.debugLine="ZeroBytes(keyBytes)";
 _zerobytes(_ba,_keybytes);
  //BA.debugLineNum = 427;BA.debugLine="ZeroBytes(ivBytes)";
@@ -477,7 +477,7 @@ _result = anywheresoftware.b4a.keywords.Common.BytesToString(_decrypted,(int) (0
  } 
        catch (Exception e53) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e53); //BA.debugLineNum = 464;BA.debugLine="Log(\"ModSecurity.DecryptWithSalt erro: \" & LastE";
-anywheresoftware.b4a.keywords.Common.LogImpl("810158159","ModSecurity.DecryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610420303","ModSecurity.DecryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 468;BA.debugLine="ZeroBytes(keyBytes)";
 _zerobytes(_ba,_keybytes);
@@ -550,7 +550,7 @@ _zerochars(_ba,_passchars);
  //BA.debugLineNum = 306;BA.debugLine="ZeroBytes(saltBytes)";
 _zerobytes(_ba,_saltbytes);
  //BA.debugLineNum = 307;BA.debugLine="Log(\"DeriveKeyPBKDF2 erro: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("810027045","DeriveKeyPBKDF2 erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610289189","DeriveKeyPBKDF2 erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  //BA.debugLineNum = 308;BA.debugLine="Return Null";
 if (true) return (byte[])(anywheresoftware.b4a.keywords.Common.Null);
  };
@@ -625,7 +625,7 @@ _result = "AES:"+_su.EncodeBase64(_encrypted);
  } 
        catch (Exception e21) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e21); //BA.debugLineNum = 190;BA.debugLine="Log(\"ModSecurity.Encrypt erro: \" & LastException";
-anywheresoftware.b4a.keywords.Common.LogImpl("89764892","ModSecurity.Encrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610027036","ModSecurity.Encrypt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 194;BA.debugLine="ZeroBytes(keyBytes)";
 _zerobytes(_ba,_keybytes);
@@ -714,7 +714,7 @@ _result = "AES:"+_ivhex+":"+_su.EncodeBase64(_encrypted)+":"+_hmachex;
  } 
        catch (Exception e28) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e28); //BA.debugLineNum = 365;BA.debugLine="Log(\"ModSecurity.EncryptWithSalt erro: \" & LastE";
-anywheresoftware.b4a.keywords.Common.LogImpl("810092585","ModSecurity.EncryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("610354729","ModSecurity.EncryptWithSalt erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 369;BA.debugLine="ZeroBytes(keyBytes)";
 _zerobytes(_ba,_keybytes);
@@ -1136,7 +1136,7 @@ _attempts = _parser.NextObject();
  } 
        catch (Exception e10) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e10); //BA.debugLineNum = 667;BA.debugLine="Log(\"ModSecurity.LoadAttempts erro: \" & LastExc";
-anywheresoftware.b4a.keywords.Common.LogImpl("811141131","ModSecurity.LoadAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("611403275","ModSecurity.LoadAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  };
  //BA.debugLineNum = 671;BA.debugLine="Return attempts";
@@ -1167,7 +1167,7 @@ _settings = _parser.NextObject();
  } 
        catch (Exception e10) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e10); //BA.debugLineNum = 699;BA.debugLine="Log(\"ModSecurity.LoadSettings erro: \" & LastExc";
-anywheresoftware.b4a.keywords.Common.LogImpl("811272203","ModSecurity.LoadSettings erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("611534347","ModSecurity.LoadSettings erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  };
  //BA.debugLineNum = 703;BA.debugLine="Return settings";
@@ -1408,7 +1408,7 @@ if (anywheresoftware.b4a.keywords.Common.File.Exists(anywheresoftware.b4a.keywor
  //BA.debugLineNum = 996;BA.debugLine="File.Delete(File.DirInternal, PIN_FILE)";
 anywheresoftware.b4a.keywords.Common.File.Delete(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_pin_file);
  //BA.debugLineNum = 997;BA.debugLine="Log(\"ModSecurity: PIN removido\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("812845059","ModSecurity: PIN removido",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613369347","ModSecurity: PIN removido",0);
  };
  //BA.debugLineNum = 999;BA.debugLine="End Sub";
 return "";
@@ -1442,7 +1442,7 @@ anywheresoftware.b4a.keywords.Common.File.WriteString(anywheresoftware.b4a.keywo
  } 
        catch (Exception e6) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e6); //BA.debugLineNum = 680;BA.debugLine="Log(\"ModSecurity.SaveAttempts erro: \" & LastExce";
-anywheresoftware.b4a.keywords.Common.LogImpl("811206662","ModSecurity.SaveAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("611468806","ModSecurity.SaveAttempts erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 682;BA.debugLine="End Sub";
 return "";
@@ -1476,7 +1476,7 @@ String _data = "";
  //BA.debugLineNum = 881;BA.debugLine="If pin.Length < 4 Or pin.Length > 8 Then";
 if (_pin.length()<4 || _pin.length()>8) { 
  //BA.debugLineNum = 882;BA.debugLine="Log(\"SavePIN: PIN deve ter 4-8 digitos\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("812517378","SavePIN: PIN deve ter 4-8 digitos",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613041666","SavePIN: PIN deve ter 4-8 digitos",0);
  //BA.debugLineNum = 883;BA.debugLine="Return";
 if (true) return "";
  };
@@ -1498,11 +1498,11 @@ _data = _salt+":"+_hashhex;
  //BA.debugLineNum = 900;BA.debugLine="File.WriteString(File.DirInternal, PIN_FILE, dat";
 anywheresoftware.b4a.keywords.Common.File.WriteString(anywheresoftware.b4a.keywords.Common.File.getDirInternal(),_pin_file,_data);
  //BA.debugLineNum = 901;BA.debugLine="Log(\"ModSecurity: PIN salvo com PBKDF2\")";
-anywheresoftware.b4a.keywords.Common.LogImpl("812517397","ModSecurity: PIN salvo com PBKDF2",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613041685","ModSecurity: PIN salvo com PBKDF2",0);
  } 
        catch (Exception e15) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e15); //BA.debugLineNum = 903;BA.debugLine="Log(\"SavePIN erro: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("812517399","SavePIN erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613041687","SavePIN erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 907;BA.debugLine="ZeroBytes(hashBytes)";
 _zerobytes(_ba,_hashbytes);
@@ -1669,7 +1669,7 @@ _data = anywheresoftware.b4a.keywords.Common.File.ReadString(anywheresoftware.b4
  //BA.debugLineNum = 921;BA.debugLine="If data.Contains(\":\") = False Then";
 if (_data.contains(":")==anywheresoftware.b4a.keywords.Common.False) { 
  //BA.debugLineNum = 923;BA.debugLine="Log(\"ValidatePIN: Migrando PIN do formato antig";
-anywheresoftware.b4a.keywords.Common.LogImpl("812582924","ValidatePIN: Migrando PIN do formato antigo para PBKDF2",0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613107212","ValidatePIN: Migrando PIN do formato antigo para PBKDF2",0);
  //BA.debugLineNum = 924;BA.debugLine="Dim oldPin As String = MigrateLegacyPIN(data)";
 _oldpin = _migratelegacypin(_ba,_data);
  //BA.debugLineNum = 925;BA.debugLine="If oldPin.Length > 0 And inputPin = oldPin Then";
@@ -1703,7 +1703,7 @@ _result = _securecompare(_ba,_inputhash,_savedhash);
  } 
        catch (Exception e24) {
 			(_ba.processBA == null ? _ba : _ba.processBA).setLastException(e24); //BA.debugLineNum = 950;BA.debugLine="Log(\"ValidatePIN erro: \" & LastException)";
-anywheresoftware.b4a.keywords.Common.LogImpl("812582951","ValidatePIN erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
+anywheresoftware.b4a.keywords.Common.LogImpl("613107239","ValidatePIN erro: "+BA.ObjectToString(anywheresoftware.b4a.keywords.Common.LastException(_ba)),0);
  };
  //BA.debugLineNum = 954;BA.debugLine="ZeroBytes(inputHashBytes)";
 _zerobytes(_ba,_inputhashbytes);

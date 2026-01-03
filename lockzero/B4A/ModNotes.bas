@@ -22,6 +22,7 @@ End Sub
 Public Sub Init
 	If mInitialized Then Return
 	ForceReload
+	EnsureSystemGroups
 End Sub
 
 Public Sub ForceReload
@@ -116,6 +117,121 @@ End Sub
 Public Sub CountNoteGroups As Int
 	EnsureInit
 	Return NoteGroups.Size
+End Sub
+
+' ============================================
+'  GRUPOS DE SISTEMA
+' ============================================
+
+'ID fixo do grupo Cartoes (sistema)
+Public Sub GetCardsGroupId As String
+	Return "system_cards"
+End Sub
+
+'Garante que grupos de sistema existem
+'Chamado no Init - cria grupo Cartoes se nao existir
+Public Sub EnsureSystemGroups
+	'Verifica se grupo Cartoes existe
+	Dim cardsGroup As clsNoteGroup = GetNoteGroupById(GetCardsGroupId)
+
+	If cardsGroup = Null Then
+		'Cria grupo Cartoes
+		Dim grp As clsNoteGroup
+		grp.Initialize
+		grp.Id = GetCardsGroupId
+		grp.Name = ModLang.T("cards")
+		grp.Icon = Chr(0xD83D) & Chr(0xDCB3)  '💳 cartao de credito
+		grp.IsSecure = True     'Sempre seguro
+		grp.IsSystem = True     'Grupo de sistema
+		grp.TemplateType = "card"
+
+		'Herda Salt/TestValue de outro grupo de notas se existir
+		CopySecurityFromExistingGroup(grp)
+
+		NoteGroups.Add(grp)
+		SaveData
+		Log("ModNotes: Grupo Cartoes criado (sistema)")
+	Else
+		'Grupo ja existe - verifica se precisa herdar seguranca
+		If cardsGroup.Salt = "" Or cardsGroup.TestValue = "" Then
+			CopySecurityFromExistingGroup(cardsGroup)
+			SaveNoteGroup(cardsGroup)
+		End If
+	End If
+End Sub
+
+'Copia Salt/TestValue de outro grupo de notas existente para o grupo alvo
+'Usado para grupos de sistema herdarem a frase unica
+Private Sub CopySecurityFromExistingGroup(targetGroup As clsNoteGroup)
+	For i = 0 To NoteGroups.Size - 1
+		Dim grp As clsNoteGroup = NoteGroups.Get(i)
+		'Pula o proprio grupo e grupos sem seguranca configurada
+		If grp.Id = targetGroup.Id Then Continue
+		If grp.Salt = "" Or grp.TestValue = "" Then Continue
+
+		'Encontrou grupo com frase configurada - copia
+		targetGroup.Salt = grp.Salt
+		targetGroup.TestValue = grp.TestValue
+		Log("ModNotes: Seguranca copiada de " & grp.Name & " para " & targetGroup.Name)
+		Return
+	Next
+	Log("ModNotes: Nenhum grupo com frase encontrado para copiar")
+End Sub
+
+'Limpa todas as notas de um grupo de sistema (sem deletar o grupo)
+Public Sub ClearSystemGroup(groupId As String)
+	EnsureInit
+
+	'Verifica se e grupo de sistema
+	Dim grp As clsNoteGroup = GetNoteGroupById(groupId)
+	If grp = Null Or grp.IsSystem = False Then Return
+
+	'Remove todas as notas do grupo
+	For i = Notes.Size - 1 To 0 Step -1
+		Dim note As clsNoteEntry = Notes.Get(i)
+		If note.GroupId = groupId Then
+			Notes.RemoveAt(i)
+		End If
+	Next
+
+	SaveData
+	Log("ModNotes: Grupo " & groupId & " limpo (" & grp.Name & ")")
+End Sub
+
+'Retorna template de cartao como lista de Maps [{text, checked}, ...]
+'Usado ao criar nova nota no grupo Cartoes
+Public Sub GetCardTemplate As List
+	Dim items As List
+	items.Initialize
+
+	'Campos do cartao (9 campos)
+	items.Add(CreateItem(ModLang.T("card_name") & ": "))
+	items.Add(CreateItem(ModLang.T("card_brand") & ": "))
+	items.Add(CreateItem(ModLang.T("card_number") & ": "))
+	items.Add(CreateItem(ModLang.T("card_expiry") & ": "))
+	items.Add(CreateItem(ModLang.T("card_cvv") & ": "))
+	items.Add(CreateItem(ModLang.T("card_password") & ": "))
+	items.Add(CreateItem(ModLang.T("card_holder") & ": "))
+	items.Add(CreateItem(ModLang.T("card_limit") & ": "))
+	items.Add(CreateItem(ModLang.T("notes") & ": "))
+
+	Return items
+End Sub
+
+'Cria item de lista {text, checked}
+Private Sub CreateItem(text As String) As Map
+	Dim item As Map
+	item.Initialize
+	item.Put("text", text)
+	item.Put("checked", False)
+	Return item
+End Sub
+
+'Verifica se grupo e de sistema
+Public Sub IsSystemGroup(groupId As String) As Boolean
+	Dim grp As clsNoteGroup = GetNoteGroupById(groupId)
+	If grp = Null Then Return False
+	Return grp.IsSystem
 End Sub
 
 ' ============================================

@@ -59,16 +59,16 @@ public com.lockzero.b4xpages _b4xpages = null;
 public com.lockzero.b4xcollections _b4xcollections = null;
 public com.lockzero.xuiviewsutils _xuiviewsutils = null;
 public String  _applytheme() throws Exception{
- //BA.debugLineNum = 543;BA.debugLine="Private Sub ApplyTheme";
- //BA.debugLineNum = 544;BA.debugLine="Root.Color = ModTheme.HomeBg";
+ //BA.debugLineNum = 560;BA.debugLine="Private Sub ApplyTheme";
+ //BA.debugLineNum = 561;BA.debugLine="Root.Color = ModTheme.HomeBg";
 _root.setColor(_modtheme._homebg /*int*/ (ba));
- //BA.debugLineNum = 547;BA.debugLine="btnBack.Color = Colors.Transparent";
+ //BA.debugLineNum = 564;BA.debugLine="btnBack.Color = Colors.Transparent";
 _btnback.setColor(__c.Colors.Transparent);
- //BA.debugLineNum = 548;BA.debugLine="btnBack.TextColor = Colors.White";
+ //BA.debugLineNum = 565;BA.debugLine="btnBack.TextColor = Colors.White";
 _btnback.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 550;BA.debugLine="lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 2";
+ //BA.debugLineNum = 567;BA.debugLine="lblEmpty.TextColor = Colors.ARGB(150, 255, 255, 2";
 _lblempty.setTextColor(__c.Colors.ARGB((int) (150),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 551;BA.debugLine="End Sub";
+ //BA.debugLineNum = 568;BA.debugLine="End Sub";
 return "";
 }
 public void  _b4xpage_appear() throws Exception{
@@ -93,7 +93,7 @@ case 0:
 //C
 this.state = 1;
  //BA.debugLineNum = 48;BA.debugLine="Log(\"PageNotesList.B4XPage_Appear - IsNavigating=";
-parent.__c.LogImpl("832768002","PageNotesList.B4XPage_Appear - IsNavigating="+BA.ObjectToString(parent._isnavigating),0);
+parent.__c.LogImpl("635782658","PageNotesList.B4XPage_Appear - IsNavigating="+BA.ObjectToString(parent._isnavigating),0);
  //BA.debugLineNum = 51;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null Then";
 if (true) break;
 
@@ -157,7 +157,7 @@ this.state = -1;
  //BA.debugLineNum = 68;BA.debugLine="IsNavigating = False";
 parent._isnavigating = parent.__c.False;
  //BA.debugLineNum = 69;BA.debugLine="Log(\"PageNotesList - IsNavigating resetado para F";
-parent.__c.LogImpl("832768023","PageNotesList - IsNavigating resetado para False",0);
+parent.__c.LogImpl("635782679","PageNotesList - IsNavigating resetado para False",0);
  //BA.debugLineNum = 70;BA.debugLine="End Sub";
 if (true) break;
 
@@ -177,10 +177,10 @@ _applytheme();
 return "";
 }
 public String  _btnback_click() throws Exception{
- //BA.debugLineNum = 463;BA.debugLine="Private Sub btnBack_Click";
- //BA.debugLineNum = 464;BA.debugLine="B4XPages.ClosePage(Me)";
+ //BA.debugLineNum = 474;BA.debugLine="Private Sub btnBack_Click";
+ //BA.debugLineNum = 475;BA.debugLine="B4XPages.ClosePage(Me)";
 _b4xpages._closepage /*String*/ (ba,this);
- //BA.debugLineNum = 465;BA.debugLine="End Sub";
+ //BA.debugLineNum = 476;BA.debugLine="End Sub";
 return "";
 }
 public String  _class_globals() throws Exception{
@@ -233,6 +233,7 @@ anywheresoftware.b4a.objects.PanelWrapper _pnl = null;
 anywheresoftware.b4a.objects.B4XViewWrapper _xv = null;
 boolean _needsdecrypt = false;
 String _passphrase = "";
+boolean _iscardgroup = false;
 anywheresoftware.b4a.objects.LabelWrapper _lbltypeicon = null;
 String _title = "";
 anywheresoftware.b4a.objects.LabelWrapper _lblnotetitle = null;
@@ -272,108 +273,121 @@ _passphrase = _modsession._getpassphrase /*String*/ (ba);};
  //BA.debugLineNum = 344;BA.debugLine="passphrase = ModSession.GetPassphrase";
 _passphrase = _modsession._getpassphrase /*String*/ (ba);
  };
- //BA.debugLineNum = 348;BA.debugLine="Dim lblTypeIcon As Label";
+ //BA.debugLineNum = 348;BA.debugLine="Dim isCardGroup As Boolean = False";
+_iscardgroup = __c.False;
+ //BA.debugLineNum = 349;BA.debugLine="If CurrentGroup <> Null And CurrentGroup.Template";
+if (_currentgroup!= null && (_currentgroup._templatetype /*String*/ ).equals("card")) { 
+ //BA.debugLineNum = 350;BA.debugLine="isCardGroup = True";
+_iscardgroup = __c.True;
+ };
+ //BA.debugLineNum = 354;BA.debugLine="Dim lblTypeIcon As Label";
 _lbltypeicon = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 349;BA.debugLine="lblTypeIcon.Initialize(\"\")";
+ //BA.debugLineNum = 355;BA.debugLine="lblTypeIcon.Initialize(\"\")";
 _lbltypeicon.Initialize(ba,"");
- //BA.debugLineNum = 350;BA.debugLine="If note.IsListNote Then";
-if (_note._islistnote /*boolean*/ ()) { 
- //BA.debugLineNum = 351;BA.debugLine="lblTypeIcon.Text = Chr(0x2611)  'Checkbox marcad";
+ //BA.debugLineNum = 356;BA.debugLine="If isCardGroup Then";
+if (_iscardgroup) { 
+ //BA.debugLineNum = 357;BA.debugLine="lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCB3)  'C";
+_lbltypeicon.setText(BA.ObjectToCharSequence(BA.ObjectToString(__c.Chr(((int)0xd83d)))+BA.ObjectToString(__c.Chr(((int)0xdcb3)))));
+ }else if(_note._islistnote /*boolean*/ ()) { 
+ //BA.debugLineNum = 359;BA.debugLine="lblTypeIcon.Text = Chr(0x2611)  'Checkbox marcad";
 _lbltypeicon.setText(BA.ObjectToCharSequence(__c.Chr(((int)0x2611))));
  }else {
- //BA.debugLineNum = 353;BA.debugLine="lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCDD)  'N";
+ //BA.debugLineNum = 361;BA.debugLine="lblTypeIcon.Text = Chr(0xD83D) & Chr(0xDCDD)  'N";
 _lbltypeicon.setText(BA.ObjectToCharSequence(BA.ObjectToString(__c.Chr(((int)0xd83d)))+BA.ObjectToString(__c.Chr(((int)0xdcdd)))));
  };
- //BA.debugLineNum = 355;BA.debugLine="lblTypeIcon.TextSize = 20";
+ //BA.debugLineNum = 363;BA.debugLine="lblTypeIcon.TextSize = 20";
 _lbltypeicon.setTextSize((float) (20));
- //BA.debugLineNum = 356;BA.debugLine="lblTypeIcon.Gravity = Gravity.CENTER";
+ //BA.debugLineNum = 364;BA.debugLine="lblTypeIcon.Gravity = Gravity.CENTER";
 _lbltypeicon.setGravity(__c.Gravity.CENTER);
- //BA.debugLineNum = 357;BA.debugLine="pnl.AddView(lblTypeIcon, 8dip, 25dip, 30dip, 30di";
+ //BA.debugLineNum = 365;BA.debugLine="pnl.AddView(lblTypeIcon, 8dip, 25dip, 30dip, 30di";
 _pnl.AddView((android.view.View)(_lbltypeicon.getObject()),__c.DipToCurrent((int) (8)),__c.DipToCurrent((int) (25)),__c.DipToCurrent((int) (30)),__c.DipToCurrent((int) (30)));
- //BA.debugLineNum = 360;BA.debugLine="Dim title As String";
+ //BA.debugLineNum = 368;BA.debugLine="Dim title As String";
 _title = "";
- //BA.debugLineNum = 361;BA.debugLine="If needsDecrypt Then";
-if (_needsdecrypt) { 
- //BA.debugLineNum = 362;BA.debugLine="title = note.GetDecryptedTitle(passphrase)";
+ //BA.debugLineNum = 369;BA.debugLine="If isCardGroup And note.IsListNote Then";
+if (_iscardgroup && _note._islistnote /*boolean*/ ()) { 
+ //BA.debugLineNum = 371;BA.debugLine="title = GetCardNameFromNote(note, passphrase, ne";
+_title = _getcardnamefromnote(_note,_passphrase,_needsdecrypt);
+ }else if(_needsdecrypt) { 
+ //BA.debugLineNum = 373;BA.debugLine="title = note.GetDecryptedTitle(passphrase)";
 _title = _note._getdecryptedtitle /*String*/ (_passphrase);
  }else {
- //BA.debugLineNum = 364;BA.debugLine="title = note.Title  'Texto claro para grupos abe";
+ //BA.debugLineNum = 375;BA.debugLine="title = note.Title  'Texto claro para grupos abe";
 _title = _note._title /*String*/ ;
  };
- //BA.debugLineNum = 366;BA.debugLine="If title.Length > 25 Then title = title.SubString";
+ //BA.debugLineNum = 377;BA.debugLine="If title.Length > 25 Then title = title.SubString";
 if (_title.length()>25) { 
 _title = _title.substring((int) (0),(int) (25))+"...";};
- //BA.debugLineNum = 368;BA.debugLine="Dim lblNoteTitle As Label";
+ //BA.debugLineNum = 379;BA.debugLine="Dim lblNoteTitle As Label";
 _lblnotetitle = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 369;BA.debugLine="lblNoteTitle.Initialize(\"\")";
+ //BA.debugLineNum = 380;BA.debugLine="lblNoteTitle.Initialize(\"\")";
 _lblnotetitle.Initialize(ba,"");
- //BA.debugLineNum = 370;BA.debugLine="lblNoteTitle.Text = title";
+ //BA.debugLineNum = 381;BA.debugLine="lblNoteTitle.Text = title";
 _lblnotetitle.setText(BA.ObjectToCharSequence(_title));
- //BA.debugLineNum = 371;BA.debugLine="lblNoteTitle.TextSize = Starter.FONT_BODY";
+ //BA.debugLineNum = 382;BA.debugLine="lblNoteTitle.TextSize = Starter.FONT_BODY";
 _lblnotetitle.setTextSize(_starter._font_body /*float*/ );
- //BA.debugLineNum = 372;BA.debugLine="lblNoteTitle.TextColor = Colors.White";
+ //BA.debugLineNum = 383;BA.debugLine="lblNoteTitle.TextColor = Colors.White";
 _lblnotetitle.setTextColor(__c.Colors.White);
- //BA.debugLineNum = 373;BA.debugLine="lblNoteTitle.Typeface = Typeface.CreateNew(Typefa";
+ //BA.debugLineNum = 384;BA.debugLine="lblNoteTitle.Typeface = Typeface.CreateNew(Typefa";
 _lblnotetitle.setTypeface(__c.Typeface.CreateNew(__c.Typeface.DEFAULT,__c.Typeface.STYLE_BOLD));
- //BA.debugLineNum = 374;BA.debugLine="pnl.AddView(lblNoteTitle, 42dip, 10dip, cardWidth";
+ //BA.debugLineNum = 385;BA.debugLine="pnl.AddView(lblNoteTitle, 42dip, 10dip, cardWidth";
 _pnl.AddView((android.view.View)(_lblnotetitle.getObject()),__c.DipToCurrent((int) (42)),__c.DipToCurrent((int) (10)),(int) (_cardwidth-__c.DipToCurrent((int) (90))),__c.DipToCurrent((int) (25)));
- //BA.debugLineNum = 377;BA.debugLine="Dim preview As String";
+ //BA.debugLineNum = 388;BA.debugLine="Dim preview As String";
 _preview = "";
- //BA.debugLineNum = 378;BA.debugLine="If note.IsListNote Then";
+ //BA.debugLineNum = 389;BA.debugLine="If note.IsListNote Then";
 if (_note._islistnote /*boolean*/ ()) { 
- //BA.debugLineNum = 380;BA.debugLine="Dim total As Int = note.GetItemsCount";
+ //BA.debugLineNum = 391;BA.debugLine="Dim total As Int = note.GetItemsCount";
 _total = _note._getitemscount /*int*/ ();
- //BA.debugLineNum = 381;BA.debugLine="Dim checked As Int = note.GetCheckedCount";
+ //BA.debugLineNum = 392;BA.debugLine="Dim checked As Int = note.GetCheckedCount";
 _checked = _note._getcheckedcount /*int*/ ();
- //BA.debugLineNum = 382;BA.debugLine="preview = checked & \" \" & ModLang.T(\"of\") & \" \"";
+ //BA.debugLineNum = 393;BA.debugLine="preview = checked & \" \" & ModLang.T(\"of\") & \" \"";
 _preview = BA.NumberToString(_checked)+" "+_modlang._t /*String*/ (ba,"of")+" "+BA.NumberToString(_total)+" "+_modlang._t /*String*/ (ba,"items");
  }else {
- //BA.debugLineNum = 385;BA.debugLine="If needsDecrypt Then";
+ //BA.debugLineNum = 396;BA.debugLine="If needsDecrypt Then";
 if (_needsdecrypt) { 
- //BA.debugLineNum = 386;BA.debugLine="preview = note.GetDecryptedContent(passphrase)";
+ //BA.debugLineNum = 397;BA.debugLine="preview = note.GetDecryptedContent(passphrase)";
 _preview = _note._getdecryptedcontent /*String*/ (_passphrase);
  }else {
- //BA.debugLineNum = 388;BA.debugLine="preview = note.Content";
+ //BA.debugLineNum = 399;BA.debugLine="preview = note.Content";
 _preview = _note._content /*String*/ ;
  };
- //BA.debugLineNum = 390;BA.debugLine="If preview.Length > 40 Then preview = preview.Su";
+ //BA.debugLineNum = 401;BA.debugLine="If preview.Length > 40 Then preview = preview.Su";
 if (_preview.length()>40) { 
 _preview = _preview.substring((int) (0),(int) (40))+"...";};
- //BA.debugLineNum = 391;BA.debugLine="preview = preview.Replace(Chr(10), \" \").Replace(";
+ //BA.debugLineNum = 402;BA.debugLine="preview = preview.Replace(Chr(10), \" \").Replace(";
 _preview = _preview.replace(BA.ObjectToString(__c.Chr((int) (10)))," ").replace(BA.ObjectToString(__c.Chr((int) (13)))," ");
  };
- //BA.debugLineNum = 394;BA.debugLine="Dim lblPreview As Label";
+ //BA.debugLineNum = 405;BA.debugLine="Dim lblPreview As Label";
 _lblpreview = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 395;BA.debugLine="lblPreview.Initialize(\"\")";
+ //BA.debugLineNum = 406;BA.debugLine="lblPreview.Initialize(\"\")";
 _lblpreview.Initialize(ba,"");
- //BA.debugLineNum = 396;BA.debugLine="lblPreview.Text = preview";
+ //BA.debugLineNum = 407;BA.debugLine="lblPreview.Text = preview";
 _lblpreview.setText(BA.ObjectToCharSequence(_preview));
- //BA.debugLineNum = 397;BA.debugLine="lblPreview.TextSize = Starter.FONT_LABEL";
+ //BA.debugLineNum = 408;BA.debugLine="lblPreview.TextSize = Starter.FONT_LABEL";
 _lblpreview.setTextSize(_starter._font_label /*float*/ );
- //BA.debugLineNum = 398;BA.debugLine="lblPreview.TextColor = Colors.ARGB(180, 255, 255,";
+ //BA.debugLineNum = 409;BA.debugLine="lblPreview.TextColor = Colors.ARGB(180, 255, 255,";
 _lblpreview.setTextColor(__c.Colors.ARGB((int) (180),(int) (255),(int) (255),(int) (255)));
- //BA.debugLineNum = 399;BA.debugLine="pnl.AddView(lblPreview, 42dip, 38dip, cardWidth -";
+ //BA.debugLineNum = 410;BA.debugLine="pnl.AddView(lblPreview, 42dip, 38dip, cardWidth -";
 _pnl.AddView((android.view.View)(_lblpreview.getObject()),__c.DipToCurrent((int) (42)),__c.DipToCurrent((int) (38)),(int) (_cardwidth-__c.DipToCurrent((int) (90))),__c.DipToCurrent((int) (30)));
- //BA.debugLineNum = 402;BA.debugLine="If note.IsFavorite Then";
+ //BA.debugLineNum = 413;BA.debugLine="If note.IsFavorite Then";
 if (_note._isfavorite /*boolean*/ ) { 
- //BA.debugLineNum = 403;BA.debugLine="Dim lblStar As Label";
+ //BA.debugLineNum = 414;BA.debugLine="Dim lblStar As Label";
 _lblstar = new anywheresoftware.b4a.objects.LabelWrapper();
- //BA.debugLineNum = 404;BA.debugLine="lblStar.Initialize(\"\")";
+ //BA.debugLineNum = 415;BA.debugLine="lblStar.Initialize(\"\")";
 _lblstar.Initialize(ba,"");
- //BA.debugLineNum = 405;BA.debugLine="lblStar.Text = Chr(9733) '\"★\"";
+ //BA.debugLineNum = 416;BA.debugLine="lblStar.Text = Chr(9733) '\"★\"";
 _lblstar.setText(BA.ObjectToCharSequence(__c.Chr((int) (9733))));
- //BA.debugLineNum = 406;BA.debugLine="lblStar.TextSize = 20";
+ //BA.debugLineNum = 417;BA.debugLine="lblStar.TextSize = 20";
 _lblstar.setTextSize((float) (20));
- //BA.debugLineNum = 407;BA.debugLine="lblStar.TextColor = Colors.RGB(255, 200, 100) 'A";
+ //BA.debugLineNum = 418;BA.debugLine="lblStar.TextColor = Colors.RGB(255, 200, 100) 'A";
 _lblstar.setTextColor(__c.Colors.RGB((int) (255),(int) (200),(int) (100)));
- //BA.debugLineNum = 408;BA.debugLine="lblStar.Gravity = Gravity.CENTER";
+ //BA.debugLineNum = 419;BA.debugLine="lblStar.Gravity = Gravity.CENTER";
 _lblstar.setGravity(__c.Gravity.CENTER);
- //BA.debugLineNum = 409;BA.debugLine="pnl.AddView(lblStar, cardWidth - 40dip, 25dip, 3";
+ //BA.debugLineNum = 420;BA.debugLine="pnl.AddView(lblStar, cardWidth - 40dip, 25dip, 3";
 _pnl.AddView((android.view.View)(_lblstar.getObject()),(int) (_cardwidth-__c.DipToCurrent((int) (40))),__c.DipToCurrent((int) (25)),__c.DipToCurrent((int) (30)),__c.DipToCurrent((int) (30)));
  };
- //BA.debugLineNum = 412;BA.debugLine="Return pnl";
+ //BA.debugLineNum = 423;BA.debugLine="Return pnl";
 if (true) return _pnl;
- //BA.debugLineNum = 413;BA.debugLine="End Sub";
+ //BA.debugLineNum = 424;BA.debugLine="End Sub";
 return null;
 }
 public String  _createui() throws Exception{
@@ -598,17 +612,17 @@ _pnlnotes.setHeight((int) (_y+__c.DipToCurrent((int) (20))));
 return "";
 }
 public String  _edtsearch_textchanged(String _old,String _new) throws Exception{
- //BA.debugLineNum = 480;BA.debugLine="Private Sub edtSearch_TextChanged(Old As String, N";
- //BA.debugLineNum = 482;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
+ //BA.debugLineNum = 491;BA.debugLine="Private Sub edtSearch_TextChanged(Old As String, N";
+ //BA.debugLineNum = 493;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
 if (_isnotegroup && _currentgroup!= null && _currentgroup._issecure /*boolean*/ ) { 
- //BA.debugLineNum = 483;BA.debugLine="ModSession.Touch";
+ //BA.debugLineNum = 494;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
  };
- //BA.debugLineNum = 485;BA.debugLine="FilterNotes(New)";
+ //BA.debugLineNum = 496;BA.debugLine="FilterNotes(New)";
 _filternotes(_new);
- //BA.debugLineNum = 487;BA.debugLine="lblClearSearch.Visible = (New.Length > 0)";
+ //BA.debugLineNum = 498;BA.debugLine="lblClearSearch.Visible = (New.Length > 0)";
 _lblclearsearch.setVisible((_new.length()>0));
- //BA.debugLineNum = 488;BA.debugLine="End Sub";
+ //BA.debugLineNum = 499;BA.debugLine="End Sub";
 return "";
 }
 public String  _filternotes(String _query) throws Exception{
@@ -706,6 +720,66 @@ _displaynotes();
  //BA.debugLineNum = 270;BA.debugLine="End Sub";
 return "";
 }
+public String  _getcardnamefromnote(com.lockzero.clsnoteentry _note,String _passphrase,boolean _needsdecrypt) throws Exception{
+String _itemsjson = "";
+anywheresoftware.b4a.objects.collections.JSONParser _parser = null;
+anywheresoftware.b4a.objects.collections.List _items = null;
+anywheresoftware.b4a.objects.collections.Map _firstitem = null;
+String _text = "";
+String[] _parts = null;
+ //BA.debugLineNum = 577;BA.debugLine="Private Sub GetCardNameFromNote(note As clsNoteEnt";
+ //BA.debugLineNum = 578;BA.debugLine="Try";
+try { //BA.debugLineNum = 579;BA.debugLine="Dim itemsJson As String";
+_itemsjson = "";
+ //BA.debugLineNum = 580;BA.debugLine="If needsDecrypt And passphrase <> \"\" Then";
+if (_needsdecrypt && (_passphrase).equals("") == false) { 
+ //BA.debugLineNum = 581;BA.debugLine="itemsJson = note.GetDecryptedItems(passphrase)";
+_itemsjson = _note._getdecrypteditems /*String*/ (_passphrase);
+ }else {
+ //BA.debugLineNum = 583;BA.debugLine="itemsJson = note.Items";
+_itemsjson = _note._items /*String*/ ;
+ };
+ //BA.debugLineNum = 586;BA.debugLine="If itemsJson = \"\" Or itemsJson = \"[]\" Then Retur";
+if ((_itemsjson).equals("") || (_itemsjson).equals("[]")) { 
+if (true) return _modlang._t /*String*/ (ba,"new_card");};
+ //BA.debugLineNum = 588;BA.debugLine="Dim parser As JSONParser";
+_parser = new anywheresoftware.b4a.objects.collections.JSONParser();
+ //BA.debugLineNum = 589;BA.debugLine="parser.Initialize(itemsJson)";
+_parser.Initialize(_itemsjson);
+ //BA.debugLineNum = 590;BA.debugLine="Dim items As List = parser.NextArray";
+_items = new anywheresoftware.b4a.objects.collections.List();
+_items = _parser.NextArray();
+ //BA.debugLineNum = 592;BA.debugLine="If items.Size > 0 Then";
+if (_items.getSize()>0) { 
+ //BA.debugLineNum = 593;BA.debugLine="Dim firstItem As Map = items.Get(0)";
+_firstitem = new anywheresoftware.b4a.objects.collections.Map();
+_firstitem = (anywheresoftware.b4a.objects.collections.Map) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.collections.Map(), (java.util.Map)(_items.Get((int) (0))));
+ //BA.debugLineNum = 594;BA.debugLine="Dim text As String = firstItem.GetDefault(\"text";
+_text = BA.ObjectToString(_firstitem.GetDefault((Object)("text"),(Object)("")));
+ //BA.debugLineNum = 596;BA.debugLine="If text.Contains(\":\") Then";
+if (_text.contains(":")) { 
+ //BA.debugLineNum = 597;BA.debugLine="Dim parts() As String = Regex.Split(\":\", text)";
+_parts = __c.Regex.Split(":",_text);
+ //BA.debugLineNum = 598;BA.debugLine="If parts.Length > 1 Then";
+if (_parts.length>1) { 
+ //BA.debugLineNum = 599;BA.debugLine="text = parts(1).Trim";
+_text = _parts[(int) (1)].trim();
+ };
+ };
+ //BA.debugLineNum = 602;BA.debugLine="If text.Length > 0 Then Return text";
+if (_text.length()>0) { 
+if (true) return _text;};
+ };
+ } 
+       catch (Exception e24) {
+			ba.setLastException(e24); //BA.debugLineNum = 605;BA.debugLine="Log(\"GetCardNameFromNote error: \" & LastExceptio";
+__c.LogImpl("636831260","GetCardNameFromNote error: "+__c.LastException(ba).getMessage(),0);
+ };
+ //BA.debugLineNum = 608;BA.debugLine="Return ModLang.T(\"new_card\")";
+if (true) return _modlang._t /*String*/ (ba,"new_card");
+ //BA.debugLineNum = 609;BA.debugLine="End Sub";
+return "";
+}
 public String  _initialize(anywheresoftware.b4a.BA _ba) throws Exception{
 innerInitialize(_ba);
  //BA.debugLineNum = 35;BA.debugLine="Public Sub Initialize";
@@ -725,8 +799,8 @@ public ResumableSub_lblAdd_Click(com.lockzero.pagenoteslist parent) {
 this.parent = parent;
 }
 com.lockzero.pagenoteslist parent;
-int _result = 0;
 String _notetype = "";
+int _result = 0;
 anywheresoftware.b4a.objects.collections.Map _params = null;
 com.lockzero.pagenoteedit _pg = null;
 
@@ -741,9 +815,9 @@ return;
 case 0:
 //C
 this.state = 1;
- //BA.debugLineNum = 498;BA.debugLine="Log(\"lblAdd_Click - IsNavigating=\" & IsNavigating";
-parent.__c.LogImpl("833292289","lblAdd_Click - IsNavigating="+BA.ObjectToString(parent._isnavigating),0);
- //BA.debugLineNum = 500;BA.debugLine="If IsNavigating Then Return";
+ //BA.debugLineNum = 509;BA.debugLine="Log(\"lblAdd_Click - IsNavigating=\" & IsNavigating";
+parent.__c.LogImpl("636700161","lblAdd_Click - IsNavigating="+BA.ObjectToString(parent._isnavigating),0);
+ //BA.debugLineNum = 511;BA.debugLine="If IsNavigating Then Return";
 if (true) break;
 
 case 1:
@@ -763,7 +837,7 @@ case 6:
 //C
 this.state = 7;
 ;
- //BA.debugLineNum = 503;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
+ //BA.debugLineNum = 514;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
 if (true) break;
 
 case 7:
@@ -776,7 +850,7 @@ this.state = 9;
 case 9:
 //C
 this.state = 10;
- //BA.debugLineNum = 504;BA.debugLine="ModSession.Touch";
+ //BA.debugLineNum = 515;BA.debugLine="ModSession.Touch";
 parent._modsession._touch /*String*/ (ba);
  if (true) break;
 
@@ -784,104 +858,132 @@ case 10:
 //C
 this.state = 11;
 ;
- //BA.debugLineNum = 508;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"note_type_c";
-parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"note_type_choose")),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"new_note")),parent._modlang._t /*String*/ (ba,"note_type_text"),parent._modlang._t /*String*/ (ba,"cancel"),parent._modlang._t /*String*/ (ba,"note_type_list"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
-this.state = 23;
-return;
-case 23:
-//C
-this.state = 11;
-_result = (Integer) result[0];
-;
- //BA.debugLineNum = 510;BA.debugLine="Dim noteType As String = \"\"";
+ //BA.debugLineNum = 518;BA.debugLine="Dim noteType As String = \"\"";
 _notetype = "";
- //BA.debugLineNum = 511;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+ //BA.debugLineNum = 521;BA.debugLine="If CurrentGroup <> Null And CurrentGroup.Template";
 if (true) break;
 
 case 11:
 //if
-this.state = 18;
-if (_result==parent._xui.DialogResponse_Positive) { 
+this.state = 24;
+if (parent._currentgroup!= null && (parent._currentgroup._templatetype /*String*/ ).equals("card")) { 
 this.state = 13;
-}else if(_result==parent._xui.DialogResponse_Negative) { 
-this.state = 15;
 }else {
-this.state = 17;
+this.state = 15;
 }if (true) break;
 
 case 13:
 //C
-this.state = 18;
- //BA.debugLineNum = 512;BA.debugLine="noteType = \"text\"";
-_notetype = "text";
+this.state = 24;
+ //BA.debugLineNum = 522;BA.debugLine="noteType = \"list\"";
+_notetype = "list";
  if (true) break;
 
 case 15:
 //C
-this.state = 18;
- //BA.debugLineNum = 514;BA.debugLine="noteType = \"list\"";
-_notetype = "list";
- if (true) break;
-
-case 17:
+this.state = 16;
+ //BA.debugLineNum = 525;BA.debugLine="Wait For (xui.Msgbox2Async(ModLang.T(\"note_type_";
+parent.__c.WaitFor("msgbox_result", ba, this, parent._xui.Msgbox2Async(ba,BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"note_type_choose")),BA.ObjectToCharSequence(parent._modlang._t /*String*/ (ba,"new_note")),parent._modlang._t /*String*/ (ba,"note_type_text"),parent._modlang._t /*String*/ (ba,"cancel"),parent._modlang._t /*String*/ (ba,"note_type_list"),(anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.drawable.CanvasWrapper.BitmapWrapper(), (android.graphics.Bitmap)(parent.__c.Null))));
+this.state = 29;
+return;
+case 29:
 //C
+this.state = 16;
+_result = (Integer) result[0];
+;
+ //BA.debugLineNum = 527;BA.debugLine="If Result = xui.DialogResponse_Positive Then";
+if (true) break;
+
+case 16:
+//if
+this.state = 23;
+if (_result==parent._xui.DialogResponse_Positive) { 
 this.state = 18;
- //BA.debugLineNum = 516;BA.debugLine="Return  'Cancelou";
-if (true) return ;
- if (true) break;
+}else if(_result==parent._xui.DialogResponse_Negative) { 
+this.state = 20;
+}else {
+this.state = 22;
+}if (true) break;
 
 case 18:
 //C
-this.state = 19;
-;
- //BA.debugLineNum = 519;BA.debugLine="IsNavigating = True";
-parent._isnavigating = parent.__c.True;
- //BA.debugLineNum = 521;BA.debugLine="Dim params As Map";
-_params = new anywheresoftware.b4a.objects.collections.Map();
- //BA.debugLineNum = 522;BA.debugLine="params.Initialize";
-_params.Initialize();
- //BA.debugLineNum = 523;BA.debugLine="params.Put(\"noteId\", \"\")";
-_params.Put((Object)("noteId"),(Object)(""));
- //BA.debugLineNum = 524;BA.debugLine="params.Put(\"groupId\", CurrentGroupId)";
-_params.Put((Object)("groupId"),(Object)(parent._currentgroupid));
- //BA.debugLineNum = 525;BA.debugLine="params.Put(\"isNoteGroup\", IsNoteGroup)";
-_params.Put((Object)("isNoteGroup"),(Object)(parent._isnotegroup));
- //BA.debugLineNum = 526;BA.debugLine="params.Put(\"noteType\", noteType)";
-_params.Put((Object)("noteType"),(Object)(_notetype));
- //BA.debugLineNum = 527;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null Then";
-if (true) break;
+this.state = 23;
+ //BA.debugLineNum = 528;BA.debugLine="noteType = \"text\"";
+_notetype = "text";
+ if (true) break;
 
-case 19:
-//if
-this.state = 22;
-if (parent._isnotegroup && parent._currentgroup!= null) { 
-this.state = 21;
-}if (true) break;
-
-case 21:
+case 20:
 //C
-this.state = 22;
- //BA.debugLineNum = 528;BA.debugLine="params.Put(\"isSecure\", CurrentGroup.IsSecure)";
-_params.Put((Object)("isSecure"),(Object)(parent._currentgroup._issecure /*boolean*/ ));
- //BA.debugLineNum = 529;BA.debugLine="params.Put(\"passphrase\", GroupPassphrase)";
-_params.Put((Object)("passphrase"),(Object)(parent._grouppassphrase));
- //BA.debugLineNum = 530;BA.debugLine="params.Put(\"groupName\", CurrentGroup.Name)";
-_params.Put((Object)("groupName"),(Object)(parent._currentgroup._name /*String*/ ));
+this.state = 23;
+ //BA.debugLineNum = 530;BA.debugLine="noteType = \"list\"";
+_notetype = "list";
  if (true) break;
 
 case 22:
 //C
+this.state = 23;
+ //BA.debugLineNum = 532;BA.debugLine="Return  'Cancelou";
+if (true) return ;
+ if (true) break;
+
+case 23:
+//C
+this.state = 24;
+;
+ if (true) break;
+
+case 24:
+//C
+this.state = 25;
+;
+ //BA.debugLineNum = 536;BA.debugLine="IsNavigating = True";
+parent._isnavigating = parent.__c.True;
+ //BA.debugLineNum = 538;BA.debugLine="Dim params As Map";
+_params = new anywheresoftware.b4a.objects.collections.Map();
+ //BA.debugLineNum = 539;BA.debugLine="params.Initialize";
+_params.Initialize();
+ //BA.debugLineNum = 540;BA.debugLine="params.Put(\"noteId\", \"\")";
+_params.Put((Object)("noteId"),(Object)(""));
+ //BA.debugLineNum = 541;BA.debugLine="params.Put(\"groupId\", CurrentGroupId)";
+_params.Put((Object)("groupId"),(Object)(parent._currentgroupid));
+ //BA.debugLineNum = 542;BA.debugLine="params.Put(\"isNoteGroup\", IsNoteGroup)";
+_params.Put((Object)("isNoteGroup"),(Object)(parent._isnotegroup));
+ //BA.debugLineNum = 543;BA.debugLine="params.Put(\"noteType\", noteType)";
+_params.Put((Object)("noteType"),(Object)(_notetype));
+ //BA.debugLineNum = 544;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null Then";
+if (true) break;
+
+case 25:
+//if
+this.state = 28;
+if (parent._isnotegroup && parent._currentgroup!= null) { 
+this.state = 27;
+}if (true) break;
+
+case 27:
+//C
+this.state = 28;
+ //BA.debugLineNum = 545;BA.debugLine="params.Put(\"isSecure\", CurrentGroup.IsSecure)";
+_params.Put((Object)("isSecure"),(Object)(parent._currentgroup._issecure /*boolean*/ ));
+ //BA.debugLineNum = 546;BA.debugLine="params.Put(\"passphrase\", GroupPassphrase)";
+_params.Put((Object)("passphrase"),(Object)(parent._grouppassphrase));
+ //BA.debugLineNum = 547;BA.debugLine="params.Put(\"groupName\", CurrentGroup.Name)";
+_params.Put((Object)("groupName"),(Object)(parent._currentgroup._name /*String*/ ));
+ if (true) break;
+
+case 28:
+//C
 this.state = -1;
 ;
- //BA.debugLineNum = 533;BA.debugLine="Dim pg As PageNoteEdit = B4XPages.GetPage(\"PageNo";
+ //BA.debugLineNum = 550;BA.debugLine="Dim pg As PageNoteEdit = B4XPages.GetPage(\"PageNo";
 _pg = (com.lockzero.pagenoteedit)(parent._b4xpages._getpage /*Object*/ (ba,"PageNoteEdit"));
- //BA.debugLineNum = 534;BA.debugLine="pg.SetParams(params)";
+ //BA.debugLineNum = 551;BA.debugLine="pg.SetParams(params)";
 _pg._setparams /*String*/ (_params);
- //BA.debugLineNum = 535;BA.debugLine="ModTransition.SlideToLeft(Root, pg.Root)";
+ //BA.debugLineNum = 552;BA.debugLine="ModTransition.SlideToLeft(Root, pg.Root)";
 parent._modtransition._slidetoleft /*anywheresoftware.b4a.keywords.Common.ResumableSubWrapper*/ (ba,parent._root,_pg._root /*anywheresoftware.b4a.objects.B4XViewWrapper*/ );
- //BA.debugLineNum = 536;BA.debugLine="B4XPages.ShowPage(\"PageNoteEdit\")";
+ //BA.debugLineNum = 553;BA.debugLine="B4XPages.ShowPage(\"PageNoteEdit\")";
 parent._b4xpages._showpage /*String*/ (ba,"PageNoteEdit");
- //BA.debugLineNum = 537;BA.debugLine="End Sub";
+ //BA.debugLineNum = 554;BA.debugLine="End Sub";
 if (true) break;
 
             }
@@ -891,30 +993,30 @@ if (true) break;
 public void  _msgbox_result(int _result) throws Exception{
 }
 public String  _lblclearsearch_click() throws Exception{
- //BA.debugLineNum = 491;BA.debugLine="Private Sub lblClearSearch_Click";
- //BA.debugLineNum = 492;BA.debugLine="edtSearch.Text = \"\"";
+ //BA.debugLineNum = 502;BA.debugLine="Private Sub lblClearSearch_Click";
+ //BA.debugLineNum = 503;BA.debugLine="edtSearch.Text = \"\"";
 _edtsearch.setText(BA.ObjectToCharSequence(""));
- //BA.debugLineNum = 493;BA.debugLine="lblClearSearch.Visible = False";
+ //BA.debugLineNum = 504;BA.debugLine="lblClearSearch.Visible = False";
 _lblclearsearch.setVisible(__c.False);
- //BA.debugLineNum = 494;BA.debugLine="FilterNotes(\"\")";
+ //BA.debugLineNum = 505;BA.debugLine="FilterNotes(\"\")";
 _filternotes("");
- //BA.debugLineNum = 495;BA.debugLine="End Sub";
+ //BA.debugLineNum = 506;BA.debugLine="End Sub";
 return "";
 }
 public String  _lblsearch_click() throws Exception{
- //BA.debugLineNum = 468;BA.debugLine="Private Sub lblSearch_Click";
- //BA.debugLineNum = 469;BA.debugLine="IsSearchVisible = Not(IsSearchVisible)";
+ //BA.debugLineNum = 479;BA.debugLine="Private Sub lblSearch_Click";
+ //BA.debugLineNum = 480;BA.debugLine="IsSearchVisible = Not(IsSearchVisible)";
 _issearchvisible = __c.Not(_issearchvisible);
- //BA.debugLineNum = 470;BA.debugLine="UpdateSearchVisibility";
+ //BA.debugLineNum = 481;BA.debugLine="UpdateSearchVisibility";
 _updatesearchvisibility();
- //BA.debugLineNum = 472;BA.debugLine="If IsSearchVisible = False Then";
+ //BA.debugLineNum = 483;BA.debugLine="If IsSearchVisible = False Then";
 if (_issearchvisible==__c.False) { 
- //BA.debugLineNum = 474;BA.debugLine="edtSearch.Text = \"\"";
+ //BA.debugLineNum = 485;BA.debugLine="edtSearch.Text = \"\"";
 _edtsearch.setText(BA.ObjectToCharSequence(""));
- //BA.debugLineNum = 475;BA.debugLine="FilterNotes(\"\")";
+ //BA.debugLineNum = 486;BA.debugLine="FilterNotes(\"\")";
 _filternotes("");
  };
- //BA.debugLineNum = 477;BA.debugLine="End Sub";
+ //BA.debugLineNum = 488;BA.debugLine="End Sub";
 return "";
 }
 public String  _loadnotes() throws Exception{
@@ -951,75 +1053,75 @@ public String  _opennote(String _noteid) throws Exception{
 com.lockzero.clsnoteentry _note = null;
 anywheresoftware.b4a.objects.collections.Map _params = null;
 com.lockzero.pagenoteedit _pg = null;
- //BA.debugLineNum = 422;BA.debugLine="Private Sub OpenNote(noteId As String)";
- //BA.debugLineNum = 424;BA.debugLine="If IsNavigating Then Return";
+ //BA.debugLineNum = 433;BA.debugLine="Private Sub OpenNote(noteId As String)";
+ //BA.debugLineNum = 435;BA.debugLine="If IsNavigating Then Return";
 if (_isnavigating) { 
 if (true) return "";};
- //BA.debugLineNum = 425;BA.debugLine="IsNavigating = True";
+ //BA.debugLineNum = 436;BA.debugLine="IsNavigating = True";
 _isnavigating = __c.True;
- //BA.debugLineNum = 428;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
+ //BA.debugLineNum = 439;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null And Curre";
 if (_isnotegroup && _currentgroup!= null && _currentgroup._issecure /*boolean*/ ) { 
- //BA.debugLineNum = 429;BA.debugLine="ModSession.Touch";
+ //BA.debugLineNum = 440;BA.debugLine="ModSession.Touch";
 _modsession._touch /*String*/ (ba);
  };
- //BA.debugLineNum = 432;BA.debugLine="Dim note As clsNoteEntry = ModNotes.GetNoteById(n";
+ //BA.debugLineNum = 443;BA.debugLine="Dim note As clsNoteEntry = ModNotes.GetNoteById(n";
 _note = _modnotes._getnotebyid /*com.lockzero.clsnoteentry*/ (ba,_noteid);
- //BA.debugLineNum = 433;BA.debugLine="If note = Null Then";
+ //BA.debugLineNum = 444;BA.debugLine="If note = Null Then";
 if (_note== null) { 
- //BA.debugLineNum = 434;BA.debugLine="IsNavigating = False";
+ //BA.debugLineNum = 445;BA.debugLine="IsNavigating = False";
 _isnavigating = __c.False;
- //BA.debugLineNum = 435;BA.debugLine="Return";
+ //BA.debugLineNum = 446;BA.debugLine="Return";
 if (true) return "";
  };
- //BA.debugLineNum = 438;BA.debugLine="Dim params As Map";
+ //BA.debugLineNum = 449;BA.debugLine="Dim params As Map";
 _params = new anywheresoftware.b4a.objects.collections.Map();
- //BA.debugLineNum = 439;BA.debugLine="params.Initialize";
+ //BA.debugLineNum = 450;BA.debugLine="params.Initialize";
 _params.Initialize();
- //BA.debugLineNum = 440;BA.debugLine="params.Put(\"noteId\", noteId)";
+ //BA.debugLineNum = 451;BA.debugLine="params.Put(\"noteId\", noteId)";
 _params.Put((Object)("noteId"),(Object)(_noteid));
- //BA.debugLineNum = 441;BA.debugLine="params.Put(\"groupId\", CurrentGroupId)";
+ //BA.debugLineNum = 452;BA.debugLine="params.Put(\"groupId\", CurrentGroupId)";
 _params.Put((Object)("groupId"),(Object)(_currentgroupid));
- //BA.debugLineNum = 442;BA.debugLine="params.Put(\"isNoteGroup\", IsNoteGroup)";
+ //BA.debugLineNum = 453;BA.debugLine="params.Put(\"isNoteGroup\", IsNoteGroup)";
 _params.Put((Object)("isNoteGroup"),(Object)(_isnotegroup));
- //BA.debugLineNum = 443;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null Then";
+ //BA.debugLineNum = 454;BA.debugLine="If IsNoteGroup And CurrentGroup <> Null Then";
 if (_isnotegroup && _currentgroup!= null) { 
- //BA.debugLineNum = 444;BA.debugLine="params.Put(\"isSecure\", CurrentGroup.IsSecure)";
+ //BA.debugLineNum = 455;BA.debugLine="params.Put(\"isSecure\", CurrentGroup.IsSecure)";
 _params.Put((Object)("isSecure"),(Object)(_currentgroup._issecure /*boolean*/ ));
- //BA.debugLineNum = 445;BA.debugLine="params.Put(\"passphrase\", GroupPassphrase)";
+ //BA.debugLineNum = 456;BA.debugLine="params.Put(\"passphrase\", GroupPassphrase)";
 _params.Put((Object)("passphrase"),(Object)(_grouppassphrase));
- //BA.debugLineNum = 446;BA.debugLine="params.Put(\"groupName\", CurrentGroup.Name)";
+ //BA.debugLineNum = 457;BA.debugLine="params.Put(\"groupName\", CurrentGroup.Name)";
 _params.Put((Object)("groupName"),(Object)(_currentgroup._name /*String*/ ));
  };
- //BA.debugLineNum = 449;BA.debugLine="If edtSearch.Text.Trim.Length > 0 Then";
+ //BA.debugLineNum = 460;BA.debugLine="If edtSearch.Text.Trim.Length > 0 Then";
 if (_edtsearch.getText().trim().length()>0) { 
- //BA.debugLineNum = 450;BA.debugLine="params.Put(\"searchQuery\", edtSearch.Text.Trim)";
+ //BA.debugLineNum = 461;BA.debugLine="params.Put(\"searchQuery\", edtSearch.Text.Trim)";
 _params.Put((Object)("searchQuery"),(Object)(_edtsearch.getText().trim()));
  };
- //BA.debugLineNum = 453;BA.debugLine="Dim pg As PageNoteEdit = B4XPages.GetPage(\"PageNo";
+ //BA.debugLineNum = 464;BA.debugLine="Dim pg As PageNoteEdit = B4XPages.GetPage(\"PageNo";
 _pg = (com.lockzero.pagenoteedit)(_b4xpages._getpage /*Object*/ (ba,"PageNoteEdit"));
- //BA.debugLineNum = 454;BA.debugLine="pg.SetParams(params)";
+ //BA.debugLineNum = 465;BA.debugLine="pg.SetParams(params)";
 _pg._setparams /*String*/ (_params);
- //BA.debugLineNum = 455;BA.debugLine="ModTransition.SlideToLeft(Root, pg.Root)";
+ //BA.debugLineNum = 466;BA.debugLine="ModTransition.SlideToLeft(Root, pg.Root)";
 _modtransition._slidetoleft /*anywheresoftware.b4a.keywords.Common.ResumableSubWrapper*/ (ba,_root,_pg._root /*anywheresoftware.b4a.objects.B4XViewWrapper*/ );
- //BA.debugLineNum = 456;BA.debugLine="B4XPages.ShowPage(\"PageNoteEdit\")";
+ //BA.debugLineNum = 467;BA.debugLine="B4XPages.ShowPage(\"PageNoteEdit\")";
 _b4xpages._showpage /*String*/ (ba,"PageNoteEdit");
- //BA.debugLineNum = 457;BA.debugLine="End Sub";
+ //BA.debugLineNum = 468;BA.debugLine="End Sub";
 return "";
 }
 public String  _pnlnote_click() throws Exception{
 anywheresoftware.b4a.objects.PanelWrapper _pnl = null;
 String _noteid = "";
- //BA.debugLineNum = 415;BA.debugLine="Private Sub pnlNote_Click";
- //BA.debugLineNum = 416;BA.debugLine="Log(\"pnlNote_Click - IsNavigating=\" & IsNavigatin";
-__c.LogImpl("833095681","pnlNote_Click - IsNavigating="+BA.ObjectToString(_isnavigating),0);
- //BA.debugLineNum = 417;BA.debugLine="Dim pnl As Panel = Sender";
+ //BA.debugLineNum = 426;BA.debugLine="Private Sub pnlNote_Click";
+ //BA.debugLineNum = 427;BA.debugLine="Log(\"pnlNote_Click - IsNavigating=\" & IsNavigatin";
+__c.LogImpl("636306945","pnlNote_Click - IsNavigating="+BA.ObjectToString(_isnavigating),0);
+ //BA.debugLineNum = 428;BA.debugLine="Dim pnl As Panel = Sender";
 _pnl = new anywheresoftware.b4a.objects.PanelWrapper();
 _pnl = (anywheresoftware.b4a.objects.PanelWrapper) anywheresoftware.b4a.AbsObjectWrapper.ConvertToWrapper(new anywheresoftware.b4a.objects.PanelWrapper(), (android.view.ViewGroup)(__c.Sender(ba)));
- //BA.debugLineNum = 418;BA.debugLine="Dim noteId As String = pnl.Tag";
+ //BA.debugLineNum = 429;BA.debugLine="Dim noteId As String = pnl.Tag";
 _noteid = BA.ObjectToString(_pnl.getTag());
- //BA.debugLineNum = 419;BA.debugLine="OpenNote(noteId)";
+ //BA.debugLineNum = 430;BA.debugLine="OpenNote(noteId)";
 _opennote(_noteid);
- //BA.debugLineNum = 420;BA.debugLine="End Sub";
+ //BA.debugLineNum = 431;BA.debugLine="End Sub";
 return "";
 }
 public String  _setparams(anywheresoftware.b4a.objects.collections.Map _params) throws Exception{
