@@ -454,7 +454,7 @@ Private Sub ShowImportCSVInstructions
 
 	'Dialog
 	Dim dialogW As Int = width - 32dip
-	Dim dialogH As Int = 300dip
+	Dim dialogH As Int = 480dip  'Aumentado para caber formato CSV
 	Dim pnlDialog As Panel
 	pnlDialog.Initialize("")
 	pnlDialog.Color = ModTheme.HomeHeaderBg
@@ -496,7 +496,54 @@ Private Sub ShowImportCSVInstructions
 		y = y + 36dip
 	Next
 
+	y = y + 20dip
+
+	'Separador
+	Dim pnlSep As Panel
+	pnlSep.Initialize("")
+	pnlSep.Color = Colors.ARGB(60, 255, 255, 255)
+	pnlDialog.AddView(pnlSep, 16dip, y, dialogW - 32dip, 1dip)
 	y = y + 15dip
+
+	'Titulo formato CSV
+	Dim lblFormat As Label
+	lblFormat.Initialize("")
+	lblFormat.Text = ModLang.T("csv_format_title")
+	lblFormat.TextSize = 14
+	lblFormat.TextColor = Colors.White
+	lblFormat.Typeface = Typeface.DEFAULT_BOLD
+	lblFormat.Gravity = Gravity.CENTER_HORIZONTAL
+	pnlDialog.AddView(lblFormat, 0, y, dialogW, 22dip)
+	y = y + 28dip
+
+	'Info formato
+	Dim lblFormatInfo As Label
+	lblFormatInfo.Initialize("")
+	lblFormatInfo.Text = ModLang.T("csv_format_info")
+	lblFormatInfo.TextSize = 12
+	lblFormatInfo.TextColor = Colors.ARGB(200, 255, 255, 255)
+	pnlDialog.AddView(lblFormatInfo, 16dip, y, dialogW - 32dip, 36dip)
+	y = y + 36dip
+
+	'Colunas (destaque) - amarelo claro para contraste no fundo azul
+	Dim lblCols As Label
+	lblCols.Initialize("")
+	lblCols.Text = ModLang.T("csv_format_columns")
+	lblCols.TextSize = 13
+	lblCols.TextColor = Colors.RGB(255, 235, 130)  'Amarelo claro
+	lblCols.Typeface = Typeface.MONOSPACE
+	lblCols.Gravity = Gravity.CENTER
+	pnlDialog.AddView(lblCols, 16dip, y, dialogW - 32dip, 24dip)
+	y = y + 28dip
+
+	'Nota formato
+	Dim lblFormatNote As Label
+	lblFormatNote.Initialize("")
+	lblFormatNote.Text = ModLang.T("csv_format_note")
+	lblFormatNote.TextSize = 11
+	lblFormatNote.TextColor = Colors.ARGB(160, 255, 255, 255)
+	pnlDialog.AddView(lblFormatNote, 16dip, y, dialogW - 32dip, 36dip)
+	y = y + 40dip
 
 	'Botao Entendi
 	Dim btnOk As Button

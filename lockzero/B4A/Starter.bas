@@ -18,10 +18,46 @@ Sub Process_Globals
 	Public Const APP_VERSION As String = "0.1.0"
 	Public Const APP_TAGLINE As String = "Lock and ZERO worries"
 
+	'=== VERSAO FREE/PREMIUM ===
+	'Para compilar versao PREMIUM: mudar IS_PREMIUM para True
+	Public Const IS_PREMIUM As Boolean = False   'FREE = False, PREMIUM = True
+	Public Const EDITION_NAME As String = "Free" 'Mudar para "Premium" se IS_PREMIUM = True
+
+	'=== LIMITES POR VERSAO ===
+	'FREE: limites reduzidos | PREMIUM: praticamente ilimitado
+	'NOTA: Alterar manualmente ao mudar IS_PREMIUM
+
+	'--- Limites versao FREE ---
+	Public Const MAX_PASSWORDS As Int = 15           'Total de senhas
+	Public Const MAX_NOTES As Int = 5                'Total de notas
+	Public Const MAX_CARDS As Int = 2                'Total de cartoes
+	Public Const MAX_ATTACHMENTS_PER_NOTE As Int = 2 'Anexos por nota
+	Public Const MAX_ATTACHMENTS_SIZE As Long = 26214400  '25 MB para anexos
+	Public Const ALLOW_BACKUP As Boolean = True      'Backup permitido
+	Public Const ALLOW_IMPORT_CSV As Boolean = False 'Importar CSV NAO permitido
+
+	'--- Para versao PREMIUM, descomentar estas linhas e comentar as acima ---
+	'Public Const MAX_PASSWORDS As Int = 999          'Ilimitado
+	'Public Const MAX_NOTES As Int = 999              'Ilimitado
+	'Public Const MAX_CARDS As Int = 999              'Ilimitado
+	'Public Const MAX_ATTACHMENTS_PER_NOTE As Int = 99
+	'Public Const MAX_ATTACHMENTS_SIZE As Long = 524288000  '500 MB (configuravel ate 3 GB)
+	'Public Const ALLOW_BACKUP As Boolean = True
+	'Public Const ALLOW_IMPORT_CSV As Boolean = True
+
+	'--- Opcoes de limite de anexos para PREMIUM (em bytes) ---
+	Public Const ATTACHMENTS_SIZE_500MB As Long = 524288000   '500 MB
+	Public Const ATTACHMENTS_SIZE_1GB As Long = 1073741824    '1 GB
+	Public Const ATTACHMENTS_SIZE_2GB As Long = 2147483648    '2 GB
+	Public Const ATTACHMENTS_SIZE_3GB As Long = 3221225472    '3 GB
+
 	'=== SEGURANCA ===
 	'FLAG_SECURE: Bloqueia screenshot/gravacao de tela
 	'Testes: False | Producao: True
 	Public Const ENABLE_SCREENSHOT_BLOCK As Boolean = False
+
+	'=== PADRAO DE UI - ALINHAMENTO ===
+	Public Const UI_ALIGN_BASE As Int = 76      'Base de alinhamento interno
 
 	'=== PADRAO DE UI - TAMANHOS DE FONTE ===
 	Public Const FONT_TITLE As Float = 22       'Titulos de pagina

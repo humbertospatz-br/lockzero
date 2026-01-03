@@ -10,6 +10,12 @@ Version=9.85
 
 Sub Process_Globals
 	Public IsDarkTheme As Boolean = True 'Padrao: escuro (app de seguranca)
+	Private ThemeVariantCode As Int = 90 'Codigo de variante do tema
+End Sub
+
+'Retorna codigo de variante para calculos internos
+Public Sub GetVariantCode As Int
+	Return ThemeVariantCode
 End Sub
 
 Public Sub Init

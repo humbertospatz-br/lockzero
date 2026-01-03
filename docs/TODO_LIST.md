@@ -856,40 +856,55 @@ Anexos de arquivos (imagens, videos, documentos) em notas serao:
 
 ### Tarefas - Modulo ModAttachments.bas
 
-- [ ] [2026-01-03] Criar ModAttachments.bas
-- [ ] [2026-01-03] Constantes MAX_FILE_SIZE, MAX_TOTAL_NOTE, MAX_TOTAL_APP
-- [ ] [2026-01-03] AddAttachment(noteId, filePath, passphrase) - copia, criptografa, compacta
-- [ ] [2026-01-03] GetAttachment(noteId, attachId, passphrase) - descriptografa para Temp/
-- [ ] [2026-01-03] DeleteAttachment(noteId, attachId) - remove arquivo .lza
-- [ ] [2026-01-03] DeleteAllAttachments(noteId) - ao deletar nota
-- [ ] [2026-01-03] ValidateFileSize(filePath) - verifica limite
-- [ ] [2026-01-03] CanAddAttachment(noteId, fileSize) - verifica espaco disponivel
-- [ ] [2026-01-03] GetTotalAppSize() - soma de todos anexos
-- [ ] [2026-01-03] CleanupTempFiles() - limpar arquivos temporarios ao sair
+- [x] [2026-01-03] Criar ModAttachments.bas
+- [x] [2026-01-03] Constantes MAX_FILE_SIZE, MAX_TOTAL_NOTE, MAX_TOTAL_APP
+- [x] [2026-01-03] AddAttachment(noteId, filePath, passphrase) - copia, criptografa, compacta
+- [x] [2026-01-03] GetAttachment(noteId, attachId, passphrase) - descriptografa para Temp/
+- [x] [2026-01-03] DeleteAttachment(noteId, attachId) - remove arquivo .lza
+- [x] [2026-01-03] DeleteAllAttachments(noteId) - ao deletar nota
+- [x] [2026-01-03] ValidateFileSize(filePath) - verifica limite
+- [x] [2026-01-03] CanAddAttachment(noteId, fileSize) - verifica espaco disponivel
+- [x] [2026-01-03] GetTotalAppSize() - soma de todos anexos
+- [x] [2026-01-03] CleanupTempFiles() - limpar arquivos temporarios ao sair
 
 ### Tarefas - Estrutura de Arquivos
 
-- [ ] [2026-01-03] Criar pasta Attachments/ em File.DirInternal
-- [ ] [2026-01-03] Subpastas por nota: Attachments/{noteId}/
-- [ ] [2026-01-03] Arquivos .lza (LockZero Attachment) com JSON + dados criptografados
-- [ ] [2026-01-03] Pasta Temp/ para arquivos descriptografados temporariamente
+- [x] [2026-01-03] Criar pasta Attachments/ em File.DirInternal
+- [x] [2026-01-03] Subpastas por nota: Attachments/{noteId}/
+- [x] [2026-01-03] Arquivos .lza (LockZero Attachment) com JSON + dados criptografados
+- [x] [2026-01-03] Pasta Temp/ para arquivos descriptografados temporariamente
 
 ### Tarefas - Interface PageNoteEdit.bas
 
-- [ ] [2026-01-03] Secao "Anexos" com contador (X arquivos)
-- [ ] [2026-01-03] Botao + para adicionar anexo (ContentChooser)
-- [ ] [2026-01-03] Lista de anexos: icone + nome + tamanho + lixeira
-- [ ] [2026-01-03] Barra de espaco usado (X MB / 100 MB)
-- [ ] [2026-01-03] Toque no anexo: abre com app externo
-- [ ] [2026-01-03] Toque na lixeira: confirma e remove
+- [x] [2026-01-03] Secao "Anexos" com contador (X arquivos)
+- [x] [2026-01-03] Botao + para adicionar anexo (ContentChooser)
+- [x] [2026-01-03] Lista de anexos: icone + nome + tamanho + lixeira
+- [x] [2026-01-03] Barra de espaco usado (X MB / 100 MB)
+- [x] [2026-01-03] Toque no anexo: descriptografa e abre com app externo
+- [x] [2026-01-03] Toque na lixeira: confirma e remove
+
+### Tarefas - Configuracao FileProvider
+
+- [x] [2026-01-03] Atualizar provider_paths em lockzero.b4a para incluir pasta Temp
 
 ### Tarefas - Backup com Anexos
 
-- [ ] [2026-01-03] Atualizar ModBackup.ExportBackup para incluir anexos
-- [ ] [2026-01-03] Estrutura backup v2.0 com campo "attachments"
-- [ ] [2026-01-03] Atualizar ModBackup.ImportBackup para restaurar anexos
-- [ ] [2026-01-03] Aviso de tamanho do backup antes de exportar
+- [x] [2026-01-03] Atualizar ModBackup.ExportBackup para incluir anexos
+- [x] [2026-01-03] Estrutura backup v2.0 com campo "attachments"
+- [x] [2026-01-03] Atualizar ModBackup.ImportBackup para restaurar anexos
+- [x] [2026-01-03] Funcao EstimateBackupSize para calcular tamanho
+- [x] [2026-01-03] Funcao GetBackupStats para exibir estatisticas
 - [ ] [2026-01-03] Verificar espaco disponivel antes de importar
+
+### Tarefas - Versao Free/Premium
+
+- [x] [2026-01-03] Adicionar #define FREE / #define PREMIUM em Starter.bas
+- [x] [2026-01-03] Constantes IS_PREMIUM e EDITION_NAME
+- [x] [2026-01-03] Limites por versao: MAX_PASSWORD_GROUPS, MAX_NOTES_PER_GROUP, etc
+- [x] [2026-01-03] Textos de limite em ModLang.bas (PT/EN/ES/HE)
+- [ ] [2026-01-03] Implementar verificacao de limites em PagePasswords.bas
+- [ ] [2026-01-03] Implementar verificacao de limites em PageNotesGroups.bas
+- [ ] [2026-01-03] Implementar verificacao de limites em PageNoteEdit.bas (anexos)
 
 ### Tipos de Arquivo Suportados
 
@@ -1083,7 +1098,7 @@ Anexos de arquivos (imagens, videos, documentos) em notas serao:
 | ModBackup.bas | OK | Export/Import .lockzero |
 | ModPasswords.bas | OK | CRUD senhas/grupos |
 | ModNotes.bas | OK | CRUD notas |
-| ModAttachments.bas | PENDENTE | Gestao de anexos (copia, criptografa, compacta) |
+| ModAttachments.bas | OK | Gestao de anexos (copia, criptografa, compacta) |
 
 ### Classes:
 | Arquivo | Status | Descricao |

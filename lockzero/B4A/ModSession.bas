@@ -14,6 +14,9 @@ Sub Process_Globals
 	Private PhraseObfuscated As String
 	Private SessionSalt As String
 
+	'Limite de cache de sessao (usado internamente)
+	Private Const SESSION_CACHE_LIMIT As Int = 10
+
 	'Cache da frase normalizada (evita recalcular a cada encrypt/decrypt)
 	Private NormalizedPhraseCache As String
 
@@ -101,6 +104,11 @@ Public Sub GetPassphrase As String
 		Return Obfuscate(PhraseObfuscated, SessionSalt) 'XOR novamente = original
 	End If
 	Return ""
+End Sub
+
+'Retorna limite de cache (usado internamente)
+Public Sub GetCacheLimit As Int
+	Return SESSION_CACHE_LIMIT
 End Sub
 
 'Retorna frase normalizada (cacheada, evita recalcular)

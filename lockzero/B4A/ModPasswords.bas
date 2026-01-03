@@ -337,6 +337,11 @@ Public Sub GetTotalEntryCount As Int
 	Return Entries.Size
 End Sub
 
+'Verifica se pode adicionar nova senha (limite FREE)
+Public Sub CanAddPassword As Boolean
+	Return GetTotalEntryCount < Starter.MAX_PASSWORDS
+End Sub
+
 ' ============================================
 '  FAVORITOS
 ' ============================================

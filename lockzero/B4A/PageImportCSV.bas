@@ -819,8 +819,7 @@ Private Sub ShowNewGroupDialog
 	'Campo frase
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+	ModSecurity.ConfigureSecureField(edtPassphrase) 'Configura todas as protecoes
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -935,8 +934,7 @@ Private Sub ShowPassphraseDialog
 	'Campo frase
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+	ModSecurity.ConfigureSecureField(edtPassphrase) 'Configura todas as protecoes
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -1050,6 +1048,32 @@ End Sub
 Private Sub DoImport
 	Dim imported As Int = 0
 	Dim updated As Int = 0
+	Dim skippedByLimit As Int = 0
+
+	'Verifica limite de senhas (versao FREE)
+	Dim currentCount As Int = ModPasswords.GetTotalEntryCount
+	Dim maxAllowed As Int = Starter.MAX_PASSWORDS
+	Dim availableSlots As Int = maxAllowed - currentCount
+
+	'Conta quantas sao novas (nao duplicatas)
+	Dim newEntriesCount As Int = 0
+	For Each idx As Int In SelectedIndexes
+		Dim csvEntry As Map = CSVEntries.Get(idx)
+		Dim url As String = csvEntry.Get("url")
+		Dim username As String = csvEntry.Get("username")
+		If FindExistingEntry(url, username) = "" Then
+			newEntriesCount = newEntriesCount + 1
+		End If
+	Next
+
+	'Se limite sera excedido, avisa usuario
+	If newEntriesCount > availableSlots And availableSlots >= 0 Then
+		Dim msg As String = ModLang.T("csv_limit_warning")
+		msg = msg.Replace("{available}", availableSlots)
+		msg = msg.Replace("{selected}", newEntriesCount)
+		ToastMessageShow(msg, True)
+		'Continua importando ate o limite
+	End If
 
 	For Each idx As Int In SelectedIndexes
 		Dim csvEntry As Map = CSVEntries.Get(idx)
@@ -1094,6 +1118,12 @@ Private Sub DoImport
 			ModPasswords.SaveEntry(existing)
 			updated = updated + 1
 		Else
+			'Verifica limite antes de criar nova
+			If ModPasswords.CanAddPassword = False Then
+				skippedByLimit = skippedByLimit + 1
+				Continue
+			End If
+
 			'Cria nova
 			Dim e As clsPasswordEntry
 			e.Initialize
@@ -1112,6 +1142,9 @@ Private Sub DoImport
 	Dim msg As String = imported & " " & ModLang.T("csv_imported")
 	If updated > 0 Then
 		msg = msg & ", " & updated & " " & ModLang.T("csv_updated")
+	End If
+	If skippedByLimit > 0 Then
+		msg = msg & " (" & skippedByLimit & " " & ModLang.T("csv_skipped_limit") & ")"
 	End If
 	ToastMessageShow(msg, True)
 

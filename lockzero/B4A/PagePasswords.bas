@@ -494,8 +494,7 @@ Private Sub ShowUnlockGroupDialog(groupId As String)
 
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+	ModSecurity.ConfigureSecureField(edtPassphrase) 'Configura todas as protecoes
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -642,8 +641,7 @@ Private Sub ShowAddGroupDialog
 
 		edtPassphrase.Initialize("edtPassphrase")
 		edtPassphrase.Hint = ModLang.T("passphrase_hint")
-		edtPassphrase.SingleLine = True
-		edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		ModSecurity.ConfigureSecureField(edtPassphrase) 'Configura todas as protecoes
 		edtPassphrase.Text = ""
 		edtPassphrase.TextColor = Colors.White
 		edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -674,8 +672,7 @@ Private Sub ShowAddGroupDialog
 
 		edtPassphraseConfirm.Initialize("edtPassphraseConfirm")
 		edtPassphraseConfirm.Hint = ModLang.T("passphrase_confirm_new")
-		edtPassphraseConfirm.SingleLine = True
-		edtPassphraseConfirm.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+		ModSecurity.ConfigureSecureField(edtPassphraseConfirm) 'Configura todas as protecoes
 		edtPassphraseConfirm.Text = ""
 		edtPassphraseConfirm.TextColor = Colors.White
 		edtPassphraseConfirm.HintColor = Colors.ARGB(120, 255, 255, 255)
@@ -866,8 +863,7 @@ Private Sub ShowDeleteGroupDialog(groupId As String)
 
 	edtPassphrase.Initialize("edtPassphrase")
 	edtPassphrase.Hint = ModLang.T("passphrase_hint")
-	edtPassphrase.SingleLine = True
-	edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+	ModSecurity.ConfigureSecureField(edtPassphrase) 'Configura todas as protecoes
 	edtPassphrase.Text = ""
 	edtPassphrase.TextColor = Colors.White
 	edtPassphrase.HintColor = Colors.ARGB(120, 255, 255, 255)

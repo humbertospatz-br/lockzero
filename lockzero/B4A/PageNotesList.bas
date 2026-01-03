@@ -55,8 +55,9 @@ Private Sub B4XPage_Appear
 
 	'Atualiza titulo com breadcrumb: Notas → NomeGrupo
 	If IsNoteGroup And CurrentGroup <> Null Then
-		lblTitle.Text = ModLang.T("notes") & " → " & CurrentGroup.Name
-		CallSub2(Main, "SetPageTitle", CurrentGroup.Name)
+		Dim displayName As String = GetGroupDisplayName(CurrentGroup)
+		lblTitle.Text = ModLang.T("notes") & " → " & displayName
+		CallSub2(Main, "SetPageTitle", displayName)
 	Else
 		lblTitle.Text = ModLang.T("notes")
 		CallSub2(Main, "SetPageTitle", ModLang.T("notes"))
@@ -390,9 +391,12 @@ Private Sub CreateNoteCard(note As clsNoteEntry, cardWidth As Int) As Panel
 	lblNoteTitle.Typeface = Typeface.CreateNew(Typeface.DEFAULT, Typeface.STYLE_BOLD)
 	pnl.AddView(lblNoteTitle, 42dip, 10dip, cardWidth - 90dip, 25dip)
 
-	'Preview baseado no tipo de nota
-	Dim preview As String
-	If note.IsListNote Then
+	'Preview baseado no tipo de nota (nao mostra para cartoes)
+	Dim preview As String = ""
+	If isCardGroup Then
+		'Cartao: sem preview
+		preview = ""
+	Else If note.IsListNote Then
 		'Lista: mostra "X de Y itens"
 		Dim total As Int = note.GetItemsCount
 		Dim checked As Int = note.GetCheckedCount
@@ -612,4 +616,14 @@ Private Sub GetCardNameFromNote(note As clsNoteEntry, passphrase As String, need
 	End Try
 
 	Return ModLang.T("new_card")
+End Sub
+
+'Retorna nome de exibicao do grupo (traduzido para grupos de sistema)
+Private Sub GetGroupDisplayName(g As clsNoteGroup) As String
+	If g.IsSystem Then
+		If g.Id = ModNotes.GetCardsGroupId Then
+			Return ModLang.T("cards")
+		End If
+	End If
+	Return g.Name
 End Sub

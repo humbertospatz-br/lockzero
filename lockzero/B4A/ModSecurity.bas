@@ -53,7 +53,8 @@ End Sub
 ' ================================================
 
 'Normaliza frase: minusculas, remove acentos/espacos, pega 10 primeiros chars unicos
-'Ex: "Minha avó nasceu" → "minhavonsc"
+'Aplica transformacao interna e adiciona salt
+'Ex: "Minha avó nasceu" → resultado transformado
 Public Sub NormalizePassphrase(phrase As String) As String
 	If phrase.Length = 0 Then Return ""
 
@@ -63,14 +64,64 @@ Public Sub NormalizePassphrase(phrase As String) As String
 	'Pega os 10 primeiros caracteres unicos
 	Dim unique As String = GetUniqueChars(cleaned, 10)
 
-	Return unique
+	'Aplica transformacao de case (posicoes 1, 5, 8 viram maiusculas se forem letras)
+	Dim transformed As String = ApplyInternalTransform(unique)
+
+	'Adiciona salt interno
+	Return transformed & GetInternalSalt
+End Sub
+
+'Transforma posicoes especificas para maiusculas (se forem letras)
+'Posicoes 1, 5, 8 (0-indexed) - ex: "minhavonsc" → "mInhavOnSc"
+Private Sub ApplyInternalTransform(text As String) As String
+	If text.Length < 10 Then Return text
+
+	Dim result As StringBuilder
+	result.Initialize
+
+	For i = 0 To text.Length - 1
+		Dim c As String = text.CharAt(i)
+
+		'Posicoes 1, 5, 8 viram maiusculas (se for letra a-z)
+		If i = 1 Or i = 5 Or i = 8 Then
+			Dim code As Int = Asc(c)
+			'Se for letra minuscula (a-z = 97-122), converte para maiuscula
+			If code >= 97 And code <= 122 Then
+				result.Append(Chr(code - 32))  'a→A, b→B, etc
+			Else
+				result.Append(c)  'Numero ou outro - mantem
+			End If
+		Else
+			result.Append(c)
+		End If
+	Next
+
+	Return result.ToString
+End Sub
+
+'Monta salt interno a partir de componentes distribuidos
+Private Sub GetInternalSalt As String
+	'Componentes vem de diferentes modulos (valores FIXOS, nunca mudam)
+	Dim p1 As String = Chr(Starter.UI_ALIGN_BASE)        'L (76)
+	Dim p2 As String = Chr(ModTheme.GetVariantCode)      'Z (90)
+	Dim p3 As String = Chr(ModLang.GetHashBase)          '# (35)
+	Dim p4 As String = ModSession.GetCacheLimit          '10
+	Return p1 & p2 & p3 & p4  'LZ#10
 End Sub
 
 'Valida se frase tem pelo menos 10 caracteres unicos (case-insensitive, sem espacos)
+'Tambem valida que nao seja majoritariamente numeros (max 4 numeros nos 10 unicos)
 Public Sub ValidatePassphraseStrength(phrase As String) As Boolean
 	Dim cleaned As String = RemoveAccents(phrase.Replace(" ", "").ToLowerCase)
 	Dim unique As String = GetUniqueChars(cleaned, 10)
-	Return unique.Length >= 10
+
+	If unique.Length < 10 Then Return False
+
+	'Conta numeros nos 10 caracteres unicos - maximo 4 permitido
+	Dim digitCount As Int = CountDigits(unique)
+	If digitCount > 4 Then Return False
+
+	Return True
 End Sub
 
 'Retorna mensagem de erro se frase for fraca, ou "" se OK
@@ -87,7 +138,25 @@ Public Sub GetPassphraseError(phrase As String) As String
 		Return ModLang.T("passphrase_too_short")
 	End If
 
+	'Valida quantidade de numeros - max 4 nos 10 unicos (min 6 letras)
+	Dim digitCount As Int = CountDigits(unique)
+	If digitCount > 4 Then
+		Return ModLang.T("passphrase_too_weak")
+	End If
+
 	Return "" 'OK
+End Sub
+
+'Conta quantos digitos (0-9) existem na string
+Private Sub CountDigits(text As String) As Int
+	Dim count As Int = 0
+	For i = 0 To text.Length - 1
+		Dim code As Int = Asc(text.CharAt(i))
+		If code >= 48 And code <= 57 Then  '0-9
+			count = count + 1
+		End If
+	Next
+	Return count
 End Sub
 
 'Remove acentos convertendo para ASCII
@@ -802,21 +871,46 @@ End Sub
 '  ENTRADA SEGURA DE FRASE-SENHA
 ' ============================================
 '
-' SEGURANCA: Campos de frase-senha devem:
-' 1. Desabilitar sugestoes do Android (NO_SUGGESTIONS)
-' 2. Desabilitar autocomplete
-' 3. Limpar clipboard apos digitacao
+' *** DOCUMENTACAO OBRIGATORIA - LEIA ANTES DE CRIAR CAMPOS DE SENHA ***
 '
-' InputType flags:
+' REGRA DE OURO: Todo EditText que recebe frase-senha ou senha DEVE usar
+' as funcoes abaixo. NUNCA criar campo de senha sem essas funcoes.
+'
+' ONDE USAR (OBRIGATORIO):
+' - Campos de frase-senha (desbloqueio, criacao de grupo, backup)
+' - Campos de confirmacao de frase
+' - Campos de senha de entrada (PagePasswordEdit)
+' - Campos de PIN
+'
+' COMO USAR:
+' 1. Apos Initialize do EditText, chamar:
+'    edtPassphrase.InputType = ModSecurity.GetSecurePassphraseInputType
+'
+' 2. Para toggle ver/ocultar senha:
+'    If visivel Then
+'        edt.InputType = ModSecurity.GetSecureVisibleInputType
+'    Else
+'        edt.InputType = ModSecurity.GetSecurePassphraseInputType
+'    End If
+'
+' 3. Para configuracao completa (recomendado):
+'    ModSecurity.ConfigureSecureField(edtPassphrase)
+'
+' EFEITOS:
+' - Desabilita sugestoes do teclado
+' - Desabilita aprendizado de palavras
+' - Desabilita autocomplete
+' - Mostra pontos ao digitar (modo oculto)
+'
+' InputType flags usadas:
 ' - TYPE_CLASS_TEXT = 1
 ' - TYPE_TEXT_VARIATION_PASSWORD = 128
 ' - TYPE_TEXT_FLAG_NO_SUGGESTIONS = 524288 (0x80000)
-'
-' Combinado: 1 + 128 + 524288 = 524417
+' - TYPE_TEXT_VARIATION_VISIBLE_PASSWORD = 144 (para modo visivel)
 '
 ' ============================================
 
-'Constante para InputType seguro de frase-senha
+'Constante para InputType seguro de frase-senha (modo oculto)
 Public Sub GetSecurePassphraseInputType As Int
 	'TEXT + PASSWORD + NO_SUGGESTIONS
 	Return Bit.Or(Bit.Or(1, 128), 524288)
@@ -824,8 +918,34 @@ End Sub
 
 'Constante para InputType seguro visivel (quando mostrar senha)
 Public Sub GetSecureVisibleInputType As Int
-	'TEXT + NO_SUGGESTIONS (sem PASSWORD para ser visivel)
-	Return Bit.Or(1, 524288)
+	'TEXT + VISIBLE_PASSWORD + NO_SUGGESTIONS
+	'VISIBLE_PASSWORD (144) = impede sugestoes mesmo visivel
+	Return Bit.Or(Bit.Or(1, 144), 524288)
+End Sub
+
+'Configura EditText para entrada segura de senha/frase
+'Usar esta funcao apos Initialize para garantir todas as protecoes
+Public Sub ConfigureSecureField(edt As EditText)
+	edt.SingleLine = True
+
+	'Desabilita flags extras via JavaObject para mais seguranca
+	Try
+		Dim jo As JavaObject = edt
+		'Desabilita autocomplete (Android 8+)
+		jo.RunMethod("setImportantForAutofill", Array(2)) '2 = IMPORTANT_FOR_AUTOFILL_NO
+	Catch
+		'Ignora se Android antigo nao suportar
+		Log("ConfigureSecureField: flags extras nao suportadas")
+	End Try
+
+	'IMPORTANTE: InputType deve ser definido POR ULTIMO
+	'para nao ser sobrescrito pelos metodos acima
+	edt.InputType = GetSecurePassphraseInputType
+End Sub
+
+'Configura EditText para entrada segura VISIVEL
+Public Sub ConfigureSecureFieldVisible(edt As EditText)
+	edt.InputType = GetSecureVisibleInputType
 End Sub
 
 'Limpa o clipboard do sistema

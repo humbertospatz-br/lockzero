@@ -282,8 +282,7 @@ Private Sub CreatePhraseDialog
 	Dim edtW As Int = dialogW - 40dip - btnShowW - 5dip
 	edtPhrase.Initialize("edtPhrase")
 	edtPhrase.Hint = ModLang.T("backup_phrase_hint")
-	edtPhrase.SingleLine = True
-	edtPhrase.InputType = ModSecurity.GetSecurePassphraseInputType 'TEXT + PASSWORD + NO_SUGGESTIONS
+	ModSecurity.ConfigureSecureField(edtPhrase) 'Configura todas as protecoes
 	edtPhrase.TextColor = Colors.White
 	edtPhrase.HintColor = Colors.ARGB(120, 255, 255, 255)
 

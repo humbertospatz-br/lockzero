@@ -70,13 +70,14 @@ Sub Class_Globals
 	'Modo cartao - UI exclusiva sem checkboxes/filtro/add
 	Private IsCardTemplate As Boolean = False
 
-	'Anexos
+	'Anexos (integrado com ModAttachments)
 	Private ivIconAttach As ImageView  'Icone de anexo no header
 	Private pnlAttachments As Panel    'Container para lista de anexos
-	Private AttachmentsList As List    'Lista de caminhos de anexos
+	Private AttachmentsList As List    'Lista de Maps com info dos anexos (id, originalName, etc)
 	Private ContentChooser1 As ContentChooser  'Para selecionar arquivos
-	Private PendingAttachUri As String  'URI temporaria do anexo sendo adicionado
-	Private edtAttachName As EditText  'Campo para nome do anexo no dialog
+	Private PendingAttachDir As String  'Dir temporario do anexo sendo adicionado
+	Private PendingAttachFile As String  'Nome do arquivo sendo adicionado
+	Private GroupSalt As String = ""  'Salt do grupo para criptografia de anexos
 End Sub
 
 Public Sub Initialize
@@ -133,6 +134,18 @@ Public Sub SetParams(params As Map)
 	If Passphrase = "" And IsSecure Then
 		Passphrase = ModSession.GetPassphrase
 	End If
+
+	'Carrega salt do grupo para criptografia de anexos
+	GroupSalt = ""
+	If IsSecure Then
+		Dim grpNote As clsNoteGroup = ModNotes.GetNoteGroupById(CurrentGroupId)
+		If grpNote <> Null Then
+			GroupSalt = grpNote.Salt
+		End If
+	End If
+
+	'Inicializa ModAttachments
+	ModAttachments.Init
 
 	IsNewNote = (CurrentNoteId.Length = 0)
 	ItemsList.Initialize
@@ -1181,24 +1194,9 @@ Private Sub LoadNote
 		End If
 	End If
 
-	'Carrega anexos
+	'Carrega anexos do ModAttachments (criptografados)
 	If IsCardTemplate = False Then
-		AttachmentsList.Initialize
-		Dim attachJson As String
-		If IsSecure Then
-			attachJson = note.GetDecryptedAttachments(Passphrase)
-		Else
-			attachJson = note.Attachments
-		End If
-		If attachJson <> "" And attachJson <> "[]" Then
-			Try
-				Dim parserAtt As JSONParser
-				parserAtt.Initialize(attachJson)
-				AttachmentsList = parserAtt.NextArray
-			Catch
-				Log("LoadNote: erro ao parsear anexos")
-			End Try
-		End If
+		AttachmentsList = ModAttachments.ListAttachments(CurrentNoteId)
 		RebuildAttachmentsUI
 	End If
 End Sub
@@ -1244,6 +1242,23 @@ Private Sub SaveNote(closeAfter As Boolean) As Boolean
 		If title.Length < 1 Then
 			ToastMessageShow(ModLang.T("error_empty_field"), True)
 			Return False
+		End If
+	End If
+
+	'Verifica limite para novas notas/cartoes
+	If IsNewNote Then
+		If IsCardTemplate Then
+			'Verifica limite de cartoes
+			If ModNotes.CanAddCard = False Then
+				ToastMessageShow(ModLang.T("limit_cards_free"), True)
+				Return False
+			End If
+		Else
+			'Verifica limite de notas
+			If ModNotes.CanAddNote = False Then
+				ToastMessageShow(ModLang.T("limit_notes_free"), True)
+				Return False
+			End If
 		End If
 	End If
 
@@ -1314,19 +1329,9 @@ Private Sub SaveNote(closeAfter As Boolean) As Boolean
 		End If
 	End If
 
-	'Salva anexos
-	If IsCardTemplate = False And AttachmentsList.IsInitialized And AttachmentsList.Size > 0 Then
-		Dim genAtt As JSONGenerator
-		genAtt.Initialize2(AttachmentsList)
-		Dim jsonAttach As String = genAtt.ToString
-		If IsSecure Then
-			note.EncryptAttachments(Passphrase, jsonAttach)
-		Else
-			note.Attachments = jsonAttach
-		End If
-	Else
-		note.Attachments = "[]"
-	End If
+	'Anexos sao salvos automaticamente pelo ModAttachments
+	'O campo note.Attachments nao e mais usado (mantido para compatibilidade)
+	note.Attachments = "[]"
 
 	note.IsFavorite = chkFavorite.Checked
 	Log("Chamando ModNotes.SaveNote...")
@@ -1386,13 +1391,17 @@ Private Sub lblIconAdd_Click
 	ShowInputDialog(ModLang.T("note_add_item"), "", -1)
 End Sub
 
-'Icone lixeira - excluir nota
+'Icone lixeira - excluir nota (e todos os anexos)
 Private Sub ivIconDelete_Click
 	If IsSecure Then ModSession.Touch
 
 	Wait For (xui.Msgbox2Async(ModLang.T("confirm_delete"), ModLang.T("delete"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
 
 	If Result = xui.DialogResponse_Positive Then
+		'Remove todos os anexos da nota primeiro
+		ModAttachments.DeleteAllAttachments(CurrentNoteId)
+
+		'Depois deleta a nota
 		ModNotes.DeleteNote(CurrentNoteId)
 		ToastMessageShow(ModLang.T("success"), False)
 		B4XPages.ClosePage(Me)
@@ -1501,99 +1510,142 @@ End Sub
 'Resultado da selecao de arquivo
 Private Sub ContentChooser1_Result(Success As Boolean, Dir As String, FileName As String)
 	If Success = False Then Return
+	If IsSecure Then ModSession.Touch
 
-	'Guarda URI temporariamente
-	If Dir.StartsWith("content") Then
-		PendingAttachUri = Dir
-	Else If FileName.StartsWith("content") Then
-		PendingAttachUri = FileName
-	Else
-		PendingAttachUri = File.Combine(Dir, FileName)
+	'Nota precisa estar salva para ter ID
+	If CurrentNoteId = "" Then
+		'Salva nota primeiro para obter ID
+		If SaveNote(False) = False Then Return
 	End If
 
-	'Tenta extrair nome do arquivo da URI
-	Dim suggestedName As String = ""
-	If FileName.Contains("/") Then
-		suggestedName = FileName.SubString(FileName.LastIndexOf("/") + 1)
-	Else If FileName.Contains("%2F") Then
-		suggestedName = FileName.SubString(FileName.LastIndexOf("%2F") + 3)
-	End If
+	'Verifica se e URI ou caminho de arquivo
+	Dim isUri As Boolean = Dir.StartsWith("content") Or FileName.StartsWith("content")
 
-	'Remove parametros da URL se houver
-	If suggestedName.Contains("?") Then
-		suggestedName = suggestedName.SubString2(0, suggestedName.IndexOf("?"))
-	End If
-
-	'Se nao conseguiu extrair nome, usa generico
-	If suggestedName = "" Or suggestedName.StartsWith("content") Then
-		suggestedName = "arquivo"
-	End If
-
-	'Cria panel customizado para o dialog
-	Dim pnlDialog As B4XView = xui.CreatePanel("")
-	pnlDialog.SetLayoutAnimated(0, 0, 0, 280dip, 60dip)
-	pnlDialog.Color = ModTheme.HomeHeaderBg
-
-	edtAttachName.Initialize("")
-	edtAttachName.Text = suggestedName
-	edtAttachName.Hint = ModLang.T("attachment_name")
-	edtAttachName.SingleLine = True
-	edtAttachName.TextSize = Starter.FONT_INPUT
-	edtAttachName.TextColor = Colors.White
-	edtAttachName.HintColor = Colors.ARGB(120, 255, 255, 255)
-	pnlDialog.AddView(edtAttachName, 10dip, 10dip, 260dip, 44dip)
-
-	'Mostra dialog
-	Dim dlg As B4XDialog
-	dlg.Initialize(Root)
-	dlg.Title = ModLang.T("attachment_name")
-
-	'Foca o campo e mostra teclado apos um pequeno delay
-	CallSubDelayed(Me, "FocusAttachInput")
-
-	Wait For (dlg.ShowCustom(pnlDialog, "OK", "", ModLang.T("cancel"))) Complete (dialogResult As Int)
-
-	If dialogResult = xui.DialogResponse_Positive Then
-		Dim attachName As String = edtAttachName.Text.Trim
-		If attachName = "" Then attachName = suggestedName
-
-		'Verifica se ja existe (pelo nome)
-		For i = 0 To AttachmentsList.Size - 1
-			Dim item As Object = AttachmentsList.Get(i)
-			Dim existingName As String = ""
-			If item Is Map Then
-				Dim existing As Map = item
-				existingName = existing.GetDefault("name", "")
-			End If
-			If existingName = attachName Then
-				ToastMessageShow(ModLang.T("file_exists"), False)
-				Return
-			End If
-		Next
-
-		'Adiciona anexo com nome amigavel
-		Dim attachment As Map
-		attachment.Initialize
-		attachment.Put("uri", PendingAttachUri)
-		attachment.Put("name", attachName)
-		AttachmentsList.Add(attachment)
-		RebuildAttachmentsUI
-		ToastMessageShow(ModLang.T("attachment_added"), False)
-	End If
+	Try
+		If isUri Then
+			'Copia arquivo da URI para pasta temporaria
+			Dim uri As String = IIf(Dir.StartsWith("content"), Dir, FileName)
+			CopyFromUriAndAddAttachment(uri)
+		Else
+			'Caminho de arquivo direto
+			AddAttachmentFromFile(Dir, FileName)
+		End If
+	Catch
+		Log("ContentChooser1_Result erro: " & LastException.Message)
+		ToastMessageShow(ModLang.T("attachment_error"), True)
+	End Try
 End Sub
 
-'Foca o campo de nome do anexo e mostra teclado
-Private Sub FocusAttachInput
-	Sleep(150)  'Aguarda dialog aparecer
-	If edtAttachName.IsInitialized Then
-		edtAttachName.RequestFocus
-		edtAttachName.SelectAll
-		'Mostra teclado
-		Dim imm As JavaObject
+'Copia arquivo de URI para pasta temp e adiciona como anexo
+Private Sub CopyFromUriAndAddAttachment(uri As String)
+	Try
+		'Parse URI
+		Dim uriParser As JavaObject
+		uriParser.InitializeStatic("android.net.Uri")
+		Dim parsedUri As Object = uriParser.RunMethod("parse", Array(uri))
+
+		'Obtem ContentResolver
 		Dim ctxt As JavaObject
 		ctxt.InitializeContext
-		imm = ctxt.RunMethod("getSystemService", Array("input_method"))
-		imm.RunMethod("showSoftInput", Array(edtAttachName, 0))
+		Dim resolver As JavaObject = ctxt.RunMethod("getContentResolver", Null)
+
+		'Obtem nome do arquivo
+		Dim fileName As String = GetFileNameFromUri(parsedUri, resolver)
+		If fileName = "" Then fileName = "arquivo_" & DateTime.Now
+
+		'Copia para pasta Temp
+		Dim tempDir As String = File.DirInternal
+		Dim tempName As String = "temp_" & DateTime.Now & "_" & fileName
+
+		'Abre InputStream da URI
+		Dim inp As InputStream = resolver.RunMethod("openInputStream", Array(parsedUri))
+
+		'Copia para arquivo temp
+		Dim out As OutputStream = File.OpenOutput(tempDir, tempName, False)
+		File.Copy2(inp, out)
+		out.Close
+		inp.Close
+
+		'Agora adiciona o arquivo
+		AddAttachmentFromFile(tempDir, tempName)
+
+		'Remove arquivo temp
+		File.Delete(tempDir, tempName)
+
+	Catch
+		Log("CopyFromUriAndAddAttachment erro: " & LastException.Message)
+		ToastMessageShow(ModLang.T("attachment_error"), True)
+	End Try
+End Sub
+
+'Obtem nome do arquivo a partir de URI
+Private Sub GetFileNameFromUri(parsedUri As Object, resolver As JavaObject) As String
+	Try
+		'Tenta obter via cursor
+		Dim cursor As JavaObject = resolver.RunMethod("query", Array(parsedUri, Null, Null, Null, Null))
+		If cursor.IsInitialized Then
+			cursor.RunMethod("moveToFirst", Null)
+			Dim nameIndex As Int = cursor.RunMethod("getColumnIndex", Array("_display_name"))
+			If nameIndex >= 0 Then
+				Dim name As String = cursor.RunMethod("getString", Array(nameIndex))
+				cursor.RunMethod("close", Null)
+				Return name
+			End If
+			cursor.RunMethod("close", Null)
+		End If
+	Catch
+		Log("GetFileNameFromUri erro: " & LastException.Message)
+	End Try
+	Return ""
+End Sub
+
+'Adiciona anexo a partir de arquivo local
+Private Sub AddAttachmentFromFile(sourceDir As String, sourceFile As String)
+	'Verifica limite de anexos por nota
+	If AttachmentsList.Size >= Starter.MAX_ATTACHMENTS_PER_NOTE Then
+		ToastMessageShow(ModLang.T("limit_attachments_per_note") & " (" & Starter.MAX_ATTACHMENTS_PER_NOTE & ")", True)
+		Return
+	End If
+
+	'Valida tamanho
+	If ModAttachments.ValidateFileSize(sourceDir, sourceFile) = False Then
+		ToastMessageShow(ModLang.T("attachment_too_large"), True)
+		Return
+	End If
+
+	'Valida extensao
+	Dim ext As String = ""
+	If sourceFile.Contains(".") Then
+		ext = sourceFile.SubString(sourceFile.LastIndexOf(".") + 1).ToLowerCase
+	End If
+	If ext <> "" And ModAttachments.IsExtensionAllowed(ext) = False Then
+		ToastMessageShow(ModLang.T("attachment_type_not_allowed"), True)
+		Return
+	End If
+
+	'Verifica espaco disponivel (limite total de anexos)
+	Dim fileSize As Long = File.Size(sourceDir, sourceFile)
+	If ModAttachments.CanAddAttachment(CurrentNoteId, fileSize) = False Then
+		ToastMessageShow(ModLang.T("attachment_limit_app"), True)
+		Return
+	End If
+
+	'Adiciona anexo (copia, criptografa, salva)
+	Dim result As Map
+	If IsSecure And GroupSalt <> "" Then
+		result = ModAttachments.AddAttachment(CurrentNoteId, sourceDir, sourceFile, Passphrase, GroupSalt)
+	Else
+		'Grupo nao seguro - usa passphrase vazia e salt fixo
+		result = ModAttachments.AddAttachment(CurrentNoteId, sourceDir, sourceFile, "lockzero_open", "nosalt")
+	End If
+
+	If result <> Null Then
+		'Atualiza lista e UI
+		AttachmentsList.Add(result)
+		RebuildAttachmentsUI
+		ToastMessageShow(ModLang.T("attachment_added"), False)
+	Else
+		ToastMessageShow(ModLang.T("attachment_error"), True)
 	End If
 End Sub
 
@@ -1603,43 +1655,70 @@ Private Sub RebuildAttachmentsUI
 
 	Dim width As Int = pnlAttachments.Width
 	Dim y As Int = 0
-	Dim itemHeight As Int = 44dip
+	Dim itemHeight As Int = 50dip
 
-	'Titulo "Anexos" se houver anexos
+	'Calcula espaco total usado
+	Dim totalSize As Long = ModAttachments.GetTotalNoteSize(CurrentNoteId)
+	Dim maxSize As Long = ModAttachments.MAX_TOTAL_NOTE
+
+	'Titulo "Anexos" com contador
+	Dim lblAttachTitle As Label
+	lblAttachTitle.Initialize("")
 	If AttachmentsList.Size > 0 Then
-		Dim lblAttachTitle As Label
-		lblAttachTitle.Initialize("")
 		lblAttachTitle.Text = ModLang.T("attachments") & " (" & AttachmentsList.Size & ")"
-		lblAttachTitle.TextSize = Starter.FONT_LABEL
-		lblAttachTitle.TextColor = Colors.ARGB(180, 255, 255, 255)
-		lblAttachTitle.Gravity = Gravity.CENTER_VERTICAL
-		pnlAttachments.AddView(lblAttachTitle, 0, y, width, 24dip)
-		y = y + 28dip
+	Else
+		lblAttachTitle.Text = ModLang.T("no_attachments")
+	End If
+	lblAttachTitle.TextSize = Starter.FONT_LABEL
+	lblAttachTitle.TextColor = Colors.ARGB(180, 255, 255, 255)
+	lblAttachTitle.Gravity = Gravity.CENTER_VERTICAL
+	pnlAttachments.AddView(lblAttachTitle, 0, y, width, 24dip)
+	y = y + 28dip
+
+	'Barra de espaco usado (se houver anexos)
+	If AttachmentsList.Size > 0 Then
+		'Label de espaco
+		Dim lblSpace As Label
+		lblSpace.Initialize("")
+		lblSpace.Text = ModLang.T("attachment_space_used") & ": " & ModAttachments.FormatFileSize(totalSize) & " " & ModLang.T("attachment_of") & " " & ModAttachments.FormatFileSize(maxSize)
+		lblSpace.TextSize = Starter.FONT_CAPTION
+		lblSpace.TextColor = Colors.ARGB(140, 255, 255, 255)
+		pnlAttachments.AddView(lblSpace, 0, y, width, 18dip)
+		y = y + 22dip
+
+		'Barra de progresso visual
+		Dim pnlBarBg As Panel
+		pnlBarBg.Initialize("")
+		pnlBarBg.Color = Colors.ARGB(60, 255, 255, 255)
+		pnlAttachments.AddView(pnlBarBg, 0, y, width, 6dip)
+
+		Dim usedPercent As Float = (totalSize * 100) / maxSize
+		If usedPercent > 100 Then usedPercent = 100
+		Dim barWidth As Int = (width * usedPercent) / 100
+
+		Dim pnlBarFill As Panel
+		pnlBarFill.Initialize("")
+		If usedPercent > 80 Then
+			pnlBarFill.Color = Colors.RGB(255, 100, 100)  'Vermelho
+		Else If usedPercent > 50 Then
+			pnlBarFill.Color = Colors.RGB(255, 180, 100)  'Laranja
+		Else
+			pnlBarFill.Color = Colors.RGB(100, 200, 100)  'Verde
+		End If
+		pnlAttachments.AddView(pnlBarFill, 0, y, barWidth, 6dip)
+		y = y + 14dip
 	End If
 
 	'Lista de anexos
 	For i = 0 To AttachmentsList.Size - 1
-		Dim item As Object = AttachmentsList.Get(i)
-		Dim fileName As String = ""
-
-		'Trata formato antigo (string) e novo (Map)
-		If item Is Map Then
-			Dim attachment As Map = item
-			fileName = attachment.GetDefault("name", "")
-		Else If item Is String Then
-			'Formato antigo - string e o path/nome
-			fileName = item
-		End If
-
-		If fileName <> "" Then
-			Dim pnlItem As Panel = CreateAttachmentPanel(i, fileName, width)
-			pnlAttachments.AddView(pnlItem, 0, y, width, itemHeight)
-			y = y + itemHeight + 6dip
-		End If
+		Dim attachment As Map = AttachmentsList.Get(i)
+		Dim pnlItem As Panel = CreateAttachmentPanel(i, attachment, width)
+		pnlAttachments.AddView(pnlItem, 0, y, width, itemHeight)
+		y = y + itemHeight + 6dip
 	Next
 
 	'Ajusta altura do painel
-	pnlAttachments.Height = Max(y, 10dip)
+	pnlAttachments.Height = Max(y, 50dip)
 
 	'Ajusta posicao do painel de anexos
 	If NoteType = "text" Then
@@ -1652,7 +1731,7 @@ Private Sub RebuildAttachmentsUI
 End Sub
 
 'Cria painel para um anexo
-Private Sub CreateAttachmentPanel(index As Int, fileName As String, panelWidth As Int) As Panel
+Private Sub CreateAttachmentPanel(index As Int, attachment As Map, panelWidth As Int) As Panel
 	Dim pnl As Panel
 	pnl.Initialize("pnlAttachment")
 	pnl.Tag = index
@@ -1660,17 +1739,23 @@ Private Sub CreateAttachmentPanel(index As Int, fileName As String, panelWidth A
 	Dim xv As B4XView = pnl
 	xv.SetColorAndBorder(ModTheme.HomeIconBg, 0, ModTheme.HomeIconBg, 8dip)
 
-	'Trunca nome se muito longo
-	Dim displayName As String = fileName
-	If displayName.Length > 30 Then displayName = displayName.SubString2(0, 27) & "..."
+	'Dados do anexo
+	Dim attachId As String = attachment.GetDefault("id", "")
+	Dim originalName As String = attachment.GetDefault("originalName", "arquivo")
+	Dim originalSize As Long = attachment.GetDefault("originalSize", 0)
+	Dim mimeType As String = attachment.GetDefault("mimeType", "")
 
-	'Icone de arquivo (clip)
+	'Trunca nome se muito longo
+	Dim displayName As String = originalName
+	If displayName.Length > 22 Then displayName = displayName.SubString2(0, 19) & "..."
+
+	'Icone baseado no tipo
 	Dim lblIcon As Label
 	lblIcon.Initialize("")
-	lblIcon.Text = Chr(0x1F4CE)  'Paperclip emoji
+	lblIcon.Text = ModAttachments.GetFileIcon(mimeType)
 	lblIcon.TextSize = 18
 	lblIcon.Gravity = Gravity.CENTER
-	pnl.AddView(lblIcon, 8dip, 0, 30dip, 44dip)
+	pnl.AddView(lblIcon, 8dip, 0, 30dip, 50dip)
 
 	'Nome do arquivo (clicavel para abrir)
 	Dim lblFileName As Label
@@ -1680,114 +1765,129 @@ Private Sub CreateAttachmentPanel(index As Int, fileName As String, panelWidth A
 	lblFileName.TextSize = Starter.FONT_BODY
 	lblFileName.TextColor = Colors.RGB(100, 180, 255)  'Azul link
 	lblFileName.Gravity = Gravity.CENTER_VERTICAL
-	pnl.AddView(lblFileName, 42dip, 0, panelWidth - 100dip, 44dip)
+	pnl.AddView(lblFileName, 42dip, 0, panelWidth - 140dip, 50dip)
+
+	'Tamanho do arquivo
+	Dim lblSize As Label
+	lblSize.Initialize("")
+	lblSize.Text = ModAttachments.FormatFileSize(originalSize)
+	lblSize.TextSize = Starter.FONT_CAPTION
+	lblSize.TextColor = Colors.ARGB(140, 255, 255, 255)
+	lblSize.Gravity = Gravity.CENTER
+	pnl.AddView(lblSize, panelWidth - 100dip, 0, 50dip, 50dip)
 
 	'Botao X para remover
 	Dim lblRemove As Label
 	lblRemove.Initialize("lblAttachRemove")
 	lblRemove.Tag = index
 	lblRemove.Text = "X"
-	lblRemove.TextSize = 16
+	lblRemove.TextSize = 18
 	lblRemove.TextColor = Colors.RGB(255, 100, 100)
 	lblRemove.Gravity = Gravity.CENTER
-	pnl.AddView(lblRemove, panelWidth - 44dip, 0, 40dip, 44dip)
+	pnl.AddView(lblRemove, panelWidth - 44dip, 0, 40dip, 50dip)
 
 	Return pnl
 End Sub
 
-'Clique no nome do arquivo - abre com app externo
+'Clique no nome do arquivo - descriptografa e abre com app externo
 Private Sub lblAttachOpen_Click
 	Dim lbl As Label = Sender
 	Dim index As Int = lbl.Tag
 
 	If index < 0 Or index >= AttachmentsList.Size Then Return
+	If IsSecure Then ModSession.Touch
 
-	Dim item As Object = AttachmentsList.Get(index)
-	Dim uri As String = ""
-	Dim fileName As String = ""
+	Dim attachment As Map = AttachmentsList.Get(index)
+	Dim attachId As String = attachment.GetDefault("id", "")
+	Dim originalName As String = attachment.GetDefault("originalName", "")
+	Dim mimeType As String = attachment.GetDefault("mimeType", "")
 
-	If item Is Map Then
-		Dim attachment As Map = item
-		'Novo formato usa "uri", antigo usava "dir"
-		uri = attachment.GetDefault("uri", "")
-		If uri = "" Then uri = attachment.GetDefault("dir", "")
-		fileName = attachment.GetDefault("name", "")
+	If attachId = "" Then
+		ToastMessageShow(ModLang.T("attachment_not_found"), True)
+		Return
 	End If
 
-	If uri <> "" Then
-		OpenFileWithUri(uri, fileName)
+	'Descriptografa anexo para pasta Temp
+	Dim tempPath As String
+	If IsSecure And GroupSalt <> "" Then
+		tempPath = ModAttachments.GetAttachment(CurrentNoteId, attachId, Passphrase, GroupSalt)
 	Else
-		ToastMessageShow(ModLang.T("file_not_found"), True)
+		tempPath = ModAttachments.GetAttachment(CurrentNoteId, attachId, "lockzero_open", "nosalt")
 	End If
+
+	If tempPath = "" Then
+		ToastMessageShow(ModLang.T("attachment_open_error"), True)
+		Return
+	End If
+
+	'Abre arquivo com app externo
+	OpenTempFile(tempPath, originalName, mimeType)
 End Sub
 
-'Abre arquivo usando URI
-Private Sub OpenFileWithUri(uri As String, displayName As String)
+'Abre arquivo temporario descriptografado
+Private Sub OpenTempFile(filePath As String, displayName As String, mimeType As String)
 	Try
-		Log("OpenFileWithUri: uri=" & uri & ", name=" & displayName)
+		Log("OpenTempFile: path=" & filePath & ", name=" & displayName & ", mime=" & mimeType)
 
-		'Determina MIME type pelo nome do arquivo
-		Dim mimeType As String = "*/*"
-		Dim lowerName As String = displayName.ToLowerCase
-		If lowerName.EndsWith(".pdf") Then mimeType = "application/pdf"
-		If lowerName.EndsWith(".jpg") Or lowerName.EndsWith(".jpeg") Then mimeType = "image/jpeg"
-		If lowerName.EndsWith(".png") Then mimeType = "image/png"
-		If lowerName.EndsWith(".gif") Then mimeType = "image/gif"
-		If lowerName.EndsWith(".webp") Then mimeType = "image/webp"
-		If lowerName.EndsWith(".bmp") Then mimeType = "image/bmp"
-		If lowerName.EndsWith(".doc") Then mimeType = "application/msword"
-		If lowerName.EndsWith(".docx") Then mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-		If lowerName.EndsWith(".xls") Then mimeType = "application/vnd.ms-excel"
-		If lowerName.EndsWith(".xlsx") Then mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-		If lowerName.EndsWith(".txt") Then mimeType = "text/plain"
-		If lowerName.EndsWith(".mp4") Then mimeType = "video/mp4"
-		If lowerName.EndsWith(".mp3") Then mimeType = "audio/mpeg"
-		If lowerName.EndsWith(".wav") Then mimeType = "audio/wav"
-		If lowerName.EndsWith(".zip") Then mimeType = "application/zip"
-
-		'Se nome nao tem extensao, tenta detectar pelo tipo generico
-		If mimeType = "*/*" Then
-			'Verifica se parece ser imagem pela URI
-			If uri.Contains("image") Or uri.Contains("photo") Or uri.Contains("camera") Then
-				mimeType = "image/*"
-			Else If uri.Contains("video") Then
-				mimeType = "video/*"
-			Else If uri.Contains("audio") Then
-				mimeType = "audio/*"
-			End If
+		'Se mimeType nao veio, tenta detectar
+		If mimeType = "" Or mimeType = "application/octet-stream" Then
+			mimeType = ModAttachments.GetMimeType(displayName)
 		End If
 
-		Log("OpenFileWithUri: mimeType=" & mimeType)
+		'Usa FileProvider para compartilhar arquivo com outros apps
+		Dim ctxt As JavaObject
+		ctxt.InitializeContext
 
-		'Parse URI
-		Dim uriParser As JavaObject
-		uriParser.InitializeStatic("android.net.Uri")
-		Dim parsedUri As Object = uriParser.RunMethod("parse", Array(uri))
+		'Cria File object
+		Dim fileObj As JavaObject
+		fileObj.InitializeNewInstance("java.io.File", Array(filePath))
+
+		'Obtem URI via FileProvider
+		Dim authority As String = Application.PackageName & ".provider"
+		Dim fileProvider As JavaObject
+		fileProvider.InitializeStatic("androidx.core.content.FileProvider")
+		Dim contentUri As Object = fileProvider.RunMethod("getUriForFile", Array(ctxt, authority, fileObj))
 
 		'Cria Intent para abrir
 		Dim openIntent As Intent
 		openIntent.Initialize(openIntent.ACTION_VIEW, "")
 		Dim intentJO As JavaObject = openIntent
-		intentJO.RunMethod("setDataAndType", Array(parsedUri, mimeType))
+		intentJO.RunMethod("setDataAndType", Array(contentUri, mimeType))
 		intentJO.RunMethod("addFlags", Array(1))  'FLAG_GRANT_READ_URI_PERMISSION
 
 		Dim jo As JavaObject
 		jo.InitializeStatic("android.content.Intent")
-		StartActivity(jo.RunMethod("createChooser", Array(openIntent, ModLang.T("open_file"))))
+		StartActivity(jo.RunMethod("createChooser", Array(openIntent, ModLang.T("open_with"))))
+
 	Catch
-		Log("OpenFileWithUri error: " & LastException.Message)
-		ToastMessageShow(ModLang.T("file_not_found"), True)
+		Log("OpenTempFile error: " & LastException.Message)
+		ToastMessageShow(ModLang.T("attachment_open_error"), True)
 	End Try
 End Sub
 
-'Clique no X - remove anexo
+'Clique no X - confirma e remove anexo
 Private Sub lblAttachRemove_Click
 	Dim lbl As Label = Sender
 	Dim index As Int = lbl.Tag
 
-	If index >= 0 And index < AttachmentsList.Size Then
+	If index < 0 Or index >= AttachmentsList.Size Then Return
+
+	'Confirma exclusao
+	Wait For (xui.Msgbox2Async(ModLang.T("attachment_delete_confirm"), ModLang.T("delete"), ModLang.T("yes"), "", ModLang.T("cancel"), Null)) Msgbox_Result(Result As Int)
+
+	If Result = xui.DialogResponse_Positive Then
+		Dim attachment As Map = AttachmentsList.Get(index)
+		Dim attachId As String = attachment.GetDefault("id", "")
+
+		'Remove do ModAttachments
+		If attachId <> "" Then
+			ModAttachments.DeleteAttachment(CurrentNoteId, attachId)
+		End If
+
+		'Atualiza lista e UI
 		AttachmentsList.RemoveAt(index)
 		RebuildAttachmentsUI
+		ToastMessageShow(ModLang.T("attachment_deleted"), False)
 	End If
 End Sub
 

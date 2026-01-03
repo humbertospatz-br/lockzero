@@ -494,6 +494,38 @@ Public Sub CountByGroup(groupId As String) As Int
 	Return count
 End Sub
 
+'Conta total de notas (excluindo cartoes)
+Public Sub GetTotalNotesCount As Int
+	EnsureInit
+	Dim count As Int = 0
+	Dim cardsGroupId As String = GetCardsGroupId
+
+	For i = 0 To Notes.Size - 1
+		Dim note As clsNoteEntry = Notes.Get(i)
+		If note.GroupId <> cardsGroupId Then
+			count = count + 1
+		End If
+	Next
+
+	Return count
+End Sub
+
+'Conta total de cartoes
+Public Sub GetTotalCardsCount As Int
+	EnsureInit
+	Return CountByGroup(GetCardsGroupId)
+End Sub
+
+'Verifica se pode adicionar nova nota (limite FREE)
+Public Sub CanAddNote As Boolean
+	Return GetTotalNotesCount < Starter.MAX_NOTES
+End Sub
+
+'Verifica se pode adicionar novo cartao (limite FREE)
+Public Sub CanAddCard As Boolean
+	Return GetTotalCardsCount < Starter.MAX_CARDS
+End Sub
+
 ' ============================================
 '  PERSISTENCIA (COM FALLBACK)
 ' ============================================

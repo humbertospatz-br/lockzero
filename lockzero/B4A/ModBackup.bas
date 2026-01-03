@@ -9,7 +9,7 @@ Version=9.85
 'Backup criptografado com frase mestre
 
 Sub Process_Globals
-	Public Const BACKUP_VERSION As Int = 1
+	Public Const BACKUP_VERSION As Int = 2   'v2: suporta anexos
 	Public Const BACKUP_EXTENSION As String = ".lockzero"
 
 	'Ultimo backup
@@ -18,6 +18,9 @@ Sub Process_Globals
 
 	'Pasta compartilhada (para FileProvider)
 	Private SharedFolder As String
+
+	'Cache de tamanho estimado do backup
+	Private LastEstimatedBackupSize As Long
 End Sub
 
 'Inicializa pasta shared (chamar antes de usar)
@@ -56,6 +59,7 @@ Public Sub ExportBackup(backupPhrase As String, destFolder As String) As String
 		'Metadados
 		backup.Put("version", BACKUP_VERSION)
 		backup.Put("appVersion", Starter.APP_VERSION)
+		backup.Put("edition", Starter.EDITION_NAME)
 		backup.Put("createdAt", DateTime.Now)
 		backup.Put("deviceModel", GetDeviceInfo)
 
@@ -77,16 +81,40 @@ Public Sub ExportBackup(backupPhrase As String, destFolder As String) As String
 		Next
 		backup.Put("entries", entriesList)
 
-		'Dados das notas
-		Dim notes As List = ModNotes.ExportAll
-		backup.Put("notes", notes)
+		'Dados das notas (com anexos embutidos - v2)
+		Dim notesData As List = ModNotes.ExportAll
+		Dim notesWithAttachments As List
+		notesWithAttachments.Initialize
+		Dim totalAttachments As Int = 0
+
+		For i = 0 To notesData.Size - 1
+			Dim noteMap As Map = notesData.Get(i)
+
+			'Verifica se e uma nota (nao grupo)
+			If noteMap.ContainsKey("groupId") Then
+				Dim noteId As String = noteMap.Get("id")
+
+				'Exporta anexos desta nota
+				Dim attachments As List = ModAttachments.ExportAttachmentsForBackup(noteId)
+				If attachments.Size > 0 Then
+					noteMap.Put("attachments", attachments)
+					totalAttachments = totalAttachments + attachments.Size
+					Log("ModBackup: nota " & noteId & " tem " & attachments.Size & " anexos")
+				End If
+			End If
+
+			notesWithAttachments.Add(noteMap)
+		Next
+
+		backup.Put("notes", notesWithAttachments)
 
 		'Estatisticas
 		Dim stats As Map
 		stats.Initialize
 		stats.Put("totalGroups", groups.Size)
 		stats.Put("totalEntries", entries.Size)
-		stats.Put("totalNotes", notes.Size)
+		stats.Put("totalNotes", notesData.Size)
+		stats.Put("totalAttachments", totalAttachments)
 		backup.Put("stats", stats)
 
 		'Converte para JSON
@@ -215,11 +243,18 @@ Public Sub ImportBackup(backupPhrase As String, sourceFolder As String, fileName
 			Next
 		End If
 
-		'Importa senhas
+		'Importa senhas (com verificacao de limite)
 		Dim entriesImported As Int = 0
+		Dim entriesSkipped As Int = 0
 		If backup.ContainsKey("entries") Then
 			Dim entriesList As List = backup.Get("entries")
 			For Each m As Map In entriesList
+				'Verifica limite antes de importar
+				If ModPasswords.CanAddPassword = False Then
+					entriesSkipped = entriesSkipped + 1
+					Continue
+				End If
+
 				Dim e As clsPasswordEntry
 				e.Initialize
 				e.FromMap(m)
@@ -228,12 +263,74 @@ Public Sub ImportBackup(backupPhrase As String, sourceFolder As String, fileName
 			Next
 		End If
 
-		'Importa notas
+		'Importa notas (com verificacao de limites)
 		Dim notesImported As Int = 0
+		Dim notesSkipped As Int = 0
+		Dim cardsSkipped As Int = 0
+		Dim attachmentsImported As Int = 0
+		Dim attachmentsSkipped As Int = 0
+
 		If backup.ContainsKey("notes") Then
 			Dim notesList As List = backup.Get("notes")
-			ModNotes.ImportAll(notesList)
-			notesImported = notesList.Size
+			Dim notesToImport As List
+			notesToImport.Initialize
+
+			'Obtem ID do grupo de cartoes
+			Dim cardsGroupId As String = ModNotes.GetCardsGroupId
+
+			'Backup v2: notas podem ter anexos embutidos
+			For i = 0 To notesList.Size - 1
+				Dim noteItem As Object = notesList.Get(i)
+				If noteItem Is Map Then
+					Dim noteMap As Map = noteItem
+
+					'Verifica se e uma nota (tem groupId) ou grupo
+					If noteMap.ContainsKey("groupId") Then
+						Dim groupId As String = noteMap.Get("groupId")
+
+						'Verifica limites baseado no tipo (nota ou cartao)
+						If groupId = cardsGroupId Then
+							'E um cartao - verifica limite de cartoes
+							If ModNotes.CanAddCard = False Then
+								cardsSkipped = cardsSkipped + 1
+								Continue
+							End If
+						Else
+							'E uma nota - verifica limite de notas
+							If ModNotes.CanAddNote = False Then
+								notesSkipped = notesSkipped + 1
+								Continue
+							End If
+						End If
+
+						'Processa anexos (v2)
+						If version >= 2 And noteMap.ContainsKey("attachments") Then
+							Dim noteId As String = noteMap.Get("id")
+							Dim attachments As List = noteMap.Get("attachments")
+
+							'Importa anexos (ModAttachments ja verifica limite interno)
+							Dim imported As Int = ModAttachments.ImportAttachmentsFromBackup(noteId, attachments)
+							attachmentsImported = attachmentsImported + imported
+							If imported < attachments.Size Then
+								attachmentsSkipped = attachmentsSkipped + (attachments.Size - imported)
+							End If
+							Log("ModBackup: importado " & imported & " anexos para nota " & noteId)
+
+							'Remove anexos do map (ja foi processado)
+							noteMap.Remove("attachments")
+						End If
+
+						notesToImport.Add(noteMap)
+					Else
+						'E um grupo - adiciona sem verificar limite
+						notesToImport.Add(noteMap)
+					End If
+				End If
+			Next
+
+			'Importa notas filtradas
+			ModNotes.ImportAll(notesToImport)
+			notesImported = notesToImport.Size
 		End If
 
 		'Estatisticas
@@ -241,13 +338,28 @@ Public Sub ImportBackup(backupPhrase As String, sourceFolder As String, fileName
 		stats.Initialize
 		stats.Put("groupsImported", groupsImported)
 		stats.Put("entriesImported", entriesImported)
+		stats.Put("entriesSkipped", entriesSkipped)
 		stats.Put("notesImported", notesImported)
+		stats.Put("notesSkipped", notesSkipped)
+		stats.Put("cardsSkipped", cardsSkipped)
+		stats.Put("attachmentsImported", attachmentsImported)
+		stats.Put("attachmentsSkipped", attachmentsSkipped)
+
+		'Mensagem de resultado
+		Dim msg As String = "Backup restaurado com sucesso"
+		Dim totalSkipped As Int = entriesSkipped + notesSkipped + cardsSkipped + attachmentsSkipped
+		If totalSkipped > 0 Then
+			msg = msg & " (" & totalSkipped & " itens ignorados por limite)"
+		End If
 
 		result.Put("success", True)
-		result.Put("message", "Backup restaurado com sucesso")
+		result.Put("message", msg)
 		result.Put("stats", stats)
 
-		Log("ModBackup: importado " & groupsImported & " grupos, " & entriesImported & " senhas, " & notesImported & " notas")
+		Log("ModBackup: importado " & groupsImported & " grupos, " & entriesImported & " senhas, " & notesImported & " notas, " & attachmentsImported & " anexos")
+		If totalSkipped > 0 Then
+			Log("ModBackup: ignorados por limite - senhas:" & entriesSkipped & " notas:" & notesSkipped & " cartoes:" & cardsSkipped & " anexos:" & attachmentsSkipped)
+		End If
 		Return result
 
 	Catch
@@ -476,4 +588,101 @@ Public Sub ExportToShared(backupPhrase As String) As String
 		Return fileName
 	End If
 	Return ""
+End Sub
+
+' ============================================
+'  ESTIMATIVA DE TAMANHO DO BACKUP
+' ============================================
+
+'Calcula tamanho estimado do backup (para avisar usuario)
+'Retorna tamanho em bytes
+Public Sub EstimateBackupSize As Long
+	Dim total As Long = 0
+
+	Try
+		'Tamanho das senhas (arquivo JSON)
+		If File.Exists(File.DirInternal, "lockzero_passwords.json") Then
+			total = total + File.Size(File.DirInternal, "lockzero_passwords.json")
+		End If
+
+		'Tamanho das notas (arquivo JSON)
+		If File.Exists(File.DirInternal, "lockzero_notes.json") Then
+			total = total + File.Size(File.DirInternal, "lockzero_notes.json")
+		End If
+
+		'Tamanho dos anexos (pasta Attachments)
+		Dim attachmentsSize As Long = ModAttachments.GetTotalAppSize
+		total = total + attachmentsSize
+
+		'Margem para overhead de criptografia (~10%)
+		total = total + (total * 0.1)
+
+		LastEstimatedBackupSize = total
+		Log("EstimateBackupSize: " & FormatSize(total))
+
+	Catch
+		Log("EstimateBackupSize erro: " & LastException.Message)
+	End Try
+
+	Return total
+End Sub
+
+'Retorna ultimo tamanho estimado
+Public Sub GetLastEstimatedSize As Long
+	Return LastEstimatedBackupSize
+End Sub
+
+'Formata tamanho para exibicao
+Public Sub FormatSize(sizeBytes As Long) As String
+	If sizeBytes < 1024 Then
+		Return sizeBytes & " B"
+	Else If sizeBytes < 1048576 Then
+		Return NumberFormat2(sizeBytes / 1024, 1, 1, 1, False) & " KB"
+	Else
+		Return NumberFormat2(sizeBytes / 1048576, 1, 2, 2, False) & " MB"
+	End If
+End Sub
+
+'Verifica se tamanho do backup e grande (> 10MB)
+Public Sub IsBackupLarge As Boolean
+	Dim size As Long = EstimateBackupSize
+	Return size > 10485760  '10 MB
+End Sub
+
+'Retorna estatisticas do backup (para exibir ao usuario)
+Public Sub GetBackupStats As Map
+	Dim stats As Map
+	stats.Initialize
+
+	'Contagem de grupos
+	Dim groups As List = ModPasswords.GetAllGroups
+	stats.Put("passwordGroups", groups.Size)
+
+	'Contagem de senhas
+	Dim entries As List = ModPasswords.GetAllEntries
+	stats.Put("passwords", entries.Size)
+
+	'Contagem de grupos de notas
+	Dim noteGroupsList As List = ModNotes.GetAllNoteGroups
+	stats.Put("noteGroups", noteGroupsList.Size)
+
+	'Contagem de notas
+	Dim totalNotes As Int = 0
+	For Each grp As clsNoteGroup In noteGroupsList
+		Dim notesList As List = ModNotes.GetNotesByGroup(grp.Id)
+		totalNotes = totalNotes + notesList.Size
+	Next
+	stats.Put("notes", totalNotes)
+
+	'Tamanho dos anexos
+	Dim attachmentsSize As Long = ModAttachments.GetTotalAppSize
+	stats.Put("attachmentsSize", attachmentsSize)
+	stats.Put("attachmentsSizeFormatted", FormatSize(attachmentsSize))
+
+	'Tamanho total estimado
+	Dim totalSize As Long = EstimateBackupSize
+	stats.Put("totalSize", totalSize)
+	stats.Put("totalSizeFormatted", FormatSize(totalSize))
+
+	Return stats
 End Sub
